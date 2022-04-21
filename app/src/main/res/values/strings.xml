@@ -3,4 +3,6 @@
 	<string name="dialog_title">App is blocked</string>
 	<string name="dialog_message">Unfortunately, this app is currently not available.</string>
 	<string name="dialog_btn_settings">Configure</string>
+	<string name="channel_description">Contains notifications like \"Focus mode is enabled\"</string>
+	<string name="channel_name">Service notifications</string>
 </resources>
