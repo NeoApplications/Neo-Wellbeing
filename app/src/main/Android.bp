@@ -17,7 +17,7 @@
 android_app {
     name: "Wellbeing",
     defaults: ["platform_app_defaults"],
-    static_libs: ["androidx.recyclerview_recyclerview"],
+    static_libs: ["androidx.recyclerview_recyclerview", "androidx-constraintlayout_constraintlayout", "androidx.cardview_cardview"],
     resource_dirs: ["res"],
 
     srcs: ["java/**/*.java", "java_real/**/*.java"],

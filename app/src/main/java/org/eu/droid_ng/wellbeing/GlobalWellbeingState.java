@@ -12,6 +12,10 @@ public class GlobalWellbeingState {
 	}
 	public Map<String, REASON> reasonMap = new HashMap<>();
 
+	public GlobalWellbeingState() {
+
+	}
+
 	public void onDestroy() {
 
 	}

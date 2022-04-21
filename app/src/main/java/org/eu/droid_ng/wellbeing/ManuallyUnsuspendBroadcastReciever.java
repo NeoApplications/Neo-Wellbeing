@@ -14,7 +14,7 @@ public class ManuallyUnsuspendBroadcastReciever extends BroadcastReceiver {
 			/* Make sure no one is trying to fool us */
 			return;
 		}
-		String packageName = intent.getStringExtra(Intent.EXTRA_PACKAGE_NAME);
+		final String packageName = intent.getStringExtra(Intent.EXTRA_PACKAGE_NAME);
 		if (packageName == null) {
 			/* Make sure we have a package name */
 			Toast.makeText(context, "Assertion failure (0xAC): packageName is null. Please report this to the developers!", Toast.LENGTH_LONG).show();
@@ -22,8 +22,8 @@ public class ManuallyUnsuspendBroadcastReciever extends BroadcastReceiver {
 		}
 
 		client.doBindService(boundService -> {
-			Toast.makeText(context, "Manually unsuspended: " + packageName + " " + boundService.state.reasonMap.getOrDefault(packageName, GlobalWellbeingState.REASON.REASON_UNKNOWN), Toast.LENGTH_LONG).show();
 			boundService.state.reasonMap.remove(packageName);
-		});
+			Toast.makeText(context, "Manually unsuspended: " + packageName + " " + boundService.state.reasonMap.getOrDefault(packageName, GlobalWellbeingState.REASON.REASON_UNKNOWN), Toast.LENGTH_LONG).show();
+		}, true);
 	}
 }

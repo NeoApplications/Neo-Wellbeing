@@ -58,26 +58,33 @@ public class WellbeingStateClient {
 		this(context, false);
 	}
 
-	void doBindService(Consumer<WellbeingStateHost> callback) {
+	boolean doBindService(Consumer<WellbeingStateHost> callback, boolean canHandleFailure) {
 		this.callback = callback;
 		if (context.bindService(new Intent(context, WellbeingStateHost.class),
 				mConnection, Context.BIND_IMPORTANT)) {
 			mShouldUnbind = true;
+			return true;
 		} else {
 			if (maybeStartService) {
 				context.startForegroundService(new Intent(context, WellbeingStateHost.class));
 				if (context.bindService(new Intent(context, WellbeingStateHost.class),
 						mConnection, Context.BIND_IMPORTANT)) {
 					mShouldUnbind = true;
-				} else {
+					return true;
+				} else if (!canHandleFailure) {
 					Toast.makeText(context, "Assertion failure (0xAA): Failed to start service. Please report this to the developers!",
 							Toast.LENGTH_SHORT).show();
 				}
-			} else {
+			} else if (!canHandleFailure) {
 				Toast.makeText(context, "Assertion failure (0xAD): Failed to find service. Please report this to the developers!",
 						Toast.LENGTH_SHORT).show();
 			}
+			return false;
 		}
+	}
+
+	void doBindService(Consumer<WellbeingStateHost> callback) {
+		doBindService(callback, false);
 	}
 
 	void doUnbindService() {
