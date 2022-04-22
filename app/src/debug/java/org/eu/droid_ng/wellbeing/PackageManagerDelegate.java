@@ -1,9 +1,8 @@
 package org.eu.droid_ng.wellbeing;
 
 import android.content.pm.PackageManager;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.os.PersistableBundle;
+import android.util.Log;
 
 import androidx.annotation.DrawableRes;
 import androidx.annotation.IntDef;
@@ -11,24 +10,104 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlSerializer;
+import org.lsposed.hiddenapibypass.HiddenApiBypass;
 
-import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 
-/* PackageManager stub for building in Android Studio for UI stuff */
+/* both PackageManager stub for building in Android Studio for UI stuff
+* and reflective delegate for magisk module, only used in debug builds.
+*
+* Note: The class must not fail or crash if a reference is missing.
+* */
 public class PackageManagerDelegate {
+	private static boolean success;
+	private static Method realSuspendDialogInfoBuilderBuild;
+	private static Method setPackagesSuspended;
+	private static Constructor<?> realSuspendDialogInfoCst;
+	private static Constructor<?> realSuspendDialogInfoBuilderCst;
+	private static Method getIconResId;
+	private static Method setIconResId;
+	private static Method getTitleResId;
+	private static Method setTitleResId;
+	private static Method getDialogMessageResId;
+	private static Method setDialogMessageResId;
+	private static Method getDialogMessage;
+	private static Method setDialogMessage;
+	private static Method getNeutralButtonTextResId;
+	private static Method setNeutralButtonTextResId;
+	private static Method getNeutralButtonAction;
+	private static Method setNeutralButtonAction;
+
+	static {
+		HiddenApiBypass.addHiddenApiExemptions(""); // Help in some cases.
+		try {
+			Class<?> realSuspendDialogInfo = Class.forName("android.content.pm.SuspendDialogInfo");
+			Class<?> realSuspendDialogInfoBuilder = Class.forName("android.content.pm.SuspendDialogInfo$Builder");
+			setPackagesSuspended = PackageManager.class.getDeclaredMethod("setPackagesSuspended", String[].class,
+					boolean.class, PersistableBundle.class, PersistableBundle.class, realSuspendDialogInfo);
+			try {
+				realSuspendDialogInfoBuilderBuild =
+						realSuspendDialogInfoBuilder.getMethod("build");
+				if (realSuspendDialogInfoBuilderBuild.getReturnType() != realSuspendDialogInfo) {
+					realSuspendDialogInfoBuilderBuild = null;
+				}
+			} catch (ReflectiveOperationException e) {
+				realSuspendDialogInfoBuilderBuild = null;
+			}
+			if (realSuspendDialogInfoBuilderBuild == null) {
+				realSuspendDialogInfoCst =
+						realSuspendDialogInfo.getConstructor(realSuspendDialogInfoBuilder);
+			}
+			realSuspendDialogInfoBuilderCst =
+					realSuspendDialogInfoBuilder.getConstructor();
+			getIconResId = realSuspendDialogInfo.getMethod("getIconResId");
+			setIconResId = realSuspendDialogInfoBuilder.getMethod("setIcon", int.class);
+			getTitleResId = realSuspendDialogInfo.getMethod("getTitleResId");
+			setTitleResId = realSuspendDialogInfoBuilder.getMethod("setTitle", int.class);
+			getDialogMessageResId = realSuspendDialogInfo.getMethod("getDialogMessageResId");
+			setDialogMessageResId = realSuspendDialogInfoBuilder.getMethod("setMessage", int.class);
+			getDialogMessage = realSuspendDialogInfo.getMethod("getDialogMessage");
+			setDialogMessage = realSuspendDialogInfoBuilder.getMethod("setMessage", String.class);
+			getNeutralButtonTextResId = realSuspendDialogInfo.getMethod("getNeutralButtonTextResId");
+			setNeutralButtonTextResId = realSuspendDialogInfoBuilder.getMethod("setNeutralButtonText", int.class);
+			try {
+				getNeutralButtonAction = realSuspendDialogInfo.getMethod("getNeutralButtonAction");
+				setNeutralButtonAction = realSuspendDialogInfoBuilder.getMethod("setNeutralButtonAction", int.class);
+			} catch (ReflectiveOperationException e) {
+				getNeutralButtonAction = null;
+				setNeutralButtonAction = null;
+			}
+			success = true;
+		} catch (ReflectiveOperationException e) {
+			Log.e("PackageManagerDelegate", // Log why it's crashing
+					"This would not occur if the app was built-in into the ROM:", e);
+			success = false;
+		}
+	}
+
+	private final PackageManager pm;
+
 	public PackageManagerDelegate(PackageManager pm) {
+		this.pm = pm;
 	}
 
 	public String[] setPackagesSuspended(@Nullable String[] packageNames, boolean suspend, @Nullable PersistableBundle appExtras, @Nullable PersistableBundle launcherExtras, @Nullable SuspendDialogInfo dialogInfo) {
+		if (success && (dialogInfo == null || dialogInfo.real != null)) {
+			try {
+				setPackagesSuspended.invoke(this.pm, packageNames, suspend, appExtras,
+						launcherExtras, dialogInfo == null ? null : dialogInfo.real);
+			} catch (ReflectiveOperationException ignored) {}
+		}
+
 		/* stub */
 		return new String[]{};
 	}
 
 	public static class SuspendDialogInfo {
+		Object real; // Instance used by reflection
 		/**
 		 * Used with {@link Builder#setNeutralButtonAction(int)} to create a neutral button that
 		 * starts the Intent#ACTION_SHOW_SUSPENDED_APP_DETAILS activity.
@@ -68,6 +147,11 @@ public class PackageManagerDelegate {
 		 */
 		@DrawableRes
 		public int getIconResId() {
+			if (success && real != null) {
+				try {
+					return (Integer) getIconResId.invoke(real);
+				} catch (ReflectiveOperationException ignored) {}
+			}
 			return 0;
 		}
 
@@ -77,6 +161,11 @@ public class PackageManagerDelegate {
 		 */
 		@StringRes
 		public int getTitleResId() {
+			if (success && real != null) {
+				try {
+					return (Integer) getTitleResId.invoke(real);
+				} catch (ReflectiveOperationException ignored) {}
+			}
 			return 0;
 		}
 
@@ -86,6 +175,11 @@ public class PackageManagerDelegate {
 		 */
 		@StringRes
 		public int getDialogMessageResId() {
+			if (success && real != null) {
+				try {
+					return (Integer) getDialogMessageResId.invoke(real);
+				} catch (ReflectiveOperationException ignored) {}
+			}
 			return 0;
 		}
 
@@ -96,6 +190,11 @@ public class PackageManagerDelegate {
 		 */
 		@Nullable
 		public String getDialogMessage() {
+			if (success && real != null) {
+				try {
+					return (String) getDialogMessage.invoke(real);
+				} catch (ReflectiveOperationException ignored) {}
+			}
 			return "";
 		}
 
@@ -105,6 +204,11 @@ public class PackageManagerDelegate {
 		 */
 		@StringRes
 		public int getNeutralButtonTextResId() {
+			if (success && real != null) {
+				try {
+					return (Integer) getNeutralButtonTextResId.invoke(real);
+				} catch (ReflectiveOperationException ignored) {}
+			}
 			return 0;
 		}
 
@@ -113,6 +217,11 @@ public class PackageManagerDelegate {
 		 */
 		@ButtonAction
 		public int getNeutralButtonAction() {
+			if (success && real != null && getNeutralButtonAction != null) {
+				try {
+					return (Integer) getNeutralButtonAction.invoke(real);
+				} catch (ReflectiveOperationException ignored) {}
+			}
 			return 0;
 		}
 
@@ -122,26 +231,30 @@ public class PackageManagerDelegate {
 		}
 
 		SuspendDialogInfo(Builder b) {
+			if (success && b != null && b.realB != null) {
+				try {
+					if (realSuspendDialogInfoBuilderBuild != null) {
+						this.real = realSuspendDialogInfoBuilderBuild.invoke(b.realB);
+					} else {
+						this.real = realSuspendDialogInfoCst.newInstance(b.realB);
+					}
+				} catch (ReflectiveOperationException ignored) {}
+			}
 		}
-
-		public static final @NonNull
-		Parcelable.Creator<SuspendDialogInfo> CREATOR =
-				new Parcelable.Creator<SuspendDialogInfo>() {
-					@Override
-					public SuspendDialogInfo createFromParcel(Parcel source) {
-						return null;
-					}
-
-					@Override
-					public SuspendDialogInfo[] newArray(int size) {
-						return new SuspendDialogInfo[size];
-					}
-				};
 
 		/**
 		 * Builder to build a {@link SuspendDialogInfo} object.
 		 */
 		public static final class Builder {
+			Object realB; // Instance used by reflection
+
+			public Builder() {
+				if (success) {
+					try {
+						this.realB = realSuspendDialogInfoBuilderCst.newInstance();
+					} catch (ReflectiveOperationException ignored) {}
+				}
+			}
 			/**
 			 * Set the resource id of the icon to be used. If not provided, no icon will be shown.
 			 *
@@ -150,6 +263,11 @@ public class PackageManagerDelegate {
 			 */
 			@NonNull
 			public Builder setIcon(@DrawableRes int resId) {
+				if (success && realB != null) {
+					try {
+						setIconResId.invoke(realB, resId);
+					} catch (ReflectiveOperationException ignored) {}
+				}
 				return this;
 			}
 
@@ -162,6 +280,11 @@ public class PackageManagerDelegate {
 			 */
 			@NonNull
 			public Builder setTitle(@StringRes int resId) {
+				if (success && realB != null) {
+					try {
+						setTitleResId.invoke(realB, resId);
+					} catch (ReflectiveOperationException ignored) {}
+				}
 				return this;
 			}
 
@@ -180,6 +303,11 @@ public class PackageManagerDelegate {
 			 */
 			@NonNull
 			public Builder setMessage(@NonNull String message) {
+				if (success && realB != null) {
+					try {
+						setDialogMessage.invoke(realB, message);
+					} catch (ReflectiveOperationException ignored) {}
+				}
 				return this;
 			}
 
@@ -199,6 +327,11 @@ public class PackageManagerDelegate {
 			 */
 			@NonNull
 			public Builder setMessage(@StringRes int resId) {
+				if (success && realB != null) {
+					try {
+						setDialogMessageResId.invoke(realB, resId);
+					} catch (ReflectiveOperationException ignored) {}
+				}
 				return this;
 			}
 
@@ -213,6 +346,11 @@ public class PackageManagerDelegate {
 			 */
 			@NonNull
 			public Builder setNeutralButtonText(@StringRes int resId) {
+				if (success && realB != null) {
+					try {
+						setNeutralButtonTextResId.invoke(realB, resId);
+					} catch (ReflectiveOperationException ignored) {}
+				}
 				return this;
 			}
 
@@ -226,6 +364,11 @@ public class PackageManagerDelegate {
 			 */
 			@NonNull
 			public Builder setNeutralButtonAction(@ButtonAction int buttonAction) {
+				if (success && realB != null && setNeutralButtonAction != null) {
+					try {
+						setNeutralButtonAction.invoke(realB, buttonAction);
+					} catch (ReflectiveOperationException ignored) {}
+				}
 				return this;
 			}
 
@@ -239,5 +382,13 @@ public class PackageManagerDelegate {
 				return new SuspendDialogInfo(this);
 			}
 		}
+	}
+
+	public static boolean canSuspend() {
+		return success;
+	}
+
+	public static boolean canSetNeutralButtonAction() {
+		return success && setNeutralButtonAction != null;
 	}
 }
