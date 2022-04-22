@@ -18,7 +18,9 @@ import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-/* This file contains all references to private API. Private API will not be used elsewhere */
+/* This file contains all references to private API. Private API will not be used elsewhere
+* This class is only used when doing full systems builds, so assume system implement required APIs
+* */
 public class PackageManagerDelegate {
 	private final PackageManager pm;
 
@@ -31,7 +33,7 @@ public class PackageManagerDelegate {
 	}
 
 	public static class SuspendDialogInfo {
-		public android.content.pm.SuspendDialogInfo real;
+		android.content.pm.SuspendDialogInfo real;
 
 		/**
 		 * Used with {@link Builder#setNeutralButtonAction(int)} to create a neutral button that
@@ -241,5 +243,13 @@ public class PackageManagerDelegate {
 				return new SuspendDialogInfo(this);
 			}
 		}
+	}
+
+	public static boolean canSuspend() {
+		return true;
+	}
+
+	public static boolean canSetNeutralButtonAction() {
+		return true;
 	}
 }

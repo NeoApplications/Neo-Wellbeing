@@ -7,7 +7,7 @@ android {
 
 	defaultConfig {
 		applicationId "org.eu.droid_ng.wellbeing.debug"
-		minSdk 32
+		minSdk 29
 		targetSdk 32
 		versionCode 1
 		versionName "1.0"
@@ -29,4 +29,6 @@ dependencies {
 	implementation 'androidx.recyclerview:recyclerview:1.2.1'
 	implementation 'androidx.constraintlayout:constraintlayout:2.1.3'
 	implementation 'androidx.cardview:cardview:1.0.0'
+	// For debug builds only
+	debugImplementation 'org.lsposed.hiddenapibypass:hiddenapibypass:4.3'
 }

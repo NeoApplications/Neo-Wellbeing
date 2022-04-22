@@ -8,6 +8,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.graphics.drawable.Icon;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 
 // Fancy class holding GlobalWellbeingState & a notification
@@ -60,11 +61,13 @@ public class WellbeingStateHost extends Service {
 	public Notification.Action buildAction(int actionText, int actionIcon, Intent actionIntent) {
 		PendingIntent pendingIntent =
 				PendingIntent.getActivity(this, 0, actionIntent, PendingIntent.FLAG_IMMUTABLE);
-		return new Notification.Action.Builder(Icon.createWithResource(getApplicationContext(), actionIcon), getText(actionText), pendingIntent)
-				.setAuthenticationRequired(true)
-				.setAllowGeneratedReplies(false)
-				.setContextual(true)
-				.build();
+		Notification.Action.Builder builder = new Notification.Action.Builder(
+				Icon.createWithResource(getApplicationContext(), actionIcon), getText(actionText), pendingIntent)
+				.setAllowGeneratedReplies(false).setContextual(true);
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+			builder.setAuthenticationRequired(true);
+		}
+		return builder.build();
 	}
 
 	private Notification buildNotification(int title, int text, int icon, Notification.Action[] actions, Intent notificationIntent) {
@@ -78,8 +81,10 @@ public class WellbeingStateHost extends Service {
 				.setContentTitle(getText(title))  // the label of the entry
 				.setContentText(getText(text))  // the contents of the entry
 				.setContentIntent(pendingIntent)  // The intent to send when the entry is clicked
-				.setForegroundServiceBehavior(Notification.FOREGROUND_SERVICE_IMMEDIATE) // do not wait with showing the notification
 				.setOnlyAlertOnce(true); // dont headsup/bling twice
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+			b.setForegroundServiceBehavior(Notification.FOREGROUND_SERVICE_IMMEDIATE); // do not wait with showing the notification
+		}
 		for (Notification.Action action : actions) {
 			b.addAction(action);
 		}
