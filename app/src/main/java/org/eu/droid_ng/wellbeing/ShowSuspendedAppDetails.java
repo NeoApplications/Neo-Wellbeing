@@ -55,6 +55,11 @@ public class ShowSuspendedAppDetails extends Activity {
 			switch (reason.get()) {
 				case REASON_FOCUS_MODE:
 					container = findViewById(R.id.focusMode);
+					findViewById(R.id.takeabreakbtn).setOnClickListener(v -> {
+						client.doBindService(boundService -> {
+							boundService.state.takeBreak(1);
+						});
+					});
 					break;
 				case REASON_MANUALLY:
 					container = findViewById(R.id.manually);
@@ -66,11 +71,12 @@ public class ShowSuspendedAppDetails extends Activity {
 			container.setVisibility(View.VISIBLE);
 		};
 		/* If service does not exist, just set UNKNOWN reason. If it exists, use its data */
-		if (!client.doBindService(boundService -> {
+		boolean hasService = client.doBindService(boundService -> {
 			reason.set(boundService.state.reasonMap.getOrDefault(packageName, GlobalWellbeingState.REASON.REASON_UNKNOWN));
 			reset.set(() -> boundService.state.reasonMap.remove(packageName));
 			next.run();
-		}, true))
+		}, false);
+		if (!hasService)
 			next.run();
 	}
 

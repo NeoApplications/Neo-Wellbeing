@@ -9,7 +9,6 @@ public class ManuallyUnsuspendBroadcastReciever extends BroadcastReceiver {
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
-		final WellbeingStateClient client = new WellbeingStateClient(context);
 		if (!"android.intent.action.PACKAGE_UNSUSPENDED_MANUALLY".equals(intent.getAction())) {
 			/* Make sure no one is trying to fool us */
 			return;
@@ -21,9 +20,7 @@ public class ManuallyUnsuspendBroadcastReciever extends BroadcastReceiver {
 			return;
 		}
 
-		client.doBindService(boundService -> {
-			boundService.state.reasonMap.remove(packageName);
-			Toast.makeText(context, "Manually unsuspended: " + packageName + " " + boundService.state.reasonMap.getOrDefault(packageName, GlobalWellbeingState.REASON.REASON_UNKNOWN), Toast.LENGTH_LONG).show();
-		}, true);
+		final WellbeingStateClient client = new WellbeingStateClient(context);
+		client.doBindService(boundService -> boundService.state.onManuallyUnsuspended(packageName), true);
 	}
 }

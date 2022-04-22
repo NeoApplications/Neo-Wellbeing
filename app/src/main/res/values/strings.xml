@@ -7,13 +7,18 @@
 	<string name="channel_name">Service notifications</string>
 	<string name="app_icon_content_desc">Application icon</string>
 	<string name="suspended_app_details_app">App</string>
-	<string name="suspended_app_details_was_suspended_due_to">...was suspended due to:</string>
+	<string name="suspended_app_details_was_suspended_due_to">…was suspended due to:</string>
 	<string name="focus_mode">Focus mode</string>
 	<string name="suspended_app_details_focus_mode">Focus mode is currently enabled!</string>
+	<string name="notification_focus_mode">Focus on your work ;)</string>
 	<string name="focus_mode_break">Take a break</string>
 	<string name="unknown">Unknown</string>
 	<string name="suspended_app_details_unknown">The app is suspended for an unknown reason. This probably is an bug!</string>
 	<string name="unsuspend">Unsuspend</string>
 	<string name="suspended_app_details_manually">The app was manually suspended.</string>
 	<string name="manually">Manual suspension</string>
+	<string name="notification_desc">Wellbeing is suspending some applications.</string>
+	<string name="notification_title">Apps suspended</string>
+	<string name="notification_action">Unsuspend</string>
+	<string name="focus_mode_off">Disable focus mode</string>
 </resources>

@@ -1,5 +1,6 @@
 package org.eu.droid_ng.wellbeing;
 
+import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -28,23 +29,26 @@ public class WellbeingStateClient {
 	// Start the service?
 	private final boolean maybeStartService;
 
+	// Connection callback utility
 	private final ServiceConnection mConnection = new ServiceConnection() {
 		public void onServiceConnected(ComponentName className, IBinder service) {
 			try {
 				mBoundService = ((WellbeingStateHost.LocalBinder) service).getService();
 			} catch (ClassCastException ignored) {
-				Toast.makeText(context, "Assertion failure (0xAF): Service is in another process. Please report this to the developers!",
+				Toast.makeText(context, "Assertion failure (0xAE): Service is in another process. Please report this to the developers!",
 						Toast.LENGTH_SHORT).show();
+				return;
 			}
-
-			if (mBoundService != null)
-				WellbeingStateClient.this.callback.accept(mBoundService);
+			WellbeingStateClient.this.callback.accept(mBoundService);
 		}
 
 		public void onServiceDisconnected(ComponentName className) {
-			// Should never happen
 			mBoundService = null;
-			Toast.makeText(context, "Assertion failure (0xAE): Service disconnected. Please report this to the developers!",
+		}
+
+		@Override
+		public void onNullBinding(ComponentName name) {
+			Toast.makeText(context, "Assertion failure (0xAF): Service is null. Please report this to the developers!",
 					Toast.LENGTH_SHORT).show();
 		}
 	};
@@ -58,15 +62,32 @@ public class WellbeingStateClient {
 		this(context, false);
 	}
 
-	boolean doBindService(Consumer<WellbeingStateHost> callback, boolean canHandleFailure) {
+	@SuppressWarnings("deprecation") //backward compatibility does what we want
+	private boolean isServiceRunning() {
+		ActivityManager manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+		for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+			if (WellbeingStateHost.class.getName().equals(service.service.getClassName())) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public boolean doBindService(Consumer<WellbeingStateHost> callback, boolean canHandleFailure) {
 		this.callback = callback;
+		if (!isServiceRunning())
+			return false;
+		if (mBoundService != null) {
+			callback.accept(mBoundService);
+			return true;
+		}
 		if (context.bindService(new Intent(context, WellbeingStateHost.class),
 				mConnection, Context.BIND_IMPORTANT)) {
 			mShouldUnbind = true;
 			return true;
 		} else {
 			if (maybeStartService) {
-				context.startForegroundService(new Intent(context, WellbeingStateHost.class));
+				startService();
 				if (context.bindService(new Intent(context, WellbeingStateHost.class),
 						mConnection, Context.BIND_IMPORTANT)) {
 					mShouldUnbind = true;
@@ -83,15 +104,23 @@ public class WellbeingStateClient {
 		}
 	}
 
-	void doBindService(Consumer<WellbeingStateHost> callback) {
+	public void doBindService(Consumer<WellbeingStateHost> callback) {
 		doBindService(callback, false);
 	}
 
-	void doUnbindService() {
+	public void doUnbindService() {
 		if (mShouldUnbind) {
 			// Release information about the service's state.
 			context.unbindService(mConnection);
 			mShouldUnbind = false;
 		}
+	}
+
+	public void startService() {
+		context.startForegroundService(new Intent(context, WellbeingStateHost.class));
+	}
+
+	public void killService() {
+		context.stopService(new Intent(context, WellbeingStateHost.class));
 	}
 }

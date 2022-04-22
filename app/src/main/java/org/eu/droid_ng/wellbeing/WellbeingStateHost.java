@@ -6,6 +6,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
+import android.graphics.drawable.Icon;
 import android.os.Binder;
 import android.os.IBinder;
 
@@ -30,7 +31,7 @@ public class WellbeingStateHost extends Service {
 
 	@Override
 	public void onCreate() {
-		state = new GlobalWellbeingState();
+		state = new GlobalWellbeingState(getApplicationContext());
 	}
 
 	@Override
@@ -45,34 +46,54 @@ public class WellbeingStateHost extends Service {
 			notificationManager.createNotificationChannel(channel);
 		}
 
-		// TODO: make this more dynamic
-		CharSequence text = "Service running";
-
+		int text = R.string.notification_desc;
+		int title = R.string.notification_title;
+		int icon = R.drawable.ic_stat_name;
 		Intent notificationIntent = new Intent(this, MainActivity.class);
+
+		// Notification ID cannot be 0.
+		startForeground(NOTIFICATION, buildNotification(title, text, icon, new Notification.Action[]{ }, notificationIntent));
+
+		return START_STICKY;
+	}
+
+	public Notification.Action buildAction(int actionText, int actionIcon, Intent actionIntent) {
+		PendingIntent pendingIntent =
+				PendingIntent.getActivity(this, 0, actionIntent, PendingIntent.FLAG_IMMUTABLE);
+		return new Notification.Action.Builder(Icon.createWithResource(getApplicationContext(), actionIcon), getText(actionText), pendingIntent)
+				.setAuthenticationRequired(true)
+				.setAllowGeneratedReplies(false)
+				.setContextual(true)
+				.build();
+	}
+
+	private Notification buildNotification(int title, int text, int icon, Notification.Action[] actions, Intent notificationIntent) {
 		PendingIntent pendingIntent =
 				PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
 
-		Notification notification = new Notification.Builder(this, CHANNEL_ID)
-				.setSmallIcon(R.drawable.ic_stat_name)  // the status icon
-				.setTicker(text)  // the status text
+		Notification.Builder b = new Notification.Builder(this, CHANNEL_ID)
+				.setSmallIcon(icon)  // the status icon
+				.setTicker(getText(text))  // the status text
 				.setWhen(System.currentTimeMillis())  // the time stamp
-				.setContentTitle("Local service")  // the label of the entry
-				.setContentText(text)  // the contents of the entry
+				.setContentTitle(getText(title))  // the label of the entry
+				.setContentText(getText(text))  // the contents of the entry
 				.setContentIntent(pendingIntent)  // The intent to send when the entry is clicked
-				.setForegroundServiceBehavior(Notification.FOREGROUND_SERVICE_IMMEDIATE)
-				.build();
-		// end
+				.setForegroundServiceBehavior(Notification.FOREGROUND_SERVICE_IMMEDIATE) // do not wait with showing the notification
+				.setOnlyAlertOnce(true); // dont headsup/bling twice
+		for (Notification.Action action : actions) {
+			b.addAction(action);
+		}
+		return b.build();
+	}
 
-		// Notification ID cannot be 0.
-		startForeground(NOTIFICATION, notification);
-
-		return START_STICKY;
+	public void updateNotification(int title, int text, int icon, Notification.Action[] actions, Intent notificationIntent) {
+		getSystemService(NotificationManager.class).notify(NOTIFICATION, buildNotification(title, text, icon, actions, notificationIntent));
 	}
 
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		state.onDestroy();
+		state.onDestroy(getApplicationContext());
 	}
 
 	@Override
