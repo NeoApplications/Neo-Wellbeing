@@ -31,4 +31,6 @@
 		<item quantity="other">%d minutes</item>
 	</plurals>
 	<string name="title_activity_settings">SettingsActivity</string>
+	<string name="app">App</string>
+	<string name="pkg_name_example">com.android.app</string>
 </resources>

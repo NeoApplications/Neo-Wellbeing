@@ -1,11 +1,11 @@
 package org.eu.droid_ng.wellbeing;
 
 import android.app.Activity;
-import android.app.Notification;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 
-import java.util.function.Consumer;
+import androidx.recyclerview.widget.RecyclerView;
 
 public class MainActivity extends Activity {
 	private WellbeingStateClient client;
@@ -29,6 +29,11 @@ public class MainActivity extends Activity {
 		});
 		findViewById(R.id.button3).setOnClickListener(a ->
 				startActivity(new Intent(MainActivity.this, SettingsActivity.class)));
+		RecyclerView r = findViewById(R.id.recyclerView);
+		r.setAdapter(
+				new PackageRecyclerViewAdapter(this,
+						getPackageManager().getInstalledApplications(PackageManager.GET_META_DATA),
+						"focus_mode"));
 	}
 
 	@Override

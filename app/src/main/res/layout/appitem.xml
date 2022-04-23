@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:id="@+id/container"
+	android:clickable="true"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:padding="10dp">
+
+	<ImageView
+		android:id="@+id/appIcon"
+		android:clickable="false"
+		android:layout_width="@android:dimen/app_icon_size"
+		android:layout_height="@android:dimen/app_icon_size"
+		android:contentDescription="@string/app_icon_content_desc"
+		app:layout_constraintBottom_toBottomOf="parent"
+		app:layout_constraintStart_toStartOf="parent"
+		app:layout_constraintTop_toTopOf="parent"
+		app:srcCompat="@android:drawable/sym_def_app_icon" />
+
+	<LinearLayout
+		android:id="@+id/linearLayout"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_marginStart="10dp"
+		android:orientation="vertical"
+		android:clickable="false"
+		app:layout_constraintBottom_toBottomOf="parent"
+		app:layout_constraintStart_toEndOf="@+id/appIcon"
+		app:layout_constraintTop_toTopOf="parent">
+
+		<TextView
+			android:id="@+id/appName2"
+			android:clickable="false"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="@string/app"
+			android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+
+		<TextView
+			android:id="@+id/pkgName"
+			android:clickable="false"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="@string/pkg_name_example"
+			android:textColor="#546E7A" />
+	</LinearLayout>
+
+	<CheckBox
+		android:id="@+id/isChecked"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:clickable="false"
+		app:layout_constraintBottom_toBottomOf="parent"
+		app:layout_constraintEnd_toEndOf="parent"
+		app:layout_constraintTop_toTopOf="parent"
+		tools:ignore="TouchTargetSizeCheck" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

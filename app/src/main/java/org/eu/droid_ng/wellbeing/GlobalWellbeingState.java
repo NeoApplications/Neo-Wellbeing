@@ -15,8 +15,10 @@ import androidx.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Stream;
 
 public class GlobalWellbeingState {
@@ -32,17 +34,13 @@ public class GlobalWellbeingState {
 	private final WellbeingStateHost service;
 	private final PackageManagerDelegate packageManagerDelegate;
 
-	//TODO: make it a setting
 	// set to -1 for "ask every time"
 	public int notificationBreakTime = -1;
-	//TODO: make it a setting
 	// set to -1 for "ask every time"
 	public int dialogBreakTime = -1;
 
-	//TODO: make it a setting
 	// if app was suspended manually, and gets unsuspended in dialog, unsuspend all apps?
 	public boolean manualUnsuspendDialogAllApps = false;
-	//TODO: make it a setting
 	// use dialog for manual unsuspend? (activity allows to choose between unsuspend all and unsuspend only this)
 	public boolean manualUnsuspendDialog = false;
 
@@ -60,8 +58,7 @@ public class GlobalWellbeingState {
 	}
 	public SERVICE_TYPE type = SERVICE_TYPE.TYPE_UNKNOWN;
 
-	//TODO: make it a setting
-	public List<String> focusModePackages = new ArrayList<>(List.of("org.lineageos.jelly", "org.lineageos.eleven"));
+	public Set<String> focusModePackages = null;
 	private boolean focusModeBreak = false;
 	private final Runnable takeBreakEndRunnable;
 	private String[] manualSuspendPkgList = null;
@@ -80,6 +77,8 @@ public class GlobalWellbeingState {
 			makeFocusModeNotification();
 		};
 		SharedPreferences prefs = context.getSharedPreferences("service", 0);
+		SharedPreferences prefs2 = context.getSharedPreferences("appLists", 0);
+		focusModePackages = prefs2.getStringSet("focus_mode", new HashSet<>());
 		notificationBreakTime = Integer.parseInt(prefs.getString("focus_notification", String.valueOf(notificationBreakTime)));
 		dialogBreakTime = Integer.parseInt(prefs.getString("focus_dialog", String.valueOf(dialogBreakTime)));
 		manualUnsuspendDialog = prefs.getBoolean("manual_dialog", manualUnsuspendDialog);
