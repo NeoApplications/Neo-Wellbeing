@@ -1,6 +1,8 @@
 package org.eu.droid_ng.wellbeing;
 
+import android.app.Notification;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Handler;
 import android.util.Log;
 import android.widget.Toast;
@@ -13,8 +15,13 @@ import java.util.stream.Stream;
 
 public class GlobalWellbeingState {
 
+	public static final String INTENT_ACTION_TAKE_BREAK = "org.eu.droid_ng.wellbeing.TAKE_BREAK";
+	public static final String INTENT_ACTION_QUIT_BREAK = "org.eu.droid_ng.wellbeing.QUIT_BREAK";
+	public static final String INTENT_ACTION_QUIT_FOCUS = "org.eu.droid_ng.wellbeing.QUIT_FOCUS";
+
 	private final Context context;
 	private final Handler handler;
+	private final WellbeingStateHost service;
 	private final PackageManagerDelegate packageManagerDelegate;
 
 	enum REASON {
@@ -33,33 +40,74 @@ public class GlobalWellbeingState {
 
 	public List<String> focusModePackages = new ArrayList<>(List.of("org.lineageos.jelly", "org.lineageos.eleven"));
 	private boolean focusModeBreak = false;
+	private final Runnable takeBreakEndRunnable;
 
 
-	public GlobalWellbeingState(Context context) {
+	public GlobalWellbeingState(Context context, WellbeingStateHost service) {
 		this.context = context;
+		this.service = service;
 		handler = new Handler(context.getMainLooper());
 		packageManagerDelegate = new PackageManagerDelegate(context.getPackageManager());
+		takeBreakEndRunnable = () -> {
+			if (!focusModeBreak)
+				return;
+			focusModeBreak = false;
+			focusModeSuspend();
+			makeFocusModeNotification();
+		};
 	}
 
-	public void onDestroy(Context c) {
+	public void onDestroy() {
 	}
-
-	// Logic starts here
 
 	public void onManuallyUnsuspended(String packageName) {
 		Toast.makeText(context, "Manually unsuspended: " + packageName + " " + reasonMap.getOrDefault(packageName, GlobalWellbeingState.REASON.REASON_UNKNOWN), Toast.LENGTH_LONG).show();
 	}
 
 	public void takeBreak(int forMinutes) {
-		Toast.makeText(context, "Break start", Toast.LENGTH_LONG).show();
+		if (focusModeBreak)
+			return;
 		int forMs = forMinutes * 60 * 1000;
 		focusModeUnsuspend();
 		focusModeBreak = true;
-		handler.postDelayed(() -> {
-			Toast.makeText(context, "Break end", Toast.LENGTH_LONG).show();
+		handler.postDelayed(takeBreakEndRunnable, forMs);
+		makeFocusModeBreakNotification();
+	}
+
+	public void endBreak() {
+		handler.removeCallbacks(takeBreakEndRunnable);
+		takeBreakEndRunnable.run();
+	}
+
+	public void enableFocusMode() {
+		focusModeBreak = false;
+		type = SERVICE_TYPE.TYPE_FOCUS_MODE;
+		makeFocusModeNotification();
+		focusModeSuspend();
+	}
+
+	private void makeFocusModeNotification() {
+		service.updateNotification(R.string.focus_mode, R.string.notification_focus_mode, R.drawable.ic_stat_name, new Notification.Action[]{
+				service.buildAction(R.string.focus_mode_break, R.drawable.ic_take_break, new Intent(context, NotificationBroadcastReciever.class).setAction(GlobalWellbeingState.INTENT_ACTION_TAKE_BREAK), true),
+				service.buildAction(R.string.focus_mode_off, R.drawable.ic_stat_name, new Intent(context, NotificationBroadcastReciever.class).setAction(GlobalWellbeingState.INTENT_ACTION_QUIT_FOCUS), true)
+		}, new Intent(context, MainActivity.class));
+	}
+
+	private void makeFocusModeBreakNotification() {
+		service.updateNotification(R.string.focus_mode, R.string.notification_focus_mode_break, R.drawable.ic_stat_name, new Notification.Action[]{
+				service.buildAction(R.string.focus_mode_break_end, R.drawable.ic_take_break, new Intent(context, NotificationBroadcastReciever.class).setAction(GlobalWellbeingState.INTENT_ACTION_QUIT_BREAK), true),
+				service.buildAction(R.string.focus_mode_off, R.drawable.ic_stat_name, new Intent(context, NotificationBroadcastReciever.class).setAction(GlobalWellbeingState.INTENT_ACTION_QUIT_FOCUS), true)
+		}, new Intent(context, MainActivity.class));
+	}
+
+	public void disableFocusMode() {
+		if (focusModeBreak) {
 			focusModeBreak = false;
-			focusModeSuspend();
-		}, forMs);
+		} else {
+			focusModeUnsuspend();
+		}
+		type = SERVICE_TYPE.TYPE_UNKNOWN;
+		service.updateDefaultNotification();
 	}
 
 	public void focusModeSuspend() {

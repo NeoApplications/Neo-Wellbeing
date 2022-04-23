@@ -17,12 +17,13 @@ import androidx.cardview.widget.CardView;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class ShowSuspendedAppDetails extends Activity {
-	public final WellbeingStateClient client = new WellbeingStateClient(this);
+	public WellbeingStateClient client;
 
 	@SuppressLint("SetTextI18n")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		client = new WellbeingStateClient(this);
 		final String packageName = getIntent().getStringExtra(Intent.EXTRA_PACKAGE_NAME);
 		if (packageName == null) {
 			Toast.makeText(ShowSuspendedAppDetails.this, "Assertion failure (0xAB): packageName is null. Please report this to the developers!", Toast.LENGTH_LONG).show();

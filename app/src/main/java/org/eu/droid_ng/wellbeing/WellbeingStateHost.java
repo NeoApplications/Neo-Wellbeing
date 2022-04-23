@@ -15,6 +15,7 @@ import android.os.IBinder;
 public class WellbeingStateHost extends Service {
 	private static final String CHANNEL_ID = "service_notif";
 	public GlobalWellbeingState state;
+	private boolean lateNotify = false;
 
 	// Unique Identification Number for the Notification.
 	private final int NOTIFICATION = 325563;
@@ -32,7 +33,7 @@ public class WellbeingStateHost extends Service {
 
 	@Override
 	public void onCreate() {
-		state = new GlobalWellbeingState(getApplicationContext());
+		state = new GlobalWellbeingState(getApplicationContext(), this);
 	}
 
 	@Override
@@ -47,20 +48,22 @@ public class WellbeingStateHost extends Service {
 			notificationManager.createNotificationChannel(channel);
 		}
 
-		int text = R.string.notification_desc;
-		int title = R.string.notification_title;
-		int icon = R.drawable.ic_stat_name;
-		Intent notificationIntent = new Intent(this, MainActivity.class);
+		lateNotify = intent.getBooleanExtra("lateNotify", lateNotify);
+		Notification n = buildDefaultNotification();
 
 		// Notification ID cannot be 0.
-		startForeground(NOTIFICATION, buildNotification(title, text, icon, new Notification.Action[]{ }, notificationIntent));
+		startForeground(NOTIFICATION, n);
 
 		return START_STICKY;
 	}
 
-	public Notification.Action buildAction(int actionText, int actionIcon, Intent actionIntent) {
-		PendingIntent pendingIntent =
-				PendingIntent.getActivity(this, 0, actionIntent, PendingIntent.FLAG_IMMUTABLE);
+	public Notification.Action buildAction(int actionText, int actionIcon, Intent actionIntent, boolean isBroadcast) {
+		final PendingIntent pendingIntent;
+		if (isBroadcast) {
+			pendingIntent = PendingIntent.getBroadcast(this, 0, actionIntent, PendingIntent.FLAG_IMMUTABLE);
+		} else {
+			pendingIntent = PendingIntent.getActivity(this, 0, actionIntent, PendingIntent.FLAG_IMMUTABLE);
+		}
 		Notification.Action.Builder builder = new Notification.Action.Builder(
 				Icon.createWithResource(getApplicationContext(), actionIcon), getText(actionText), pendingIntent)
 				.setAllowGeneratedReplies(false).setContextual(true);
@@ -70,19 +73,19 @@ public class WellbeingStateHost extends Service {
 		return builder.build();
 	}
 
-	private Notification buildNotification(int title, int text, int icon, Notification.Action[] actions, Intent notificationIntent) {
+	private Notification buildNotification(int title, String text, int icon, Notification.Action[] actions, Intent notificationIntent) {
 		PendingIntent pendingIntent =
 				PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
 
 		Notification.Builder b = new Notification.Builder(this, CHANNEL_ID)
 				.setSmallIcon(icon)  // the status icon
-				.setTicker(getText(text))  // the status text
+				.setTicker(text)  // the status text
 				.setWhen(System.currentTimeMillis())  // the time stamp
 				.setContentTitle(getText(title))  // the label of the entry
-				.setContentText(getText(text))  // the contents of the entry
+				.setContentText(text)  // the contents of the entry
 				.setContentIntent(pendingIntent)  // The intent to send when the entry is clicked
 				.setOnlyAlertOnce(true); // dont headsup/bling twice
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !lateNotify) {
 			b.setForegroundServiceBehavior(Notification.FOREGROUND_SERVICE_IMMEDIATE); // do not wait with showing the notification
 		}
 		for (Notification.Action action : actions) {
@@ -91,14 +94,34 @@ public class WellbeingStateHost extends Service {
 		return b.build();
 	}
 
+	private Notification buildDefaultNotification() {
+		int text = R.string.notification_desc;
+		int title = R.string.notification_title;
+		int icon = R.drawable.ic_stat_name;
+		Intent notificationIntent = new Intent(this, MainActivity.class);
+		return buildNotification(title, getString(text), icon, new Notification.Action[]{ }, notificationIntent);
+	}
+
+	private void updateNotification(Notification n) {
+		getSystemService(NotificationManager.class).notify(NOTIFICATION, n);
+	}
+
+	public void updateNotification(int title, String text, int icon, Notification.Action[] actions, Intent notificationIntent) {
+		updateNotification(buildNotification(title, text, icon, actions, notificationIntent));
+	}
+
 	public void updateNotification(int title, int text, int icon, Notification.Action[] actions, Intent notificationIntent) {
-		getSystemService(NotificationManager.class).notify(NOTIFICATION, buildNotification(title, text, icon, actions, notificationIntent));
+		updateNotification(title, getString(text), icon, actions, notificationIntent);
+	}
+
+	public void updateDefaultNotification() {
+		updateNotification(buildDefaultNotification());
 	}
 
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		state.onDestroy(getApplicationContext());
+		state.onDestroy();
 	}
 
 	@Override

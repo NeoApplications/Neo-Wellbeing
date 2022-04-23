@@ -26,9 +26,6 @@ public class WellbeingStateClient {
 	// Callback when service is connected
 	private Consumer<WellbeingStateHost> callback;
 
-	// Start the service?
-	private final boolean maybeStartService;
-
 	// Connection callback utility
 	private final ServiceConnection mConnection = new ServiceConnection() {
 		public void onServiceConnected(ComponentName className, IBinder service) {
@@ -53,13 +50,8 @@ public class WellbeingStateClient {
 		}
 	};
 
-	public WellbeingStateClient(Context context, boolean maybeStartService) {
-		this.context = context;
-		this.maybeStartService = maybeStartService;
-	}
-
 	public WellbeingStateClient(Context context) {
-		this(context, false);
+		this.context = context.getApplicationContext();
 	}
 
 	@SuppressWarnings("deprecation") //backward compatibility does what we want
@@ -73,24 +65,21 @@ public class WellbeingStateClient {
 		return false;
 	}
 
-	public boolean doBindService(Consumer<WellbeingStateHost> callback, boolean canHandleFailure) {
+	public boolean doBindService(Consumer<WellbeingStateHost> callback, boolean canHandleFailure, boolean maybeStartService, boolean lateNotify) {
 		this.callback = callback;
-		if (!isServiceRunning())
-			return false;
 		if (mBoundService != null) {
 			callback.accept(mBoundService);
 			return true;
 		}
-		if (context.bindService(new Intent(context, WellbeingStateHost.class),
+
+		if (isServiceRunning() && context.bindService(new Intent(context, WellbeingStateHost.class),
 				mConnection, Context.BIND_IMPORTANT)) {
 			mShouldUnbind = true;
 			return true;
 		} else {
 			if (maybeStartService) {
-				startService();
-				if (context.bindService(new Intent(context, WellbeingStateHost.class),
-						mConnection, Context.BIND_IMPORTANT)) {
-					mShouldUnbind = true;
+				startService(lateNotify);
+				if (doBindService(callback, true, false, lateNotify)) {
 					return true;
 				} else if (!canHandleFailure) {
 					Toast.makeText(context, "Assertion failure (0xAA): Failed to start service. Please report this to the developers!",
@@ -102,6 +91,10 @@ public class WellbeingStateClient {
 			}
 			return false;
 		}
+	}
+
+	public boolean doBindService(Consumer<WellbeingStateHost> callback, boolean canHandleFailure) {
+		return doBindService(callback, canHandleFailure, false, false);
 	}
 
 	public void doBindService(Consumer<WellbeingStateHost> callback) {
@@ -116,8 +109,14 @@ public class WellbeingStateClient {
 		}
 	}
 
+	public void startService(boolean lateNotify) {
+		Intent i = new Intent(context, WellbeingStateHost.class);
+		i.putExtra("lateNotify", lateNotify);
+		context.startForegroundService(i);
+	}
+
 	public void startService() {
-		context.startForegroundService(new Intent(context, WellbeingStateHost.class));
+		startService(false);
 	}
 
 	public void killService() {

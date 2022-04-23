@@ -4,37 +4,27 @@ import android.app.Activity;
 import android.app.Notification;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 
-import org.eu.droid_ng.wellbeing.PackageManagerDelegate.SuspendDialogInfo;
+import java.util.function.Consumer;
 
 public class MainActivity extends Activity {
-	private final WellbeingStateClient client = new WellbeingStateClient(this);
+	private WellbeingStateClient client;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		client = new WellbeingStateClient(this);
 		setContentView(R.layout.activity_main);
-		PackageManagerDelegate delegate = new PackageManagerDelegate(getPackageManager());
-		findViewById(R.id.button).setOnClickListener(a -> {
-			client.startService();
-			client.doBindService(boundService -> {
-				boundService.state.type = GlobalWellbeingState.SERVICE_TYPE.TYPE_FOCUS_MODE;
-				boundService.updateNotification(R.string.focus_mode, R.string.notification_focus_mode, R.drawable.ic_stat_name, new Notification.Action[]{
-						boundService.buildAction(R.string.focus_mode_break, R.drawable.ic_take_break, new Intent(MainActivity.this, MainActivity.class)),
-						boundService.buildAction(R.string.focus_mode_off, R.drawable.ic_stat_name, new Intent(MainActivity.this, MainActivity.class))
-				}, new Intent(MainActivity.this, MainActivity.class));
-				boundService.state.focusModeSuspend();
-			});
-		});
+		findViewById(R.id.button).setOnClickListener(a ->
+				client.doBindService(boundService ->
+						boundService.state.enableFocusMode()
+				, false, true, false));
 		findViewById(R.id.button2).setOnClickListener(a -> {
+			// If service is alive, use it to unsuspend all apps and kill it. If not, start it, unsuspend all apps and kill it again.
 			client.doBindService(boundService -> {
-				boundService.state.focusModeUnsuspend();
+				boundService.state.disableFocusMode();
 				client.killService();
-			}, true);
-			for (String s : delegate.setPackagesSuspended(new String[]{"org.lineageos.jelly","org.lineageos.eleven"},false,null,null,null)) {
-				Log.e("OpenWellbeing", "failed: " + s);
-			}
+			}, false, true, true);
 		});
 	}
 

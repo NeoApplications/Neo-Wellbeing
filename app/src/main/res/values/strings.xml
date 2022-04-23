@@ -21,4 +21,6 @@
 	<string name="notification_title">Apps suspended</string>
 	<string name="notification_action">Unsuspend</string>
 	<string name="focus_mode_off">Disable focus mode</string>
+	<string name="notification_focus_mode_break">You are taking a break right now!</string>
+	<string name="focus_mode_break_end">End break</string>
 </resources>
