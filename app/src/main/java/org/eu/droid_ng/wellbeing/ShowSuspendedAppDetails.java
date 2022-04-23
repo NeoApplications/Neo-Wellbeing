@@ -63,7 +63,6 @@ public class ShowSuspendedAppDetails extends Activity {
 					findViewById(R.id.takeabreakbtn).setOnClickListener(v -> client.doBindService(boundService -> boundService.state.takeBreakDialog(ShowSuspendedAppDetails.this, true)));
 					findViewById(R.id.disablefocusmode).setOnClickListener(v -> {
 						client.doBindService(boundService -> boundService.state.disableFocusMode());
-						client.killService();
 						ShowSuspendedAppDetails.this.finish();
 					});
 					break;
@@ -75,10 +74,8 @@ public class ShowSuspendedAppDetails extends Activity {
 						ShowSuspendedAppDetails.this.finish();
 					});
 					findViewById(R.id.unsuspendallbtn).setOnClickListener(v -> {
-						client.doBindService(boundService -> {
-							boundService.state.manualUnsuspend(new String[] { packageName });
-							client.killService();
-						});
+						client.doBindService(boundService ->
+							boundService.state.manualUnsuspend(new String[] { packageName }));
 						ShowSuspendedAppDetails.this.finish();
 					});
 					break;
