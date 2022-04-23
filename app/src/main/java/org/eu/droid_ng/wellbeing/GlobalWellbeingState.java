@@ -21,11 +21,15 @@ public class GlobalWellbeingState {
 	public static final String INTENT_ACTION_TAKE_BREAK = "org.eu.droid_ng.wellbeing.TAKE_BREAK";
 	public static final String INTENT_ACTION_QUIT_BREAK = "org.eu.droid_ng.wellbeing.QUIT_BREAK";
 	public static final String INTENT_ACTION_QUIT_FOCUS = "org.eu.droid_ng.wellbeing.QUIT_FOCUS";
+	public static final int[] breakTimeOptions = new int[] { 1, 3, 5, 10, 15 };
 
 	private final Context context;
 	private final Handler handler;
 	private final WellbeingStateHost service;
 	private final PackageManagerDelegate packageManagerDelegate;
+
+	// set to -1 for "ask every time"
+	public int notificationBreakTime = 5;
 
 	enum REASON {
 		REASON_MANUALLY,
@@ -83,13 +87,12 @@ public class GlobalWellbeingState {
 	}
 
 	public void takeBreakDialog(Activity activityContext, boolean endActivity) {
-		int[] options = new int[] { 1, 3, 5, 10, 15 };
-		String[] optionsS = Arrays.stream(options).mapToObj(i -> context.getResources().getQuantityString(R.plurals.break_mins, i, i)).toArray(String[]::new);
+		String[] optionsS = Arrays.stream(breakTimeOptions).mapToObj(i -> context.getResources().getQuantityString(R.plurals.break_mins, i, i)).toArray(String[]::new);
 		AlertDialog.Builder b = new AlertDialog.Builder(activityContext);
 		b.setTitle(R.string.focus_mode_break)
 				.setNegativeButton(R.string.cancel, (d, i) -> d.dismiss())
 				.setItems(optionsS, (dialogInterface, i) -> {
-					int breakMins = options[i];
+					int breakMins = breakTimeOptions[i];
 					takeBreak(breakMins);
 					if (endActivity) activityContext.finish();
 				});
@@ -105,7 +108,9 @@ public class GlobalWellbeingState {
 
 	private void makeFocusModeNotification() {
 		service.updateNotification(R.string.focus_mode, R.string.notification_focus_mode, R.drawable.ic_stat_name, new Notification.Action[]{
-				service.buildAction(R.string.focus_mode_break, R.drawable.ic_take_break, new Intent(context, NotificationBroadcastReciever.class).setAction(GlobalWellbeingState.INTENT_ACTION_TAKE_BREAK), true),
+				notificationBreakTime == -1 ?
+				service.buildAction(R.string.focus_mode_break, R.drawable.ic_take_break, new Intent(context, TakeBreakDialogActivity.class), false)
+				: service.buildAction(R.string.focus_mode_break, R.drawable.ic_take_break, new Intent(context, NotificationBroadcastReciever.class).setAction(GlobalWellbeingState.INTENT_ACTION_TAKE_BREAK), true),
 				service.buildAction(R.string.focus_mode_off, R.drawable.ic_stat_name, new Intent(context, NotificationBroadcastReciever.class).setAction(GlobalWellbeingState.INTENT_ACTION_QUIT_FOCUS), true)
 		}, new Intent(context, MainActivity.class));
 	}

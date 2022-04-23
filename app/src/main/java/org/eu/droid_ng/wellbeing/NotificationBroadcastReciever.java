@@ -11,7 +11,7 @@ public class NotificationBroadcastReciever extends BroadcastReceiver {
 	public void onReceive(Context context, Intent intent) {
 		final WellbeingStateClient client = new WellbeingStateClient(context);
 		if (GlobalWellbeingState.INTENT_ACTION_TAKE_BREAK.equals(intent.getAction())) {
-			client.doBindService(boundService -> boundService.state.takeBreak(5));
+			client.doBindService(boundService -> boundService.state.takeBreak(boundService.state.notificationBreakTime));
 		} else if (GlobalWellbeingState.INTENT_ACTION_QUIT_BREAK.equals(intent.getAction())) {
 				client.doBindService(boundService -> boundService.state.endBreak());
 		} else if (GlobalWellbeingState.INTENT_ACTION_QUIT_FOCUS.equals(intent.getAction())) {
