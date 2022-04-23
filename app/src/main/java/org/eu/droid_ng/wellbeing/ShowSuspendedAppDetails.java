@@ -18,18 +18,22 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class ShowSuspendedAppDetails extends Activity {
 	public WellbeingStateClient client;
+	private PackageManagerDelegate pmd;
 
 	@SuppressLint("SetTextI18n")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		client = new WellbeingStateClient(this);
 		final String packageName = getIntent().getStringExtra(Intent.EXTRA_PACKAGE_NAME);
 		if (packageName == null) {
 			Toast.makeText(ShowSuspendedAppDetails.this, "Assertion failure (0xAB): packageName is null. Please report this to the developers!", Toast.LENGTH_LONG).show();
 			finish();
 			return;
 		}
+		client = new WellbeingStateClient(this);
+		PackageManager pm = getPackageManager();
+		pmd = new PackageManagerDelegate(pm);
+
 		setContentView(R.layout.activity_show_suspended_app_details);
 		getActionBar().setDisplayHomeAsUpEnabled(true);
 		getActionBar().setHomeAsUpIndicator(R.drawable.ic_baseline_close_24);
@@ -40,9 +44,9 @@ public class ShowSuspendedAppDetails extends Activity {
 		Drawable icon = null;
 		CharSequence name = null;
 		try {
-			appInfo = getPackageManager().getApplicationInfo(packageName, 0);
-			icon = getPackageManager().getApplicationIcon(appInfo);
-			name = getPackageManager().getApplicationLabel(appInfo);
+			appInfo = pm.getApplicationInfo(packageName, 0);
+			icon = pm.getApplicationIcon(appInfo);
+			name = pm.getApplicationLabel(appInfo);
 		} catch (PackageManager.NameNotFoundException ignored) {
 		}
 		if (appInfo != null && icon != null && name != null) {
@@ -56,18 +60,24 @@ public class ShowSuspendedAppDetails extends Activity {
 			switch (reason.get()) {
 				case REASON_FOCUS_MODE:
 					container = findViewById(R.id.focusMode);
-					findViewById(R.id.takeabreakbtn).setOnClickListener(v -> {
-						client.doBindService(boundService -> {
-							boundService.state.takeBreak(1);
-						});
-					});
+					findViewById(R.id.takeabreakbtn).setOnClickListener(v -> client.doBindService(boundService -> boundService.state.takeBreakDialog(ShowSuspendedAppDetails.this, true)));
 					break;
 				case REASON_MANUALLY:
 					container = findViewById(R.id.manually);
+					findViewById(R.id.unsuspendbtn2).setOnClickListener(v -> {
+						pmd.setPackagesSuspended(new String[] { packageName }, false, null, null, null);
+						client.doBindService(boundService -> boundService.state.reasonMap.remove(packageName));
+						ShowSuspendedAppDetails.this.finish();
+					});
 					break;
 				case REASON_UNKNOWN:
 				default:
 					container = findViewById(R.id.unknown);
+					findViewById(R.id.unsuspendbtn).setOnClickListener(v -> {
+						pmd.setPackagesSuspended(new String[] { packageName }, false, null, null, null);
+						client.doBindService(boundService -> boundService.state.reasonMap.remove(packageName), true);
+						ShowSuspendedAppDetails.this.finish();
+					});
 			}
 			container.setVisibility(View.VISIBLE);
 		};

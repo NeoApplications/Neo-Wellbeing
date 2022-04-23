@@ -1,5 +1,7 @@
 package org.eu.droid_ng.wellbeing;
 
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Notification;
 import android.content.Context;
 import android.content.Intent;
@@ -8,6 +10,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -77,6 +80,20 @@ public class GlobalWellbeingState {
 	public void endBreak() {
 		handler.removeCallbacks(takeBreakEndRunnable);
 		takeBreakEndRunnable.run();
+	}
+
+	public void takeBreakDialog(Activity activityContext, boolean endActivity) {
+		int[] options = new int[] { 1, 3, 5, 10, 15 };
+		String[] optionsS = Arrays.stream(options).mapToObj(i -> context.getResources().getQuantityString(R.plurals.break_mins, i, i)).toArray(String[]::new);
+		AlertDialog.Builder b = new AlertDialog.Builder(activityContext);
+		b.setTitle(R.string.focus_mode_break)
+				.setNegativeButton(R.string.cancel, (d, i) -> d.dismiss())
+				.setItems(optionsS, (dialogInterface, i) -> {
+					int breakMins = options[i];
+					takeBreak(breakMins);
+					if (endActivity) activityContext.finish();
+				});
+		b.show();
 	}
 
 	public void enableFocusMode() {

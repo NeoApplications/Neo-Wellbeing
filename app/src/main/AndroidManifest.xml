@@ -132,7 +132,7 @@
 		<receiver
 			android:name=".NotificationBroadcastReciever"
 			android:enabled="true"
-			android:exported="true" />
+			android:exported="false" />
 
 		<service
 			android:name=".WellbeingStateHost"

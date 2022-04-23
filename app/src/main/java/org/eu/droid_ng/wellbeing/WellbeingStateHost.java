@@ -48,7 +48,9 @@ public class WellbeingStateHost extends Service {
 			notificationManager.createNotificationChannel(channel);
 		}
 
-		lateNotify = intent.getBooleanExtra("lateNotify", lateNotify);
+		if (intent != null) {
+			lateNotify = intent.getBooleanExtra("lateNotify", lateNotify);
+		}
 		Notification n = buildDefaultNotification();
 
 		// Notification ID cannot be 0.
