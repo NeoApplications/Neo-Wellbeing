@@ -41,6 +41,6 @@ It allows additional grants on top of privapp-permissions-platform.xml
         <permission name="android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME" />
         <permission name="android.permission.SUSPEND_APPS" />
         <permission name="android.permission.WRITE_DREAM_STATE" />
-	<permission name="android.permission.WRITE_SECURE_SETTINGS" />
+	    <permission name="android.permission.WRITE_SECURE_SETTINGS" />
     </privapp-permissions>
 </permissions>

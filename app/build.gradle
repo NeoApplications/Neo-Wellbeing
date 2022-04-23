@@ -1,3 +1,5 @@
+import java.nio.file.Files
+
 plugins {
 	id 'com.android.application'
 }
@@ -33,4 +35,47 @@ dependencies {
 	implementation 'androidx.appcompat:appcompat:1.4.1'
 	// For debug builds only
 	debugImplementation 'org.lsposed.hiddenapibypass:hiddenapibypass:4.3'
+}
+
+def magiskModuleProp = [
+		id           : "open_wellbeing",
+		name         : "OpenWellbeing systemless",
+		version      : android.defaultConfig.versionName,
+		versionCode  : android.defaultConfig.versionCode,
+		minSdkVersion: android.defaultConfig.minSdk,
+		support      : "https://github.com/nift4/android_packages_apps_Wellbeing",
+		config       : "org.eu.droid_ng.wellbeing.debug",
+		author       : "nift4",
+		description  : "OpenWellbeing is an opensource implementation of Wellbeing"
+]
+
+def outDir = rootProject.buildDir
+def magiskDir = file("$outDir/magisk_module")
+def zipName = "OpenWellbeing-${android.defaultConfig.versionName}.zip"
+
+task makeMagiskModule(type: Task) {
+	dependsOn(":app:assembleDebug")
+	doLast {
+		delete(magiskDir)
+		magiskDir.mkdirs()
+		def modulePropText = ""
+		magiskModuleProp.each { k, v -> modulePropText += "$k=$v\n" }
+		file("$magiskDir/module.prop").text = modulePropText
+		file("$magiskDir.path/system/priv-app/OpenWellbeing").mkdirs()
+		Files.copy(file("$rootDir/app/build/intermediates/apk/debug/app-debug.apk").toPath(),
+				file("${magiskDir.path}/system/priv-app/OpenWellbeing/OpenWellbeing.apk").toPath())
+		file("$magiskDir.path/system/etc/permissions").mkdirs()
+		Files.copy(file("$rootDir/app/src/main/privapp-permissions-wellbeing.xml").toPath(),
+				file("${magiskDir.path}/system/etc/permissions/privapp-permissions-wellbeing.xml").toPath())
+		file("${magiskDir.path}/system/etc/permissions/privapp-permissions-wellbeing.xml").text =
+				file("$rootDir/app/src/main/privapp-permissions-wellbeing.xml").text
+						.replace("\"org.eu.droid_ng.wellbeing\"", "\"org.eu.droid_ng.wellbeing.debug\"")
+	}
+}
+
+task zipMagiskModule(type: Zip) {
+	from magiskDir
+	archiveName zipName
+	destinationDir outDir
+	dependsOn(":app:makeMagiskModule")
 }
