@@ -36,4 +36,11 @@
 	<string name="enable">Enable</string>
 	<string name="disable">Disable</string>
 	<string name="focus_icon_content_desc">Focus mode icon</string>
+	<string name="focus_mode_pref_dialog">Default break time (dialog)</string>
+	<string name="focus_mode_pref_notification">Default break time (notification)</string>
+	<string name="manually_dialog_desc">It has less features</string>
+	<string name="manually_dialog_title">Use flow non-interrupting dialog</string>
+	<string name="manually_all_off">Only unsuspend the app you tried to open</string>
+	<string name="manually_all_on">Unsuspend all apps when you are unsuspending one</string>
+	<string name="manually_all">Unsuspend all apps</string>
 </resources>

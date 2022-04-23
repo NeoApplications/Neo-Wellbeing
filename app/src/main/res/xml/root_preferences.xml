@@ -1,13 +1,13 @@
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
 
-	<PreferenceCategory app:title="Focus mode">
+	<PreferenceCategory app:title="@string/focus_mode">
 
 		<ListPreference
 			app:defaultValue="-1"
 			app:entries="@array/break_entries"
 			app:entryValues="@array/break_values"
 			app:key="focus_dialog"
-			app:title="Default break time (dialog)"
+			app:title="@string/focus_mode_pref_dialog"
 			app:useSimpleSummaryProvider="true" />
 
 		<ListPreference
@@ -15,24 +15,24 @@
 			app:entries="@array/break_entries"
 			app:entryValues="@array/break_values"
 			app:key="focus_notification"
-			app:title="Default break time (notification)"
+			app:title="@string/focus_mode_pref_notification"
 			app:useSimpleSummaryProvider="true" />
 
 	</PreferenceCategory>
 
-	<PreferenceCategory app:title="Manual suspension">
+	<PreferenceCategory app:title="@string/manually">
 
 		<SwitchPreferenceCompat
 			app:key="manual_dialog"
-			app:summary="It has less features"
-			app:title="Use flow non-interrupting dialog" />
+			app:summary="@string/manually_dialog_desc"
+			app:title="@string/manually_dialog_title" />
 
 		<SwitchPreferenceCompat
 			app:dependency="manual_dialog"
 			app:key="manual_all"
-			app:summaryOff="Only unsuspend the app you tried to open"
-			app:summaryOn="Unsuspend all apps when you are unsuspending one"
-			app:title="Unsuspend all apps" />
+			app:summaryOff="@string/manually_all_off"
+			app:summaryOn="@string/manually_all_on"
+			app:title="@string/manually_all" />
 
 	</PreferenceCategory>
 
