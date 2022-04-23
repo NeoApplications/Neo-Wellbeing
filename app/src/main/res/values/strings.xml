@@ -2,7 +2,7 @@
 	<string name="app_name">DigitalWellbeing</string>
 	<string name="dialog_title">App is blocked</string>
 	<string name="dialog_message">Unfortunately, this app is currently not available.</string>
-	<string name="dialog_btn_settings">Configure</string>
+	<string name="dialog_btn_settings">More details</string>
 	<string name="channel_description">Contains notifications like \"Focus mode is enabled\"</string>
 	<string name="channel_name">Service notifications</string>
 	<string name="app_icon_content_desc">Application icon</string>
@@ -25,6 +25,7 @@
 	<string name="focus_mode_break_end">End break</string>
 	<string name="cancel">Cancel</string>
 	<string name="notification_manual">Some apps were manually suspended.</string>
+	<string name="unsuspend_all">Unsuspend all</string>
 	<plurals name="break_mins">
 		<item quantity="one">%d minute</item>
 		<item quantity="other">%d minutes</item>

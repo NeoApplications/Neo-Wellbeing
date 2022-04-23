@@ -61,12 +61,24 @@ public class ShowSuspendedAppDetails extends Activity {
 				case REASON_FOCUS_MODE:
 					container = findViewById(R.id.focusMode);
 					findViewById(R.id.takeabreakbtn).setOnClickListener(v -> client.doBindService(boundService -> boundService.state.takeBreakDialog(ShowSuspendedAppDetails.this, true)));
+					findViewById(R.id.disablefocusmode).setOnClickListener(v -> {
+						client.doBindService(boundService -> boundService.state.disableFocusMode());
+						client.killService();
+						ShowSuspendedAppDetails.this.finish();
+					});
 					break;
 				case REASON_MANUALLY:
 					container = findViewById(R.id.manually);
 					findViewById(R.id.unsuspendbtn2).setOnClickListener(v -> {
 						pmd.setPackagesSuspended(new String[] { packageName }, false, null, null, null);
 						client.doBindService(boundService -> boundService.state.reasonMap.remove(packageName));
+						ShowSuspendedAppDetails.this.finish();
+					});
+					findViewById(R.id.unsuspendallbtn).setOnClickListener(v -> {
+						client.doBindService(boundService -> {
+							boundService.state.manualUnsuspend(new String[] { packageName });
+							client.killService();
+						});
 						ShowSuspendedAppDetails.this.finish();
 					});
 					break;

@@ -17,14 +17,15 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 		findViewById(R.id.button).setOnClickListener(a ->
 				client.doBindService(boundService ->
-						boundService.state.manualSuspend(new String[] { "org.lineageos.jelly", "org.lineageos.etar" })
+						boundService.state.enableFocusMode()
+						//boundService.state.manualSuspend(new String[] { "org.lineageos.jelly", "org.lineageos.etar" })
 				, false, true, false));
 		findViewById(R.id.button2).setOnClickListener(a -> {
 			// If service is alive, use it to unsuspend all apps and kill it. If not, start it, unsuspend all apps and kill it again. Avoid a notification with lateNotify = true.
-			client.doBindService(boundService -> {
-				boundService.state.manualUnsuspend(new String[] { "org.lineageos.jelly", "org.lineageos.etar" });
-				client.killService();
-			}, false, true, true);
+			client.doBindService(boundService ->
+					//boundService.state.manualUnsuspend(null)
+					boundService.state.disableFocusMode()
+			, false, true, true);
 		});
 	}
 

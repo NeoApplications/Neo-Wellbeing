@@ -7,8 +7,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.util.Log;
-import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
@@ -23,6 +23,7 @@ public class GlobalWellbeingState {
 	public static final String INTENT_ACTION_TAKE_BREAK = "org.eu.droid_ng.wellbeing.TAKE_BREAK";
 	public static final String INTENT_ACTION_QUIT_BREAK = "org.eu.droid_ng.wellbeing.QUIT_BREAK";
 	public static final String INTENT_ACTION_QUIT_FOCUS = "org.eu.droid_ng.wellbeing.QUIT_FOCUS";
+	public static final String INTENT_ACTION_UNSUSPEND_ALL = "org.eu.droid_ng.wellbeing.UNSUSPEND_ALL";
 	public static final int[] breakTimeOptions = new int[] { 1, 3, 5, 10, 15 };
 
 	private final Context context;
@@ -32,7 +33,17 @@ public class GlobalWellbeingState {
 
 	//TODO: make it a setting
 	// set to -1 for "ask every time"
-	public int notificationBreakTime = 5;
+	public int notificationBreakTime = -1;
+	//TODO: make it a setting
+	// set to -1 for "ask every time"
+	public int dialogBreakTime = 5;
+
+	//TODO: make it a setting
+	// if app was suspended manually, and gets unsuspended in dialog, unsuspend all apps?
+	public boolean manualUnsuspendDialogAllApps = false;
+	//TODO: make it a setting
+	// use dialog for manual unsuspend? (activity allows to choose between unsuspend all and unsuspend only this)
+	public boolean manualUnsuspendDialog = true;
 
 	enum REASON {
 		REASON_MANUALLY,
@@ -72,8 +83,29 @@ public class GlobalWellbeingState {
 	public void onDestroy() {
 	}
 
-	public void onManuallyUnsuspended(String packageName) {
-
+	public void onManuallyUnsuspended(@NonNull String packageName) {
+		REASON suspendReason = reasonMap.getOrDefault(packageName, REASON.REASON_UNKNOWN);
+		assert suspendReason != null;
+		reasonMap.remove(packageName);
+		switch (suspendReason) {
+			case REASON_FOCUS_MODE:
+				takeBreak(dialogBreakTime);
+				break;
+			case REASON_MANUALLY:
+				if (manualUnsuspendDialogAllApps) {
+					manualUnsuspend(null);
+				}
+				// If all manually suspended apps are unsuspended, gracefully quit
+				if (reasonMap.keySet().stream().noneMatch(v -> reasonMap.get(v) == REASON.REASON_MANUALLY)) {
+					manualUnsuspend(null);
+					service.stop();
+				}
+				break;
+			case REASON_UNKNOWN:
+			default:
+				// Do nothing.
+				break;
+		}
 	}
 
 	public void takeBreak(int forMinutes) {
@@ -105,6 +137,8 @@ public class GlobalWellbeingState {
 	}
 
 	public void enableFocusMode() {
+		if (type != SERVICE_TYPE.TYPE_UNKNOWN)
+			return;
 		focusModeBreak = false;
 		type = SERVICE_TYPE.TYPE_FOCUS_MODE;
 		makeFocusModeNotification();
@@ -135,17 +169,16 @@ public class GlobalWellbeingState {
 		}
 		type = SERVICE_TYPE.TYPE_UNKNOWN;
 		service.updateDefaultNotification();
+		service.stop();
 	}
 
 	public void focusModeSuspend() {
-		if (type != SERVICE_TYPE.TYPE_UNKNOWN)
-			return;
 		String[] process = focusModePackages.stream().distinct().toArray(String[]::new);
 		String[] failed = packageManagerDelegate.setPackagesSuspended(process, true, null, null, new PackageManagerDelegate.SuspendDialogInfo.Builder()
 				.setTitle(R.string.dialog_title)
 				.setMessage(R.string.dialog_message)
-				.setNeutralButtonText(R.string.dialog_btn_settings)
-				.setNeutralButtonAction(PackageManagerDelegate.SuspendDialogInfo.BUTTON_ACTION_MORE_DETAILS)
+				.setNeutralButtonText(dialogBreakTime == -1 ? R.string.dialog_btn_settings : R.string.focus_mode_break)
+				.setNeutralButtonAction(dialogBreakTime == -1 ? PackageManagerDelegate.SuspendDialogInfo.BUTTON_ACTION_MORE_DETAILS : PackageManagerDelegate.SuspendDialogInfo.BUTTON_ACTION_UNSUSPEND)
 				.setIcon(R.drawable.ic_baseline_app_blocking_24).build());
 		for (String packageName : failed) {
 			Log.e("OpenWellbeing", "failed to suspend " + packageName);
@@ -172,12 +205,14 @@ public class GlobalWellbeingState {
 			return;
 		manualSuspendPkgList = packageNames;
 		type = SERVICE_TYPE.TYPE_MANUALLY;
-		service.updateNotification(R.string.notification_title, R.string.notification_manual, R.drawable.ic_stat_name, new Notification.Action[]{ }, new Intent(context, MainActivity.class));
+		service.updateNotification(R.string.notification_title, R.string.notification_manual, R.drawable.ic_stat_name, new Notification.Action[]{
+				service.buildAction(R.string.unsuspend_all, R.drawable.ic_stat_name, new Intent(context, NotificationBroadcastReciever.class).setAction(GlobalWellbeingState.INTENT_ACTION_UNSUSPEND_ALL), true)
+		}, new Intent(context, MainActivity.class));
 		String[] failed = packageManagerDelegate.setPackagesSuspended(packageNames, true, null, null, new PackageManagerDelegate.SuspendDialogInfo.Builder()
 				.setTitle(R.string.dialog_title)
 				.setMessage(R.string.dialog_message)
-				.setNeutralButtonText(R.string.dialog_btn_settings)
-				.setNeutralButtonAction(PackageManagerDelegate.SuspendDialogInfo.BUTTON_ACTION_MORE_DETAILS)
+				.setNeutralButtonText(manualUnsuspendDialog ? R.string.unsuspend : R.string.dialog_btn_settings)
+				.setNeutralButtonAction(manualUnsuspendDialog ? PackageManagerDelegate.SuspendDialogInfo.BUTTON_ACTION_UNSUSPEND : PackageManagerDelegate.SuspendDialogInfo.BUTTON_ACTION_MORE_DETAILS)
 				.setIcon(R.drawable.ic_baseline_app_blocking_24).build());
 		for (String packageName : failed) {
 			Log.e("OpenWellbeing", "failed to suspend " + packageName);
@@ -203,5 +238,6 @@ public class GlobalWellbeingState {
 		for (String packageName : process) {
 			reasonMap.remove(packageName);
 		}
+		service.stop();
 	}
 }

@@ -120,6 +120,11 @@ public class WellbeingStateHost extends Service {
 		updateNotification(buildDefaultNotification());
 	}
 
+	public void stop() {
+		stopForeground(true);
+		stopSelf();
+	}
+
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
