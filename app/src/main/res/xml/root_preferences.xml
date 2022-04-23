@@ -24,8 +24,8 @@
 
 		<SwitchPreferenceCompat
 			app:key="manual_dialog"
-			app:title="Use flow non-interrupting dialog"
-			app:summary="It has less features" />
+			app:summary="It has less features"
+			app:title="Use flow non-interrupting dialog" />
 
 		<SwitchPreferenceCompat
 			app:dependency="manual_dialog"

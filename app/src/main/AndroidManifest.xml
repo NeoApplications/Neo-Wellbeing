@@ -95,12 +95,8 @@
 		android:theme="@style/Theme.DigitalWellbeing"
 		tools:targetApi="s">
 		<activity
-			android:name=".SettingsActivity"
-			android:exported="false"
-			android:theme="@style/Theme.AppCompat.DayNight"
-			android:label="@string/title_activity_settings" />
-		<activity
 			android:name=".MainActivity"
+			android:theme="@style/Theme.AppCompat.DayNight"
 			android:exported="true">
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN" />
@@ -108,6 +104,15 @@
 				<category android:name="android.intent.category.LAUNCHER" />
 			</intent-filter>
 		</activity>
+		<activity
+			android:name=".FocusModeActivity"
+			android:theme="@style/Theme.AppCompat.DayNight"
+			android:exported="false" />
+		<activity
+			android:name=".SettingsActivity"
+			android:exported="false"
+			android:label="@string/title_activity_settings"
+			android:theme="@style/Theme.AppCompat.DayNight" />
 		<activity
 			android:name=".ShowSuspendedAppDetails"
 			android:excludeFromRecents="true"
