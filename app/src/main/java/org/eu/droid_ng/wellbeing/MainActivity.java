@@ -27,6 +27,8 @@ public class MainActivity extends Activity {
 					boundService.state.disableFocusMode()
 			, false, true, true);
 		});
+		findViewById(R.id.button3).setOnClickListener(a ->
+				startActivity(new Intent(MainActivity.this, SettingsActivity.class)));
 	}
 
 	@Override

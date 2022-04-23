@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.app.Notification;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Handler;
 import android.util.Log;
 
@@ -36,14 +37,14 @@ public class GlobalWellbeingState {
 	public int notificationBreakTime = -1;
 	//TODO: make it a setting
 	// set to -1 for "ask every time"
-	public int dialogBreakTime = 5;
+	public int dialogBreakTime = -1;
 
 	//TODO: make it a setting
 	// if app was suspended manually, and gets unsuspended in dialog, unsuspend all apps?
 	public boolean manualUnsuspendDialogAllApps = false;
 	//TODO: make it a setting
 	// use dialog for manual unsuspend? (activity allows to choose between unsuspend all and unsuspend only this)
-	public boolean manualUnsuspendDialog = true;
+	public boolean manualUnsuspendDialog = false;
 
 	enum REASON {
 		REASON_MANUALLY,
@@ -78,6 +79,11 @@ public class GlobalWellbeingState {
 			focusModeSuspend();
 			makeFocusModeNotification();
 		};
+		SharedPreferences prefs = context.getSharedPreferences("service", 0);
+		notificationBreakTime = Integer.parseInt(prefs.getString("focus_notification", String.valueOf(notificationBreakTime)));
+		dialogBreakTime = Integer.parseInt(prefs.getString("focus_dialog", String.valueOf(dialogBreakTime)));
+		manualUnsuspendDialog = prefs.getBoolean("manual_dialog", manualUnsuspendDialog);
+		manualUnsuspendDialogAllApps = prefs.getBoolean("manual_all", manualUnsuspendDialogAllApps);
 	}
 
 	public void onDestroy() {
@@ -85,7 +91,8 @@ public class GlobalWellbeingState {
 
 	public void onManuallyUnsuspended(@NonNull String packageName) {
 		REASON suspendReason = reasonMap.getOrDefault(packageName, REASON.REASON_UNKNOWN);
-		assert suspendReason != null;
+		if (suspendReason == null)
+			suspendReason = REASON.REASON_UNKNOWN;
 		reasonMap.remove(packageName);
 		switch (suspendReason) {
 			case REASON_FOCUS_MODE:

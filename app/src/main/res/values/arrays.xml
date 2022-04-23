@@ -1,0 +1,20 @@
+<resources>
+	<!-- Reply Preference -->
+	<string-array name="break_entries">
+		<item>Always ask</item>
+		<item>1 minute</item>
+		<item>3 minutes</item>
+		<item>5 minutes</item>
+		<item>10 minutes</item>
+		<item>15 minutes</item>
+	</string-array>
+
+	<string-array name="break_values">
+		<item>-1</item>
+		<item>1</item>
+		<item>3</item>
+		<item>5</item>
+		<item>10</item>
+		<item>15</item>
+	</string-array>
+</resources>
