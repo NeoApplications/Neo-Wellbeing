@@ -25,7 +25,7 @@ public class SettingsActivity extends AppCompatActivity {
 	}
 
 	@Override
-	public boolean onNavigateUp() {
+	public boolean onSupportNavigateUp() {
 		finish();
 		return true;
 	}

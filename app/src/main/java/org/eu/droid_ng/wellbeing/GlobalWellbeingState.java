@@ -57,9 +57,10 @@ public class GlobalWellbeingState {
 		TYPE_FOCUS_MODE
 	}
 	public SERVICE_TYPE type = SERVICE_TYPE.TYPE_UNKNOWN;
+	public List<Runnable> stateChangeCallbacks = new ArrayList<>();
 
 	public Set<String> focusModePackages = null;
-	private boolean focusModeBreak = false;
+	public boolean focusModeBreak = false;
 	private final Runnable takeBreakEndRunnable;
 	private String[] manualSuspendPkgList = null;
 
@@ -122,11 +123,13 @@ public class GlobalWellbeingState {
 		focusModeBreak = true;
 		handler.postDelayed(takeBreakEndRunnable, forMs);
 		makeFocusModeBreakNotification();
+		onStateChange();
 	}
 
 	public void endBreak() {
 		handler.removeCallbacks(takeBreakEndRunnable);
 		takeBreakEndRunnable.run();
+		onStateChange();
 	}
 
 	public void takeBreakDialog(Activity activityContext, boolean endActivity) {
@@ -149,6 +152,7 @@ public class GlobalWellbeingState {
 		type = SERVICE_TYPE.TYPE_FOCUS_MODE;
 		makeFocusModeNotification();
 		focusModeSuspend();
+		onStateChange();
 	}
 
 	private void makeFocusModeNotification() {
@@ -176,6 +180,7 @@ public class GlobalWellbeingState {
 		type = SERVICE_TYPE.TYPE_UNKNOWN;
 		service.updateDefaultNotification();
 		service.stop();
+		onStateChange();
 	}
 
 	public void focusModeSuspend() {
@@ -226,6 +231,7 @@ public class GlobalWellbeingState {
 		for (String packageName : packageNames) {
 			reasonMap.put(packageName, REASON.REASON_MANUALLY);
 		}
+		onStateChange();
 	}
 
 	public void manualUnsuspend(@Nullable String[] packageNames) {
@@ -245,5 +251,11 @@ public class GlobalWellbeingState {
 			reasonMap.remove(packageName);
 		}
 		service.stop();
+		onStateChange();
+	}
+
+	private void onStateChange() {
+		for (Runnable stateChangeCallback : stateChangeCallbacks)
+			stateChangeCallback.run();
 	}
 }
