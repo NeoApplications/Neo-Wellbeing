@@ -62,7 +62,7 @@ task makeMagiskModule(type: Task) {
 		magiskModuleProp.each { k, v -> modulePropText += "$k=$v\n" }
 		file("$magiskDir/module.prop").text = modulePropText
 		file("$magiskDir.path/system/priv-app/OpenWellbeing").mkdirs()
-		Files.copy(file("$rootDir/app/build/intermediates/apk/debug/app-debug.apk").toPath(),
+		Files.copy(file("$rootDir/app/build/outputs/apk/debug/app-debug.apk").toPath(),
 				file("${magiskDir.path}/system/priv-app/OpenWellbeing/OpenWellbeing.apk").toPath())
 		file("$magiskDir.path/system/priv-app/OpenWellbeingOverlay").mkdirs()
 		Files.copy(file("$rootDir/OpenWellbeingOverlay/overlay.apk").toPath(),
