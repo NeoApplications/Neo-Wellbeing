@@ -54,7 +54,7 @@ public class FocusModeActivity extends AppCompatActivity {
 					takeBreak.setOnClickListener(v -> client.doBindService(boundService -> boundService.state.endBreak()));
 					takeBreak.setText(R.string.focus_mode_break_end);
 				} else {
-					takeBreak.setOnClickListener(v -> client.doBindService(boundService -> boundService.state.takeBreakDialog(FocusModeActivity.this, false)));
+					takeBreak.setOnClickListener(v -> client.doBindService(boundService -> boundService.state.takeBreakDialog(FocusModeActivity.this, false, null)));
 					takeBreak.setText(R.string.focus_mode_break);
 				}
 			}

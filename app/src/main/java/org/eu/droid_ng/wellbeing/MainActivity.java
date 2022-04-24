@@ -8,6 +8,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 
+import java.util.Objects;
+
 public class MainActivity extends AppCompatActivity {
 
 	@Override
@@ -36,6 +38,14 @@ public class MainActivity extends AppCompatActivity {
 			assert settings != null;
 			settings.setOnPreferenceClickListener(p -> {
 				startActivity(new Intent(getActivity(), SettingsActivity.class));
+				return true;
+			});
+			Preference manual = findPreference("manual");
+			assert manual != null;
+			boolean show = requireActivity().getSharedPreferences("service", 0).getBoolean("manual", false);
+			manual.setVisible(show);
+			manual.setOnPreferenceClickListener(p -> {
+				startActivity(new Intent(getActivity(), ManualSuspendActivity.class));
 				return true;
 			});
 		}

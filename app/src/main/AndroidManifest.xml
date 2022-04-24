@@ -92,13 +92,13 @@
 		android:label="@string/app_name"
 		android:roundIcon="@mipmap/ic_launcher_round"
 		android:supportsRtl="true"
-		android:theme="@android:style/Theme.DeviceDefault.DayNight"
 		android:testOnly="false"
+		android:theme="@android:style/Theme.DeviceDefault.DayNight"
 		tools:targetApi="s">
 		<activity
 			android:name=".MainActivity"
-			android:theme="@style/Theme.AppCompat.DayNight"
-			android:exported="true">
+			android:exported="true"
+			android:theme="@style/Theme.AppCompat.DayNight">
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN" />
 
@@ -107,6 +107,10 @@
 		</activity>
 		<activity
 			android:name=".FocusModeActivity"
+			android:exported="false"
+			android:theme="@style/Theme.AppCompat.DayNight" />
+		<activity
+			android:name=".ManualSuspendActivity"
 			android:theme="@style/Theme.AppCompat.DayNight"
 			android:exported="false" />
 		<activity

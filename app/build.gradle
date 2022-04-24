@@ -8,7 +8,7 @@ android {
 	compileSdk 32
 
 	defaultConfig {
-		applicationId "org.eu.droid_ng.wellbeing.debug"
+		applicationId "org.eu.droid_ng.wellbeing"
 		minSdk 29
 		targetSdk 32
 		versionCode 1
@@ -44,7 +44,7 @@ def magiskModuleProp = [
 		versionCode  : android.defaultConfig.versionCode,
 		minSdkVersion: android.defaultConfig.minSdk,
 		support      : "https://github.com/nift4/android_packages_apps_Wellbeing",
-		config       : "org.eu.droid_ng.wellbeing.debug",
+		config       : "org.eu.droid_ng.wellbeing",
 		author       : "nift4",
 		description  : "OpenWellbeing is an opensource implementation of Wellbeing"
 ]
@@ -64,12 +64,16 @@ task makeMagiskModule(type: Task) {
 		file("$magiskDir.path/system/priv-app/OpenWellbeing").mkdirs()
 		Files.copy(file("$rootDir/app/build/intermediates/apk/debug/app-debug.apk").toPath(),
 				file("${magiskDir.path}/system/priv-app/OpenWellbeing/OpenWellbeing.apk").toPath())
+		file("$magiskDir.path/system/priv-app/OpenWellbeingOverlay").mkdirs()
+		Files.copy(file("$rootDir/OpenWellbeingOverlay/overlay.apk").toPath(),
+				file("${magiskDir.path}/system/priv-app/OpenWellbeingOverlay/OpenWellbeingOverlay.apk").toPath())
 		file("$magiskDir.path/system/etc/permissions").mkdirs()
 		Files.copy(file("$rootDir/app/src/main/privapp-permissions-wellbeing.xml").toPath(),
 				file("${magiskDir.path}/system/etc/permissions/privapp-permissions-wellbeing.xml").toPath())
-		file("${magiskDir.path}/system/etc/permissions/privapp-permissions-wellbeing.xml").text =
-				file("$rootDir/app/src/main/privapp-permissions-wellbeing.xml").text
-						.replace("\"org.eu.droid_ng.wellbeing\"", "\"org.eu.droid_ng.wellbeing.debug\"")
+		file("$magiskDir.path/META-INF/com/google/android").mkdirs()
+		file("$magiskDir.path/META-INF/com/google/android/updater-script").text = "#MAGISK"
+		Files.copy(file("$rootDir/update-binary").toPath(),
+				file("$magiskDir.path/META-INF/com/google/android/update-binary").toPath())
 	}
 }
 

@@ -60,7 +60,7 @@ public class ShowSuspendedAppDetails extends Activity {
 			switch (reason.get()) {
 				case REASON_FOCUS_MODE:
 					container = findViewById(R.id.focusMode);
-					findViewById(R.id.takeabreakbtn).setOnClickListener(v -> client.doBindService(boundService -> boundService.state.takeBreakDialog(ShowSuspendedAppDetails.this, true)));
+					findViewById(R.id.takeabreakbtn).setOnClickListener(v -> client.doBindService(boundService -> boundService.state.takeBreakDialog(ShowSuspendedAppDetails.this, true, boundService.state.focusModeAllApps ? null : new String[] { packageName })));
 					findViewById(R.id.disablefocusmode).setOnClickListener(v -> {
 						client.doBindService(boundService -> boundService.state.disableFocusMode());
 						ShowSuspendedAppDetails.this.finish();

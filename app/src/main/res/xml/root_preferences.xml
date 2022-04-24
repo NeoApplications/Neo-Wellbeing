@@ -18,9 +18,19 @@
 			app:title="@string/focus_mode_pref_notification"
 			app:useSimpleSummaryProvider="true" />
 
+		<SwitchPreferenceCompat
+			app:key="focus_all"
+			app:summaryOff="@string/manually_all_off"
+			app:summaryOn="@string/manually_all_on"
+			app:title="@string/manually_all" />
+
 	</PreferenceCategory>
 
 	<PreferenceCategory app:title="@string/manually">
+
+		<SwitchPreferenceCompat
+			app:key="manual"
+			app:title="@string/enable" />
 
 		<SwitchPreferenceCompat
 			app:key="manual_dialog"
