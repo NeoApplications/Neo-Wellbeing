@@ -4,7 +4,10 @@ import android.os.Bundle;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
+
+import java.util.Objects;
 
 public class SettingsActivity extends AppCompatActivity {
 
@@ -35,6 +38,10 @@ public class SettingsActivity extends AppCompatActivity {
 		public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
 			getPreferenceManager().setSharedPreferencesName("service");
 			setPreferencesFromResource(R.xml.root_preferences, rootKey);
+			if (!PackageManagerDelegate.canSetNeutralButtonAction()) {
+				((Preference) Objects.requireNonNull(findPreference("manual_dialog"))).setEnabled(false);
+				((Preference) Objects.requireNonNull(findPreference("focus_dialog"))).setEnabled(false);
+			}
 		}
 	}
 }
