@@ -64,9 +64,9 @@ task makeMagiskModule(type: Task) {
 		file("$magiskDir.path/system/priv-app/OpenWellbeing").mkdirs()
 		Files.copy(file("$rootDir/app/build/outputs/apk/debug/app-debug.apk").toPath(),
 				file("${magiskDir.path}/system/priv-app/OpenWellbeing/OpenWellbeing.apk").toPath())
-		file("$magiskDir.path/system/priv-app/OpenWellbeingOverlay").mkdirs()
+		file("$magiskDir.path/system/product/overlay/OpenWellbeingOverlay").mkdirs()
 		Files.copy(file("$rootDir/OpenWellbeingOverlay/overlay.apk").toPath(),
-				file("${magiskDir.path}/system/priv-app/OpenWellbeingOverlay/OpenWellbeingOverlay.apk").toPath())
+				file("${magiskDir.path}/system/product/overlay/OpenWellbeingOverlay/OpenWellbeingOverlay.apk").toPath())
 		file("$magiskDir.path/system/etc/permissions").mkdirs()
 		Files.copy(file("$rootDir/app/src/main/privapp-permissions-wellbeing.xml").toPath(),
 				file("${magiskDir.path}/system/etc/permissions/privapp-permissions-wellbeing.xml").toPath())

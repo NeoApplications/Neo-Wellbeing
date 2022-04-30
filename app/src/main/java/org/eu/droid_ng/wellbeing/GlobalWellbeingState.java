@@ -63,11 +63,11 @@ public class GlobalWellbeingState {
 	public SERVICE_TYPE type = SERVICE_TYPE.TYPE_UNKNOWN;
 	public List<Runnable> stateChangeCallbacks = new ArrayList<>();
 
-	public Set<String> focusModePackages = null;
-	public Set<String> manualSuspendPackages = null;
+	public Set<String> focusModePackages;
+	public Set<String> manualSuspendPackages;
 	public boolean focusModeBreak = false;
 	private final Runnable takeBreakEndRunnable;
-	private String[] manualSuspendPkgList = null;
+	private String[] manualSuspendPkgList = new String[0];
 
 
 	public GlobalWellbeingState(Context context, WellbeingStateHost service) {
@@ -107,11 +107,11 @@ public class GlobalWellbeingState {
 				break;
 			case REASON_MANUALLY:
 				if (manualUnsuspendDialogAllApps) {
-					manualUnsuspend(null);
+					manualUnsuspend(null, true);
 				}
 				// If all manually suspended apps are unsuspended, gracefully quit
 				if (reasonMap.keySet().stream().noneMatch(v -> reasonMap.get(v) == REASON.REASON_MANUALLY)) {
-					manualUnsuspend(null);
+					manualUnsuspend(null, true);
 					service.stop();
 				}
 				break;
@@ -249,17 +249,19 @@ public class GlobalWellbeingState {
 	}
 
 	public void manualSuspend(@Nullable String[] pkgNames) {
-		if (type != SERVICE_TYPE.TYPE_UNKNOWN)
+		if (type != SERVICE_TYPE.TYPE_UNKNOWN && type != SERVICE_TYPE.TYPE_MANUALLY)
 			return;
 		String[] packageNames = manualSuspendPackages.stream().distinct().toArray(String[]::new);
 		if (pkgNames != null) {
 			packageNames = Stream.concat(Arrays.stream(pkgNames), Arrays.stream(packageNames)).distinct().toArray(String[]::new);
 		}
-		manualSuspendPkgList = packageNames;
-		type = SERVICE_TYPE.TYPE_MANUALLY;
-		service.updateNotification(R.string.notification_title, R.string.notification_manual, R.drawable.ic_stat_name, new Notification.Action[]{
-				service.buildAction(R.string.unsuspend_all, R.drawable.ic_stat_name, new Intent(context, NotificationBroadcastReciever.class).setAction(GlobalWellbeingState.INTENT_ACTION_UNSUSPEND_ALL), true)
-		}, new Intent(context, MainActivity.class));
+		manualSuspendPkgList = Stream.concat(Arrays.stream(manualSuspendPkgList), Arrays.stream(packageNames)).distinct().toArray(String[]::new);
+		if (type == SERVICE_TYPE.TYPE_UNKNOWN) {
+			type = SERVICE_TYPE.TYPE_MANUALLY;
+			service.updateNotification(R.string.notification_title, R.string.notification_manual, R.drawable.ic_stat_name, new Notification.Action[]{
+					service.buildAction(R.string.unsuspend_all, R.drawable.ic_stat_name, new Intent(context, NotificationBroadcastReciever.class).setAction(GlobalWellbeingState.INTENT_ACTION_UNSUSPEND_ALL), true)
+			}, new Intent(context, MainActivity.class));
+		}
 		String[] failed = packageManagerDelegate.setPackagesSuspended(packageNames, true, null, null, new PackageManagerDelegate.SuspendDialogInfo.Builder()
 				.setTitle(R.string.dialog_title)
 				.setMessage(R.string.dialog_message)
@@ -275,13 +277,15 @@ public class GlobalWellbeingState {
 		onStateChange();
 	}
 
-	public void manualUnsuspend(@Nullable String[] pkgNames) {
-		String[] packageNames = Stream.concat(manualSuspendPackages.stream(), Arrays.stream(manualSuspendPkgList)).distinct().toArray(String[]::new);
+	public void manualUnsuspend(@Nullable String[] pkgNames, boolean wantQuit) {
+		assert pkgNames != null || !wantQuit;
+		String[] packageNames = new String[0];
+		if (wantQuit) {
+			packageNames = Stream.concat(manualSuspendPackages.stream(), Arrays.stream(manualSuspendPkgList)).distinct().toArray(String[]::new);
+		}
 		if (pkgNames != null) {
 			packageNames = Stream.concat(Arrays.stream(pkgNames), Arrays.stream(packageNames)).distinct().toArray(String[]::new);
 		}
-		type = SERVICE_TYPE.TYPE_UNKNOWN;
-		service.updateDefaultNotification();
 		String[] failed = packageManagerDelegate.setPackagesSuspended(packageNames, false, null, null, null);
 		for (String packageName : failed) {
 			Log.e("OpenWellbeing", "failed to unsuspend " + packageName);
@@ -289,7 +293,13 @@ public class GlobalWellbeingState {
 		for (String packageName : packageNames) {
 			reasonMap.remove(packageName);
 		}
-		service.stop();
+		boolean haveNoMatch = reasonMap.keySet().stream().noneMatch(v -> reasonMap.get(v) == REASON.REASON_MANUALLY);
+		assert !wantQuit || haveNoMatch;
+		if (haveNoMatch) {
+			type = SERVICE_TYPE.TYPE_UNKNOWN;
+			service.updateDefaultNotification();
+			service.stop();
+		}
 		onStateChange();
 	}
 

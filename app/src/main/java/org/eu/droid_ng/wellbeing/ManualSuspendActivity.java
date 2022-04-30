@@ -7,6 +7,8 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.widget.Button;
 
+import java.util.HashSet;
+
 public class ManualSuspendActivity extends AppCompatActivity {
 
 	@Override
@@ -17,11 +19,12 @@ public class ManualSuspendActivity extends AppCompatActivity {
 		Button suspendbtn = findViewById(R.id.suspendbtn);
 		Button unsuspendbtn = findViewById(R.id.desuspendbtn);
 		RecyclerView pkgList = findViewById(R.id.pkgList);
+		final PackageRecyclerViewAdapter a;
 		pkgList.setAdapter(
-				new PackageRecyclerViewAdapter(this,
+				a = new PackageRecyclerViewAdapter(this,
 						getPackageManager().getInstalledApplications(PackageManager.GET_META_DATA),
 						"manual_suspend"));
-		suspendbtn.setOnClickListener(v -> client.doBindService(b -> b.state.manualSuspend(null)));
-		unsuspendbtn.setOnClickListener(v -> client.doBindService(b -> b.state.manualUnsuspend(null)));
+		suspendbtn.setOnClickListener(v -> client.doBindService(b -> b.state.manualSuspend(null), false, true, false));
+		unsuspendbtn.setOnClickListener(v -> client.doBindService(b -> b.state.manualUnsuspend(a.prefs.getStringSet("manual_suspend", new HashSet<>()).toArray(new String[0]), false)));
 	}
 }

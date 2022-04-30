@@ -17,7 +17,7 @@ public class NotificationBroadcastReciever extends BroadcastReceiver {
 		} else if (GlobalWellbeingState.INTENT_ACTION_QUIT_FOCUS.equals(intent.getAction())) {
 			client.doBindService(boundService -> boundService.state.disableFocusMode(), false, true, true);
 		} else if (GlobalWellbeingState.INTENT_ACTION_UNSUSPEND_ALL.equals(intent.getAction())) {
-			client.doBindService(boundService -> boundService.state.manualUnsuspend(null));
+			client.doBindService(boundService -> boundService.state.manualUnsuspend(null, true));
 		}
 	}
 }

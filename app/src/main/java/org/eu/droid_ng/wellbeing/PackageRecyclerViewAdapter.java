@@ -30,7 +30,7 @@ public class PackageRecyclerViewAdapter extends RecyclerView.Adapter<PackageRecy
 	private final List<ApplicationInfo> mData;
 	private final List<String> enabledArr;
 	private final PackageManager pm;
-	private final SharedPreferences prefs;
+	public final SharedPreferences prefs;
 	private final String settingsKey;
 
 	public PackageRecyclerViewAdapter(Context context, List<ApplicationInfo> mData, String settingsKey) {

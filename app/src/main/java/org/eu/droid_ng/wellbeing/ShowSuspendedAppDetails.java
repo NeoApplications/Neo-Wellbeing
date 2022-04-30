@@ -69,13 +69,13 @@ public class ShowSuspendedAppDetails extends Activity {
 				case REASON_MANUALLY:
 					container = findViewById(R.id.manually);
 					findViewById(R.id.unsuspendbtn2).setOnClickListener(v -> {
-						pmd.setPackagesSuspended(new String[] { packageName }, false, null, null, null);
-						client.doBindService(boundService -> boundService.state.reasonMap.remove(packageName));
+						client.doBindService(boundService ->
+								boundService.state.manualUnsuspend(new String[] { packageName }, false));
 						ShowSuspendedAppDetails.this.finish();
 					});
 					findViewById(R.id.unsuspendallbtn).setOnClickListener(v -> {
 						client.doBindService(boundService ->
-							boundService.state.manualUnsuspend(new String[] { packageName }));
+							boundService.state.manualUnsuspend(null, true));
 						ShowSuspendedAppDetails.this.finish();
 					});
 					break;

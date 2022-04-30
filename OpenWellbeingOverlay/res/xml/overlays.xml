@@ -1,0 +1,3 @@
+<overlay>
+	<item target="string/config_defaultWellbeingPackage" value="@string/config_defaultWellbeingPackage" />
+</overlay>
