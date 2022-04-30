@@ -48,7 +48,7 @@ public class FocusModeActivity extends AppCompatActivity {
 				takeBreak.setOnClickListener(null);
 			} else {
 				toggle.setText(R.string.disable);
-				toggle.setOnClickListener(v -> client.doBindService(boundService -> boundService.state.disableFocusMode()));
+				toggle.setOnClickListener(v -> client.doBindService(boundService -> boundService.state.disableFocusMode(), false, true, true));
 				takeBreak.setVisibility(View.VISIBLE);
 				if (focusModeBreak.get()) {
 					takeBreak.setOnClickListener(v -> client.doBindService(boundService -> boundService.state.endBreak()));

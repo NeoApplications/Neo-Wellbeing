@@ -43,11 +43,11 @@ public class WellbeingStateClient {
 			mBoundService = null;
 		}
 
-		@Override
+		/*@Override
 		public void onNullBinding(ComponentName name) {
 			Toast.makeText(context, "Assertion failure (0xAF): Service is null. Please report this to the developers!",
 					Toast.LENGTH_SHORT).show();
-		}
+		}*/
 	};
 
 	public WellbeingStateClient(Context context) {

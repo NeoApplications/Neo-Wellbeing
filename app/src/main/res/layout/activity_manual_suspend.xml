@@ -29,9 +29,16 @@
 			android:text="@string/unsuspend" />
 	</LinearLayout>
 
-	<androidx.recyclerview.widget.RecyclerView
-		android:id="@+id/pkgList"
-		app:layoutManager="LinearLayoutManager"
+	<LinearLayout
 		android:layout_width="match_parent"
-		android:layout_height="wrap_content" />
+		android:layout_height="match_parent"
+		android:orientation="horizontal">
+
+		<androidx.recyclerview.widget.RecyclerView
+			android:id="@+id/pkgList"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			app:layoutManager="LinearLayoutManager" />
+	</LinearLayout>
+
 </LinearLayout>

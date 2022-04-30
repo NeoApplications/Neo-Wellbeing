@@ -10,6 +10,7 @@ import android.graphics.drawable.Icon;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
+import android.util.Log;
 
 // Fancy class holding GlobalWellbeingState & a notification
 public class WellbeingStateHost extends Service {
@@ -90,6 +91,8 @@ public class WellbeingStateHost extends Service {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !lateNotify) {
 			b.setForegroundServiceBehavior(Notification.FOREGROUND_SERVICE_IMMEDIATE); // do not wait with showing the notification
 		}
+		if (lateNotify)
+			lateNotify = false;
 		for (Notification.Action action : actions) {
 			b.addAction(action);
 		}

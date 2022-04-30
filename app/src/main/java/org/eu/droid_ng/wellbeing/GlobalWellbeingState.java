@@ -201,9 +201,9 @@ public class GlobalWellbeingState {
 			focusModeUnsuspend(true);
 		}
 		type = SERVICE_TYPE.TYPE_UNKNOWN;
+		onStateChange();
 		service.updateDefaultNotification();
 		service.stop();
-		onStateChange();
 	}
 
 	private void focusModeSuspend(String[] process, boolean enable) {
@@ -297,10 +297,12 @@ public class GlobalWellbeingState {
 		assert !wantQuit || haveNoMatch;
 		if (haveNoMatch) {
 			type = SERVICE_TYPE.TYPE_UNKNOWN;
+		}
+		onStateChange();
+		if (haveNoMatch) {
 			service.updateDefaultNotification();
 			service.stop();
 		}
-		onStateChange();
 	}
 
 	private void onStateChange() {
