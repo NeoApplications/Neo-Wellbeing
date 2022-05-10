@@ -7,7 +7,6 @@ android_app {
     srcs: ["java/**/*.java", "java_real/**/*.java"],
 
     platform_apis: true,
-    product_specific: true,
     privileged: true,
     certificate: "platform",
     required: ["privapp-permissions-wellbeing.xml"],
@@ -17,7 +16,6 @@ android_app {
 prebuilt_etc {
     name: "privapp-permissions-wellbeing.xml",
 
-    product_specific: true,
     src: "privapp-permissions-wellbeing.xml",
     sub_dir: "permissions",
 }
