@@ -66,6 +66,7 @@ public class GlobalWellbeingState {
 	public Set<String> focusModePackages;
 	public Set<String> manualSuspendPackages;
 	public boolean focusModeBreak = false;
+	public boolean focusModeEnabled = false;
 	private final Runnable takeBreakEndRunnable;
 	private String[] manualSuspendPkgList = new String[0];
 
@@ -173,6 +174,7 @@ public class GlobalWellbeingState {
 			return;
 		focusModeBreak = false;
 		type = SERVICE_TYPE.TYPE_FOCUS_MODE;
+		focusModeEnabled = true;
 		makeFocusModeNotification();
 		focusModeSuspend(true);
 		onStateChange();
@@ -200,6 +202,7 @@ public class GlobalWellbeingState {
 		} else {
 			focusModeUnsuspend(true);
 		}
+		focusModeEnabled = false;
 		type = SERVICE_TYPE.TYPE_UNKNOWN;
 		onStateChange();
 		service.updateDefaultNotification();
@@ -208,10 +211,13 @@ public class GlobalWellbeingState {
 
 	private void focusModeSuspend(String[] process, boolean enable) {
 		for (String packageName : process) {
+			if (reasonMap.get(packageName) == REASON.REASON_FOCUS_MODE_BREAK && !focusModeEnabled) {
+				// Fix bug, when unsuspending single app, then disabling focus mode, app will suspend incorrectly
+				reasonMap.remove(packageName);
+				continue;
+			}
 			if (enable)
 				reasonMap.put(packageName, REASON.REASON_FOCUS_MODE);
-			else if (reasonMap.get(packageName) == REASON.REASON_FOCUS_MODE_BREAK)
-				continue;
 			String[] failed = new String[0];
 			try {
 				failed = packageManagerDelegate.setPackagesSuspended(new String[] { packageName }, true, null, null, new PackageManagerDelegate.SuspendDialogInfo.Builder()
