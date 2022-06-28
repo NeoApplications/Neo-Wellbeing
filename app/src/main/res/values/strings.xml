@@ -52,4 +52,6 @@
 	<string name="manually_all">Unsuspend all apps</string>
 	<string name="focus_mode_dialog">%s and other distracting apps are currently disabled.</string>
 	<string name="suspend">Suspend</string>
+	<string name="schedule">Schedule</string>
+	<string name="bedtime_mode">Bedtime mode</string>
 </resources>

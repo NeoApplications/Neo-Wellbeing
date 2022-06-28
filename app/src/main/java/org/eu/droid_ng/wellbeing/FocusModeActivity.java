@@ -5,13 +5,16 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.animation.LayoutTransition;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class FocusModeActivity extends AppCompatActivity {
@@ -74,6 +77,11 @@ public class FocusModeActivity extends AppCompatActivity {
 				r.run();
 			});
 		}
+
+		TextView schedule = findViewById(R.id.schedule);
+		schedule.setOnClickListener(v -> {
+			startActivity(new Intent(this, ScheduleActivity.class).putExtra("type", "focus_mode"));
+		});
 
 		RecyclerView r = findViewById(R.id.focusModePkgs);
 		r.setAdapter(

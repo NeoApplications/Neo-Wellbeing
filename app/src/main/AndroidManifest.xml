@@ -111,13 +111,23 @@
 			android:theme="@style/Theme.AppCompat.DayNight" />
 		<activity
 			android:name=".ManualSuspendActivity"
-			android:theme="@style/Theme.AppCompat.DayNight"
-			android:exported="false" />
+			android:exported="false"
+			android:theme="@style/Theme.AppCompat.DayNight" />
 		<activity
 			android:name=".SettingsActivity"
 			android:exported="false"
 			android:label="@string/title_activity_settings"
 			android:theme="@style/Theme.AppCompat.DayNight" />
+		<activity
+			android:name=".BedtimeMode"
+			android:theme="@style/Theme.AppCompat.DayNight"
+			android:exported="false" />
+		<activity
+			android:name=".ScheduleActivity"
+			android:theme="@style/Theme.AppCompat.DayNight"
+			android:exported="false" />
+
+		<!-- Runtime UI -->
 		<activity
 			android:name=".ShowSuspendedAppDetails"
 			android:excludeFromRecents="true"

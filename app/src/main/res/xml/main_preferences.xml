@@ -4,6 +4,9 @@
 		android:key="focus_mode"
 		android:title="@string/focus_mode" />
 	<Preference
+		android:key="bedtime_mode"
+		android:title="@string/bedtime_mode" />
+	<Preference
 		android:key="manual"
 		android:title="@string/manually" />
 	<Preference

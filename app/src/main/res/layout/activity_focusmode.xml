@@ -27,11 +27,11 @@
 				android:id="@+id/focusModeIco"
 				android:layout_width="48dp"
 				android:layout_height="48dp"
+				android:contentDescription="@string/focus_icon_content_desc"
 				android:src="@drawable/ic_stat_name"
 				app:layout_constraintBottom_toBottomOf="parent"
 				app:layout_constraintStart_toStartOf="parent"
-				app:layout_constraintTop_toTopOf="parent"
-				android:contentDescription="@string/focus_icon_content_desc" />
+				app:layout_constraintTop_toTopOf="parent" />
 
 			<TextView
 				android:layout_width="wrap_content"
@@ -46,6 +46,7 @@
 		</androidx.constraintlayout.widget.ConstraintLayout>
 
 		<androidx.constraintlayout.widget.ConstraintLayout
+			android:id="@+id/constraintLayout"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:layout_marginTop="40dp"
@@ -76,6 +77,30 @@
 				app:layout_constraintEnd_toEndOf="parent"
 				app:layout_constraintStart_toStartOf="parent"
 				app:layout_constraintTop_toBottomOf="@+id/focusModeToggle" />
+		</androidx.constraintlayout.widget.ConstraintLayout>
+
+		<androidx.constraintlayout.widget.ConstraintLayout
+			android:id="@+id/constraintLayout2"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="54dp"
+			android:animateLayoutChanges="true"
+			app:layout_constraintEnd_toEndOf="parent"
+			app:layout_constraintStart_toEndOf="@+id/constraintLayout"
+			app:layout_constraintTop_toBottomOf="@+id/focusModeHeader">
+
+			<TextView
+				android:id="@+id/schedule"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="@string/schedule"
+				android:textColor="?android:attr/colorAccent"
+				app:layout_constraintBottom_toBottomOf="parent"
+				app:layout_constraintEnd_toEndOf="parent"
+				app:layout_constraintHorizontal_bias="0.0"
+				app:layout_constraintStart_toStartOf="parent"
+				app:layout_constraintTop_toTopOf="parent"
+				app:layout_constraintVertical_bias="0.0" />
 		</androidx.constraintlayout.widget.ConstraintLayout>
 
 	</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,11 +1,14 @@
 package org.eu.droid_ng.wellbeing;
 
+import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.PersistableBundle;
 import android.util.Log;
 
 import androidx.annotation.DrawableRes;
 import androidx.annotation.IntDef;
+import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
@@ -22,6 +25,7 @@ import java.lang.reflect.Method;
 *
 * Note: The class must not fail or crash if a reference is missing.
 * */
+@SuppressLint("PrivateApi")
 public class PackageManagerDelegate {
 	private static boolean success;
 	private static Method realSuspendDialogInfoBuilderBuild;
@@ -41,9 +45,13 @@ public class PackageManagerDelegate {
 	private static Method getNeutralButtonAction;
 	private static Method setNeutralButtonAction;
 
+	private static Class<?> realDisplayColorManager;
+
 	static {
 		HiddenApiBypass.addHiddenApiExemptions(""); // Help in some cases.
 		try {
+			realDisplayColorManager = Class.forName("android.hardware.display.ColorDisplayManager");
+
 			Class<?> realSuspendDialogInfo = Class.forName("android.content.pm.SuspendDialogInfo");
 			Class<?> realSuspendDialogInfoBuilder = Class.forName("android.content.pm.SuspendDialogInfo$Builder");
 			setPackagesSuspended = PackageManager.class.getDeclaredMethod("setPackagesSuspended", String[].class,
@@ -86,6 +94,115 @@ public class PackageManagerDelegate {
 					"This would not occur if the app was built-in into the ROM:", e);
 			success = false;
 		}
+	}
+
+	/* Does not belong here, but for one class im not creating a new delegate */
+	interface IColorDisplayManager {
+		/**
+		 * Returns whether the device has a wide color gamut display.
+		 */
+		boolean isDeviceColorManaged();
+
+		/**
+		 * Set the level of color saturation to apply to the display.
+		 *
+		 * @param saturationLevel 0-100 (inclusive), where 100 is full saturation
+		 * @return whether the saturation level change was applied successfully
+		 */
+		boolean setSaturationLevel(@IntRange(from = 0, to = 100) int saturationLevel);
+
+		/**
+		 * Set the level of color saturation to apply to a specific app.
+		 *
+		 * @param packageName the package name of the app whose windows should be desaturated
+		 * @param saturationLevel 0-100 (inclusive), where 100 is full saturation
+		 * @return whether the saturation level change was applied successfully
+		 */
+		boolean setAppSaturationLevel(@NonNull String packageName,
+		                                     @IntRange(from = 0, to = 100) int saturationLevel);
+
+		/**
+		 * Returns {@code true} if Night Display is supported by the device.
+		 */
+		boolean isNightDisplayAvailable(Context context);
+
+		/**
+		 * Returns {@code true} if display white balance is supported by the device.
+		 */
+		boolean isDisplayWhiteBalanceAvailable(Context context);
+	}
+
+	public static IColorDisplayManager getColorDisplayManager(Context ctx) {
+		Object cdm;
+		Method isDeviceColorManaged, setSaturationLevel, setAppSaturationLevel, isNightDisplayAvailable, isDisplayWhiteBalanceAvailable;
+		try {
+			cdm = ctx.getSystemService(realDisplayColorManager);
+			isDeviceColorManaged = realDisplayColorManager.getDeclaredMethod("isDeviceColorManaged");
+			setSaturationLevel = realDisplayColorManager.getDeclaredMethod("setSaturationLevel", int.class);
+			setAppSaturationLevel = realDisplayColorManager.getDeclaredMethod("setAppSaturationLevel", String.class, int.class);
+			isNightDisplayAvailable = realDisplayColorManager.getDeclaredMethod("isNightDisplayAvailable", Context.class);
+			isDisplayWhiteBalanceAvailable = realDisplayColorManager.getDeclaredMethod("isDisplayWhiteBalanceAvailable", Context.class);
+		} catch (ReflectiveOperationException e) {
+			Log.e("PackageManagerDelegate", // Log why it's crashing
+					"This would not occur if the app was built-in into the ROM:", e);
+			return null;
+		}
+		return new IColorDisplayManager() {
+			@Override
+			public boolean isDeviceColorManaged() {
+				try {
+					return (Boolean) isDeviceColorManaged.invoke(cdm);
+				} catch (ReflectiveOperationException | NullPointerException | ClassCastException e) {
+					Log.e("IColorDisplayManager", // Log why it's crashing
+							"This would not occur if the app was built-in into the ROM:", e);
+					return false;
+				}
+			}
+
+			@Override
+			public boolean setSaturationLevel(int saturationLevel) {
+				try {
+					return (Boolean) setSaturationLevel.invoke(cdm, saturationLevel);
+				} catch (ReflectiveOperationException | NullPointerException | ClassCastException e) {
+					Log.e("IColorDisplayManager", // Log why it's crashing
+							"This would not occur if the app was built-in into the ROM:", e);
+					return false;
+				}
+			}
+
+			@Override
+			public boolean setAppSaturationLevel(@NonNull String packageName, int saturationLevel) {
+				try {
+					return (Boolean) setAppSaturationLevel.invoke(cdm, packageName, saturationLevel);
+				} catch (ReflectiveOperationException | NullPointerException | ClassCastException e) {
+					Log.e("IColorDisplayManager", // Log why it's crashing
+							"This would not occur if the app was built-in into the ROM:", e);
+					return false;
+				}
+			}
+
+			@Override
+			public boolean isNightDisplayAvailable(Context context) {
+				try {
+					return (Boolean) isNightDisplayAvailable.invoke(null, context);
+				} catch (ReflectiveOperationException | NullPointerException | ClassCastException e) {
+					Log.e("IColorDisplayManager", // Log why it's crashing
+							"This would not occur if the app was built-in into the ROM:", e);
+					return false;
+				}
+			}
+
+			@Override
+			public boolean isDisplayWhiteBalanceAvailable(Context context) {
+				try {
+					return (Boolean) isDisplayWhiteBalanceAvailable.invoke(null, context);
+				} catch (ReflectiveOperationException | NullPointerException | ClassCastException e) {
+					Log.e("IColorDisplayManager", // Log why it's crashing
+							"This would not occur if the app was built-in into the ROM:", e);
+					return false;
+				}
+			}
+		};
 	}
 
 	private final PackageManager pm;

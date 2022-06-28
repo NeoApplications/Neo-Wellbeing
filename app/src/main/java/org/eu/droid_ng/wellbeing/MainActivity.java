@@ -34,6 +34,12 @@ public class MainActivity extends AppCompatActivity {
 				startActivity(new Intent(getActivity(), FocusModeActivity.class));
 				return true;
 			});
+			Preference sleepMode = findPreference("bedtime_mode");
+			assert sleepMode != null;
+			sleepMode.setOnPreferenceClickListener(p -> {
+				startActivity(new Intent(getActivity(), BedtimeMode.class));
+				return true;
+			});
 			Preference settings = findPreference("settings");
 			assert settings != null;
 			settings.setOnPreferenceClickListener(p -> {

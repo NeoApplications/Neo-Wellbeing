@@ -1,6 +1,7 @@
 package org.eu.droid_ng.wellbeing;
 
 import android.content.pm.PackageManager;
+import android.hardware.display.ColorDisplayManager;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
@@ -22,6 +23,73 @@ import java.lang.annotation.RetentionPolicy;
 * This class is only used when doing full systems builds, so assume system implement required APIs
 * */
 public class PackageManagerDelegate {
+
+	/* Does not belong here, but for one class im not creating a new delegate */
+	interface IColorDisplayManager {
+		/**
+		 * Returns whether the device has a wide color gamut display.
+		 */
+		boolean isDeviceColorManaged();
+
+		/**
+		 * Set the level of color saturation to apply to the display.
+		 *
+		 * @param saturationLevel 0-100 (inclusive), where 100 is full saturation
+		 * @return whether the saturation level change was applied successfully
+		 */
+		boolean setSaturationLevel(@IntRange(from = 0, to = 100) int saturationLevel);
+
+		/**
+		 * Set the level of color saturation to apply to a specific app.
+		 *
+		 * @param packageName the package name of the app whose windows should be desaturated
+		 * @param saturationLevel 0-100 (inclusive), where 100 is full saturation
+		 * @return whether the saturation level change was applied successfully
+		 */
+		boolean setAppSaturationLevel(@NonNull String packageName,
+		                              @IntRange(from = 0, to = 100) int saturationLevel);
+
+		/**
+		 * Returns {@code true} if Night Display is supported by the device.
+		 */
+		boolean isNightDisplayAvailable(Context context);
+
+		/**
+		 * Returns {@code true} if display white balance is supported by the device.
+		 */
+		boolean isDisplayWhiteBalanceAvailable(Context context);
+	}
+
+	public IColorDisplayManager getColorDisplayManager(Context ctx) {
+		ColorDisplayManager cdm = ctx.getSystemService(ColorDisplayManager.class);
+		return new IColorDisplayManager() {
+			@Override
+			public boolean isDeviceColorManaged() {
+				return cdm.isDeviceColorManaged();
+			}
+
+			@Override
+			public boolean setSaturationLevel(int saturationLevel) {
+				return cdm.setSaturationLevel(saturationLevel);
+			}
+
+			@Override
+			public boolean setAppSaturationLevel(String packageName, int saturationLevel) {
+				return cdm.setAppSaturationLevel(packageName, saturationLevel);
+			}
+
+			@Override
+			public boolean isNightDisplayAvailable(Context context) {
+				return ColorDisplayManager.isNightDisplayAvailable(context);
+			}
+
+			@Override
+			public boolean isDisplayWhiteBalanceAvailable(Context context) {
+				return ColorDisplayManager.isDisplayWhiteBalanceAvailable(context);
+			}
+		}
+	}
+
 	private final PackageManager pm;
 
 	public PackageManagerDelegate(PackageManager pm) {
