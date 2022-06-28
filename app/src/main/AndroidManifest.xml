@@ -128,6 +128,7 @@
 			android:exported="false" />
 
 		<!-- Runtime UI -->
+		<!-- to-do: On A13, implement com.google.android.apps.wellbeing.action.ACTION_WIND_DOWN_STATE_CHANGED -->
 		<activity
 			android:name=".ShowSuspendedAppDetails"
 			android:excludeFromRecents="true"
