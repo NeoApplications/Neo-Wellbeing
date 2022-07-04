@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="config_defaultWellbeingPackage">org.eu.droid_ng.wellbeing</string>
+    <string name="config_systemWellbeing">org.eu.droid_ng.wellbeing</string>
 </resources>
