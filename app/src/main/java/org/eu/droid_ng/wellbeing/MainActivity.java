@@ -40,6 +40,12 @@ public class MainActivity extends AppCompatActivity {
 				startActivity(new Intent(getActivity(), BedtimeMode.class));
 				return true;
 			});
+			Preference timers = findPreference("timers");
+			assert timers != null;
+			timers.setOnPreferenceClickListener(p -> {
+				startActivity(new Intent(getActivity(), AppTimers.class));
+				return true;
+			});
 			Preference settings = findPreference("settings");
 			assert settings != null;
 			settings.setOnPreferenceClickListener(p -> {

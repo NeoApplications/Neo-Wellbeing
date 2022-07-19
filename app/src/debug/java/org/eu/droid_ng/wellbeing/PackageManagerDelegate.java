@@ -1,6 +1,8 @@
 package org.eu.droid_ng.wellbeing;
 
 import android.annotation.SuppressLint;
+import android.app.PendingIntent;
+import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.PersistableBundle;
@@ -19,6 +21,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.util.concurrent.TimeUnit;
 
 /* both PackageManager stub for building in Android Studio for UI stuff
 * and reflective delegate for magisk module, only used in debug builds.
@@ -45,12 +48,16 @@ public class PackageManagerDelegate {
 	private static Method getNeutralButtonAction;
 	private static Method setNeutralButtonAction;
 
+	private static Class<?> realUsageStatsManager;
+	private static Method usmCall;
 	private static Class<?> realDisplayColorManager;
 
 	static {
 		HiddenApiBypass.addHiddenApiExemptions(""); // Help in some cases.
 		try {
 			realDisplayColorManager = Class.forName("android.hardware.display.ColorDisplayManager");
+			realUsageStatsManager = Class.forName("android.app.usage.UsageStatsManager");
+			usmCall = realUsageStatsManager.getMethod("registerAppUsageObserver", int.class, String[].class, long.class, TimeUnit.class, PendingIntent.class);
 
 			Class<?> realSuspendDialogInfo = Class.forName("android.content.pm.SuspendDialogInfo");
 			Class<?> realSuspendDialogInfoBuilder = Class.forName("android.content.pm.SuspendDialogInfo$Builder");
@@ -93,6 +100,16 @@ public class PackageManagerDelegate {
 			Log.e("PackageManagerDelegate", // Log why it's crashing
 					"This would not occur if the app was built-in into the ROM:", e);
 			success = false;
+		}
+	}
+
+	public static void registerAppUsageObserver(UsageStatsManager m, int observerId, @NonNull String[] observedEntities,
+	                                            long timeLimit, @NonNull TimeUnit timeUnit, @NonNull PendingIntent callbackIntent) {
+		try {
+			usmCall.invoke(m, observerId, observedEntities, timeLimit, timeUnit, callbackIntent);
+		} catch (ReflectiveOperationException | NullPointerException | ClassCastException e) {
+			Log.e("UsageStatsManager", // Log why it's crashing
+					"This would not occur if the app was built-in into the ROM:", e);
 		}
 	}
 

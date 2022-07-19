@@ -120,14 +120,16 @@
 			android:theme="@style/Theme.AppCompat.DayNight" />
 		<activity
 			android:name=".BedtimeMode"
-			android:theme="@style/Theme.AppCompat.DayNight"
-			android:exported="false" />
+			android:exported="false"
+			android:theme="@style/Theme.AppCompat.DayNight" />
+		<activity
+			android:name=".AppTimers"
+			android:exported="false"
+			android:theme="@style/Theme.AppCompat.DayNight" />
 		<activity
 			android:name=".ScheduleActivity"
-			android:theme="@style/Theme.AppCompat.DayNight"
-			android:exported="false" />
-
-		<!-- Runtime UI -->
+			android:exported="false"
+			android:theme="@style/Theme.AppCompat.DayNight" /> <!-- Runtime UI -->
 		<!-- to-do: On A13, implement com.google.android.apps.wellbeing.action.ACTION_WIND_DOWN_STATE_CHANGED -->
 		<activity
 			android:name=".ShowSuspendedAppDetails"

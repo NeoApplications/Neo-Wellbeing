@@ -21,40 +21,48 @@
 
 	<LinearLayout
 		android:id="@+id/linearLayout"
-		android:layout_width="wrap_content"
+		android:layout_width="0dp"
 		android:layout_height="wrap_content"
 		android:layout_marginStart="10dp"
-		android:orientation="vertical"
 		android:clickable="false"
+		android:orientation="vertical"
 		app:layout_constraintBottom_toBottomOf="parent"
+		app:layout_constraintEnd_toStartOf="@+id/frameLayout"
+		app:layout_constraintHorizontal_bias="0.0"
 		app:layout_constraintStart_toEndOf="@+id/appIcon"
 		app:layout_constraintTop_toTopOf="parent">
 
 		<TextView
 			android:id="@+id/appName2"
-			android:clickable="false"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
+			android:clickable="false"
 			android:text="@string/app"
 			android:textAppearance="@style/TextAppearance.AppCompat.Large" />
 
 		<TextView
 			android:id="@+id/pkgName"
-			android:clickable="false"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
+			android:clickable="false"
 			android:text="@string/pkg_name_example"
 			android:textColor="#546E7A" />
 	</LinearLayout>
 
-	<CheckBox
-		android:id="@+id/isChecked"
+	<FrameLayout
+		android:id="@+id/frameLayout"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:clickable="false"
 		app:layout_constraintBottom_toBottomOf="parent"
 		app:layout_constraintEnd_toEndOf="parent"
-		app:layout_constraintTop_toTopOf="parent"
-		tools:ignore="TouchTargetSizeCheck" />
+		app:layout_constraintTop_toTopOf="parent">
+
+		<CheckBox
+			android:id="@+id/isChecked"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:clickable="false"
+			tools:ignore="TouchTargetSizeCheck" />
+	</FrameLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

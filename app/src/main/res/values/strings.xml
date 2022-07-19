@@ -54,4 +54,6 @@
 	<string name="suspend">Suspend</string>
 	<string name="schedule">Schedule</string>
 	<string name="bedtime_mode">Bedtime mode</string>
+	<string name="no_timer">No timer set</string>
+	<string name="app_timers">App timers</string>
 </resources>

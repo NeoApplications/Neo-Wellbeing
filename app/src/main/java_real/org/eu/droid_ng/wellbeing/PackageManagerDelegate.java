@@ -24,6 +24,11 @@ import java.lang.annotation.RetentionPolicy;
 * */
 public class PackageManagerDelegate {
 
+	public static void registerAppUsageObserver(UsageStatsManager m, int observerId, @NonNull String[] observedEntities,
+	                                            long timeLimit, @NonNull TimeUnit timeUnit, @NonNull PendingIntent callbackIntent) {
+		m.registerAppUsageObserver(observerId, observedEntities, timeLimit, timeUnit, callbackIntent);
+	}
+
 	/* Does not belong here, but for one class im not creating a new delegate */
 	interface IColorDisplayManager {
 		/**

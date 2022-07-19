@@ -7,6 +7,9 @@
 		android:key="bedtime_mode"
 		android:title="@string/bedtime_mode" />
 	<Preference
+		android:key="timers"
+		android:title="@string/app_timers" />
+	<Preference
 		android:key="manual"
 		android:title="@string/manually" />
 	<Preference
