@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-	xmlns:tools="http://schemas.android.com/tools"
-	package="org.eu.droid_ng.wellbeing">
+	xmlns:tools="http://schemas.android.com/tools">
 
 	<uses-permission
 		android:name="android.permission.SUSPEND_APPS"
@@ -95,6 +94,7 @@
 		android:testOnly="false"
 		android:theme="@android:style/Theme.DeviceDefault.DayNight"
 		tools:targetApi="s">
+
 		<activity
 			android:name=".MainActivity"
 			android:exported="true"
@@ -160,6 +160,18 @@
 				<category android:name="android.intent.category.DEFAULT" />
 			</intent-filter>
 		</receiver>
+		<receiver
+			android:name=".BootReciever"
+			android:enabled="true"
+			android:exported="true">
+			<intent-filter>
+				<action android:name="android.intent.action.BOOT_COMPLETED"/>
+			</intent-filter>
+		</receiver>
+		<receiver
+			android:name=".AppTimersBroadcastReciever"
+			android:enabled="true"
+			android:exported="false" />
 		<receiver
 			android:name=".NotificationBroadcastReciever"
 			android:enabled="true"

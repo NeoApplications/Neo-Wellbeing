@@ -5,6 +5,11 @@ import android.hardware.display.ColorDisplayManager;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
+import android.app.PendingIntent;
+import android.app.usage.UsageStatsManager;
+import android.content.Context;
+import android.os.PersistableBundle;
+import android.util.Log;
 
 import androidx.annotation.DrawableRes;
 import androidx.annotation.IntDef;
@@ -18,6 +23,8 @@ import org.xmlpull.v1.XmlSerializer;
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 
 /* This file contains all references to private API. Private API will not be used elsewhere
 * This class is only used when doing full systems builds, so assume system implement required APIs
@@ -27,6 +34,11 @@ public class PackageManagerDelegate {
 	public static void registerAppUsageObserver(UsageStatsManager m, int observerId, @NonNull String[] observedEntities,
 	                                            long timeLimit, @NonNull TimeUnit timeUnit, @NonNull PendingIntent callbackIntent) {
 		m.registerAppUsageObserver(observerId, observedEntities, timeLimit, timeUnit, callbackIntent);
+	}
+
+	public static void registerAppUsageLimitObserver(UsageStatsManager m, int observerId, @NonNull String[] observedEntities,
+	                                            Duration timeLimit, Duration timeUsed, @NonNull PendingIntent callbackIntent) {
+		m.registerAppUsageLimitObserver(observerId, observedEntities, timeLimit, timeUsed, callbackIntent);
 	}
 
 	/* Does not belong here, but for one class im not creating a new delegate */

@@ -1,11 +1,13 @@
 package org.eu.droid_ng.wellbeing;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -19,9 +21,11 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.NumberPicker;
 import android.widget.TextView;
 
 import java.text.Collator;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -33,20 +37,28 @@ import java.util.stream.Collectors;
 
 public class AppTimers extends AppCompatActivity {
 
+	private AppTimersInternal ati;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		ati = AppTimersInternal.get(this);
+		ActionBar actionBar = getSupportActionBar();
+		if (actionBar != null) {
+			actionBar.setDisplayHomeAsUpEnabled(true);
+		}
 		setContentView(R.layout.activity_app_timers);
 
 		RecyclerView r = findViewById(R.id.appTimerPkgs);
 		r.setAdapter(
 				new AppTimersRecyclerViewAdapter(this,
 						getPackageManager().getInstalledApplications(PackageManager.GET_META_DATA)));
+	}
 
-		/*
-		PendingIntent pintent = PendingIntent.getActivity(this, 0, new Intent(this, FocusModeActivity.class), PendingIntent.FLAG_IMMUTABLE);
-		PackageManagerDelegate.registerAppUsageObserver((UsageStatsManager) getSystemService(Context.USAGE_STATS_SERVICE), 1, new String[] { "org.fdroid.fdroid" }, 60000, TimeUnit.MILLISECONDS, pintent);
-		*/
+	@Override
+	public boolean onSupportNavigateUp() {
+		finish();
+		return true;
 	}
 
 	public class AppTimersRecyclerViewAdapter extends RecyclerView.Adapter<AppTimersRecyclerViewAdapter.AppTimerViewHolder> {
@@ -145,23 +157,33 @@ public class AppTimers extends AppCompatActivity {
 				parent.addView(actionButton, idx);
 			}
 
-			@SuppressLint("ApplySharedPref")
 			public void apply(ApplicationInfo info, int mins) {
 				appIcon.setImageDrawable(pm.getApplicationIcon(info));
 				appName.setText(pm.getApplicationLabel(info));
 				applyText(mins);
 				container.setOnClickListener(view -> {
-					int nmins = enabledMap.getOrDefault(info.packageName, 0) != 0 ? 0 : 1;
-					enabledMap.put(info.packageName, nmins);
-					SharedPreferences.Editor p = prefs.edit();
-					p.putInt(info.packageName, nmins);
-					applyText(nmins);
-					/*
-					p.clear();
-					enabledMap.forEach(p::putInt);
-					*/
-					p.commit();
+					int realmins = enabledMap.getOrDefault(info.packageName, 0);
+					NumberPicker numberPicker = new NumberPicker(AppTimers.this);
+					numberPicker.setMinValue(0);
+					numberPicker.setMaxValue(9999); //i mean why not
+					numberPicker.setValue(realmins);
+					new AlertDialog.Builder(AppTimers.this)
+							.setTitle(pm.getApplicationLabel(info))
+							.setView(numberPicker)
+							.setNegativeButton(R.string.cancel, (d,i) -> d.dismiss())
+							.setPositiveButton(R.string.ok, (d,i) -> {
+								updateMins(info.packageName, realmins, numberPicker.getValue());
+								d.dismiss();
+							})
+							.show();
 				});
+			}
+
+			private void updateMins(String pkgName, int oldmins, int mins) {
+				enabledMap.put(pkgName, mins);
+				prefs.edit().putInt(pkgName, mins).apply();
+				applyText(mins);
+				ati.onUpdateAppTimerPreference(pkgName, Duration.ofMillis(oldmins), Duration.ofMinutes(mins));
 			}
 
 			private void applyText(int mins) {

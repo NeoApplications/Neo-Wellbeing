@@ -21,6 +21,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 /* both PackageManager stub for building in Android Studio for UI stuff
@@ -48,16 +49,17 @@ public class PackageManagerDelegate {
 	private static Method getNeutralButtonAction;
 	private static Method setNeutralButtonAction;
 
-	private static Class<?> realUsageStatsManager;
 	private static Method usmCall;
+	private static Method usmCall2;
 	private static Class<?> realDisplayColorManager;
 
 	static {
 		HiddenApiBypass.addHiddenApiExemptions(""); // Help in some cases.
 		try {
 			realDisplayColorManager = Class.forName("android.hardware.display.ColorDisplayManager");
-			realUsageStatsManager = Class.forName("android.app.usage.UsageStatsManager");
+			Class<?> realUsageStatsManager = Class.forName("android.app.usage.UsageStatsManager");
 			usmCall = realUsageStatsManager.getMethod("registerAppUsageObserver", int.class, String[].class, long.class, TimeUnit.class, PendingIntent.class);
+			usmCall2 = realUsageStatsManager.getMethod("registerAppUsageLimitObserver", int.class, String[].class, Duration.class, Duration.class, PendingIntent.class);
 
 			Class<?> realSuspendDialogInfo = Class.forName("android.content.pm.SuspendDialogInfo");
 			Class<?> realSuspendDialogInfoBuilder = Class.forName("android.content.pm.SuspendDialogInfo$Builder");
@@ -107,6 +109,16 @@ public class PackageManagerDelegate {
 	                                            long timeLimit, @NonNull TimeUnit timeUnit, @NonNull PendingIntent callbackIntent) {
 		try {
 			usmCall.invoke(m, observerId, observedEntities, timeLimit, timeUnit, callbackIntent);
+		} catch (ReflectiveOperationException | NullPointerException | ClassCastException e) {
+			Log.e("UsageStatsManager", // Log why it's crashing
+					"This would not occur if the app was built-in into the ROM:", e);
+		}
+	}
+
+	public static void registerAppUsageLimitObserver(UsageStatsManager m, int observerId, @NonNull String[] observedEntities,
+	                                                 Duration timeLimit, Duration timeUsed, @NonNull PendingIntent callbackIntent) {
+		try {
+			usmCall2.invoke(m, observerId, observedEntities, timeLimit, timeUsed, callbackIntent);
 		} catch (ReflectiveOperationException | NullPointerException | ClassCastException e) {
 			Log.e("UsageStatsManager", // Log why it's crashing
 					"This would not occur if the app was built-in into the ROM:", e);
