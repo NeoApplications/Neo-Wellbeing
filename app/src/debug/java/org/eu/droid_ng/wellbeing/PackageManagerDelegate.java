@@ -51,6 +51,8 @@ public class PackageManagerDelegate {
 
 	private static Method usmCall;
 	private static Method usmCall2;
+	private static Method usmCalla;
+	private static Method usmCalla2;
 	private static Class<?> realDisplayColorManager;
 
 	static {
@@ -60,6 +62,9 @@ public class PackageManagerDelegate {
 			Class<?> realUsageStatsManager = Class.forName("android.app.usage.UsageStatsManager");
 			usmCall = realUsageStatsManager.getMethod("registerAppUsageObserver", int.class, String[].class, long.class, TimeUnit.class, PendingIntent.class);
 			usmCall2 = realUsageStatsManager.getMethod("registerAppUsageLimitObserver", int.class, String[].class, Duration.class, Duration.class, PendingIntent.class);
+			usmCalla = realUsageStatsManager.getMethod("unregisterAppUsageObserver", int.class);
+			usmCalla2 = realUsageStatsManager.getMethod("unregisterAppUsageLimitObserver", int.class);
+
 
 			Class<?> realSuspendDialogInfo = Class.forName("android.content.pm.SuspendDialogInfo");
 			Class<?> realSuspendDialogInfoBuilder = Class.forName("android.content.pm.SuspendDialogInfo$Builder");
@@ -119,6 +124,24 @@ public class PackageManagerDelegate {
 	                                                 Duration timeLimit, Duration timeUsed, @NonNull PendingIntent callbackIntent) {
 		try {
 			usmCall2.invoke(m, observerId, observedEntities, timeLimit, timeUsed, callbackIntent);
+		} catch (ReflectiveOperationException | NullPointerException | ClassCastException e) {
+			Log.e("UsageStatsManager", // Log why it's crashing
+					"This would not occur if the app was built-in into the ROM:", e);
+		}
+	}
+
+	public static void unregisterAppUsageObserver(UsageStatsManager m, int observerId) {
+		try {
+			usmCalla.invoke(m, observerId);
+		} catch (ReflectiveOperationException | NullPointerException | ClassCastException e) {
+			Log.e("UsageStatsManager", // Log why it's crashing
+					"This would not occur if the app was built-in into the ROM:", e);
+		}
+	}
+
+	public static void unregisterAppUsageLimitObserver(UsageStatsManager m, int observerId) {
+		try {
+			usmCalla2.invoke(m, observerId);
 		} catch (ReflectiveOperationException | NullPointerException | ClassCastException e) {
 			Log.e("UsageStatsManager", // Log why it's crashing
 					"This would not occur if the app was built-in into the ROM:", e);

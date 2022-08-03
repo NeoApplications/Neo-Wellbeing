@@ -41,6 +41,14 @@ public class PackageManagerDelegate {
 		m.registerAppUsageLimitObserver(observerId, observedEntities, timeLimit, timeUsed, callbackIntent);
 	}
 
+	public static void unregisterAppUsageObserver(UsageStatsManager m, int observerId) {
+		m.unregisterAppUsageObserver(observerId);
+	}
+
+	public static void unregisterAppUsageLimitObserver(UsageStatsManager m, int observerId) {
+		m.unregisterAppUsageLimitObserver(observerId);
+	}
+
 	/* Does not belong here, but for one class im not creating a new delegate */
 	interface IColorDisplayManager {
 		/**

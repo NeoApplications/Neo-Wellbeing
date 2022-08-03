@@ -2,6 +2,7 @@ package org.eu.droid_ng.wellbeing;
 
 import android.annotation.SuppressLint;
 import android.app.PendingIntent;
+import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.content.Intent;
@@ -13,7 +14,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.Collection;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -54,6 +60,7 @@ public class AppTimersInternal {
 		return instance;
 	}
 
+	// start time limit core
 	private void updatePrefs(String key, int value) {
 		if (value < 0) {
 			prefs.edit().remove(key).apply();
@@ -129,9 +136,13 @@ public class AppTimersInternal {
 			setHintedAppTimerInternal(oid, uoid, toObserve, timeLimit, timeUsed);
 		}
 	}
+	// end time limit core
 
+	// start AppTimer feature
 	private void setAppTimer(String[] toObserve, Duration timeLimit, @Nullable Duration timeUsed) {
-		String uoid = new ParsedUoid("AppTimer", timeLimit.toMillis(), toObserve).toString();
+		// AppLimit: do not provide info to launcher, use registerAppUsageObserver
+		// AppTimer: provide info to launcher, use registerAppUsageLimitObserver
+		String uoid = new ParsedUoid(timeUsed == null ? "AppLimit" : "AppTimer", timeLimit.toMillis(), toObserve).toString();
 		Duration timeLimitInternal = timeLimit;
 		if (timeUsed != null) {
 			timeLimitInternal = timeLimitInternal.minus(timeUsed);
@@ -142,25 +153,36 @@ public class AppTimersInternal {
 		setAppTimerInternal(uoid, toObserve, timeLimitInternal, timeUsed);
 	}
 
-	private void dropAppTimer(ParsedUoid uoid) {
-		updatePrefs(uoid.toString(), -1); //delete pref
-		//TODO: call UsageStatsManager remove method using pmdelegate
-	}
-
-	public Duration getTimeUsed(String[] packageNames) {
-		//TODO: get timeUsed from UsageStatsManager
-		return null;
-	}
-
-	public void onUpdateAppTimerPreference(String packageName, Duration oldLimit, Duration limit) {
-		String[] s = new String[]{ packageName };
-		dropAppTimer(new ParsedUoid("AppTimer", oldLimit.toMillis(), s));
-		setAppTimer(s, limit, getTimeUsed(s));
+	private void dropAppTimer(ParsedUoid parsedUoid) {
+		String uoid = parsedUoid.toString();
+		updatePrefs(uoid, -1); //delete pref
+		if (parsedUoid.action.equals("AppTimer")) {
+			PackageManagerDelegate.unregisterAppUsageLimitObserver(usm, prefs.getInt(uoid, -1));
+		} else {
+			PackageManagerDelegate.unregisterAppUsageObserver(usm, prefs.getInt(uoid, -1));
+		}
 	}
 
 	private void resetupAppTimerPreference(String packageName) {
 		String[] s = new String[]{ packageName };
 		setAppTimer(s, Duration.ofMinutes(config.getInt(packageName, -1)), getTimeUsed(s));
+	}
+
+	private Duration getTimeUsed(String[] packageNames) {
+		ZoneId z = ZoneId.systemDefault();
+		Map<String, UsageStats> m = usm.queryAndAggregateUsageStats(LocalDateTime.of(LocalDate.now(z), LocalTime.MIDNIGHT).atZone(z).toEpochSecond(), System.currentTimeMillis());
+		//TODO: finish this code
+		return null;
+	}
+
+	public void onUpdateAppTimerPreference(String packageName, Duration oldLimit, Duration limit) {
+		String[] s = new String[]{ packageName };
+		ParsedUoid u = new ParsedUoid("AppTimer", oldLimit.toMillis(), s);
+		if (!prefs.contains(u.toString()))
+			u = new ParsedUoid("AppLimit", oldLimit.toMillis(), s);
+		dropAppTimer(u);
+		if (limit.toMillis() > 0)
+			setAppTimer(s, limit, getTimeUsed(s));
 	}
 
 	public void onBootRecieved() {
@@ -176,7 +198,10 @@ public class AppTimersInternal {
 			return;
 		}
 		ParsedUoid parsed = ParsedUoid.from(uoid);
-		Toast.makeText(ctx, "AppTimersInternal: success oid:" + oid + " action:" + parsed.action + " timeMillis:" + parsed.timeMillis + " pkgs:" + String.join(",", parsed.pkgs), Toast.LENGTH_LONG).show();
 		dropAppTimer(parsed);
+		// Actual logic starting here please
+		//TODO: suspend & break logic
+		Toast.makeText(ctx, "AppTimersInternal: success oid:" + oid + " action:" + parsed.action + " timeMillis:" + parsed.timeMillis + " pkgs:" + String.join(",", parsed.pkgs), Toast.LENGTH_LONG).show();
 	}
+	// end AppTimer feature
 }
