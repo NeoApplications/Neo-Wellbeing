@@ -173,8 +173,13 @@ public class AppTimersInternal {
 		String[] s = new String[]{ packageName };
 		Duration m = Duration.ofMinutes(config.getInt(packageName, -1));
 		if (m.isNegative() || m.isZero())
-			return;
-		setAppTimer(s, m, getTimeUsed(s));
+			onAppTimeout(new String[]{packageName}); //time already over on boot/updating pref, make sure app sleeps
+		else
+			setAppTimer(s, m, getTimeUsed(s));
+	}
+
+	private void onAppTimeout(String[] packageNames) {
+		//TODO: implement app suspending & break hooks
 	}
 
 	public void clearUsageStatsCache(boolean recalculate) {
@@ -228,7 +233,8 @@ public class AppTimersInternal {
 							b.append("el(t=").append(element.getEventType()).append("), ");
 						}
 						b.replace(b.length()-2, b.length()-1, "]");
-						throw new IllegalStateException("usm hard assert1 fail!! pkgName=" + pkgName + " i=" + i + " j=" +  j + " events=" + b);
+						Log.e("AppTimersInternal","usm soft assert2 fail!! pkgName=" + pkgName + " i=" + i + " j=" +  j + " events=" + b);
+						continue;
 					}
 					while ((eventTwo = events.get(i+j)).getEventType() == UsageEvents.Event.ACTIVITY_RESUMED) {
 						j++;
@@ -239,7 +245,8 @@ public class AppTimersInternal {
 								b.append("el(t=").append(element.getEventType()).append("), ");
 							}
 							b.replace(b.length()-2, b.length()-1, "]");
-							Log.e("AppTimersInternal", "usm soft assert2 fail!! pkgName=" + pkgName + " i=" + i + " j=" +  j + " events=" + b);
+							Log.e("AppTimersInternal", "usm soft assert3 fail!! pkgName=" + pkgName + " i=" + i + " j=" +  j + " events=" + b);
+							break;
 						}
 					}
 					if (!(eventTwo.getEventType() == UsageEvents.Event.ACTIVITY_PAUSED)) { // didnt find ending
@@ -249,7 +256,8 @@ public class AppTimersInternal {
 							b.append("el(t=").append(element.getEventType()).append("), ");
 						}
 						b.replace(b.length()-2, b.length()-1, "]");
-						throw new IllegalStateException("usm hard assert2 fail!! pkgName=" + pkgName + " i=" + i + " j=" +  j + " events=" + b);
+						Log.e("AppTimersInternal","usm soft assert4 fail!! pkgName=" + pkgName + " i=" + i + " j=" +  j + " events=" + b);
+						continue;
 					}
 
 					calculatedUsageStats.put(pkgName, Objects.requireNonNull(calculatedUsageStats.getOrDefault(pkgName, Duration.ZERO)).plus(Duration.ofMillis(eventTwo.getTimeStamp() - eventOne.getTimeStamp())));
@@ -275,6 +283,8 @@ public class AppTimersInternal {
 		//clearUsageStatsCache(true); moved out for threading
 		if (limit.toMinutes() > 0)
 			setAppTimer(s, limit, getTimeUsed(s));
+		else
+			onAppTimeout(new String[]{packageName});
 	}
 
 	public void onBootRecieved() {
@@ -297,8 +307,8 @@ public class AppTimersInternal {
 		msg = "AppTimersInternal: success oid:" + oid + " action:" + parsed.action + " timeMillis:" + parsed.timeMillis + " pkgs:" + String.join(",", parsed.pkgs);
 		Log.i("AppTimersInternal", msg);
 		// Actual logic starting here please
-		//TODO: suspend & break logic
-		Toast.makeText(ctx, msg, Toast.LENGTH_LONG).show();
+		onAppTimeout(parsed.pkgs);
+		//Toast.makeText(ctx, msg, Toast.LENGTH_LONG).show();
 	}
 	// end AppTimer feature
 }
