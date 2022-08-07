@@ -21,12 +21,14 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * Load AppTimers state from disk and hold it in a instance. Allow easy configuration with API calls and make this handle all the specifics.
@@ -162,7 +164,7 @@ public class AppTimersInternal {
 	private void dropAppTimer(ParsedUoid parsedUoid) {
 		String uoid = parsedUoid.toString();
 		updatePrefs(uoid, -1); //delete pref
-		if (parsedUoid.action.equals("AppTimer")) {
+		if (!parsedUoid.action.equals("AppLimit")) {
 			PackageManagerDelegate.unregisterAppUsageLimitObserver(usm, prefs.getInt(uoid, -1));
 		} else {
 			PackageManagerDelegate.unregisterAppUsageObserver(usm, prefs.getInt(uoid, -1));
@@ -171,7 +173,10 @@ public class AppTimersInternal {
 
 	private void resetupAppTimerPreference(String packageName) {
 		String[] s = new String[]{ packageName };
-		Duration m = Duration.ofMinutes(config.getInt(packageName, -1));
+		int i = config.getInt(packageName, -1);
+		Duration m = Duration.ofMinutes(i).minus(getTimeUsed(s));
+		if (i <= 0)
+			return;
 		if (m.isNegative() || m.isZero())
 			onAppTimeout(new String[]{packageName}); //time already over on boot/updating pref, make sure app sleeps
 		else
@@ -179,8 +184,34 @@ public class AppTimersInternal {
 	}
 
 	private void onAppTimeout(String[] packageNames) {
-		//TODO: implement app suspending & break hooks
+		int dialogBreakTime = 1; //TODO
+		for (String packageName : packageNames) {
+			String[] failed = new String[0];
+			try {
+				failed = pmd.setPackagesSuspended(new String[] { packageName }, true, null, null, new PackageManagerDelegate.SuspendDialogInfo.Builder()
+						.setTitle(R.string.app_timers)
+						.setMessage(ctx.getString(R.string.app_timer_exceed_f, pm.getApplicationLabel(pm.getApplicationInfo(packageName, 0))))
+						.setNeutralButtonText(dialogBreakTime == -1 ? R.string.dialog_btn_settings : ctx.getResources().getIdentifier("break_dialog_" + dialogBreakTime, "string", ctx.getPackageName()))
+						.setNeutralButtonAction(dialogBreakTime == -1 ? PackageManagerDelegate.SuspendDialogInfo.BUTTON_ACTION_MORE_DETAILS : PackageManagerDelegate.SuspendDialogInfo.BUTTON_ACTION_UNSUSPEND)
+						.setIcon(R.drawable.ic_focus_mode).build());
+			} catch (PackageManager.NameNotFoundException e) {
+				e.printStackTrace();
+			}
+			for (String f : failed) {
+				Log.e("OpenWellbeing", "failed to suspend " + f);
+			}
+		}
 	}
+
+	private void endBreak(String[] packageNames) {
+		ParsedUoid u = new ParsedUoid("AppBreak", 0, packageNames);
+		if (!prefs.contains(u.toString()))
+			return;
+		Log.i("AppTimersInternal", "end break for " + Arrays.toString(packageNames));
+		onAppTimeout(packageNames);
+	}
+
+	//public api:
 
 	public void clearUsageStatsCache(boolean recalculate) {
 		calculatedUsageStats = null;
@@ -277,14 +308,21 @@ public class AppTimersInternal {
 	public void onUpdateAppTimerPreference(String packageName, Duration oldLimit, Duration limit) {
 		String[] s = new String[]{ packageName };
 		ParsedUoid u = new ParsedUoid("AppTimer", oldLimit.toMillis(), s);
-		if (!prefs.contains(u.toString()))
-			u = new ParsedUoid("AppLimit", oldLimit.toMillis(), s);
-		dropAppTimer(u);
+		if (prefs.contains(u.toString()))
+			dropAppTimer(u);
+		u = new ParsedUoid("AppLimit", oldLimit.toMillis(), s);
+		if (prefs.contains(u.toString()))
+			dropAppTimer(u);
+		u = new ParsedUoid("AppBreak", 0, s);
+		if (prefs.contains(u.toString()))
+			dropAppTimer(u);
+		// unsuspend app if needed
+		pmd.setPackagesSuspended(new String[]{packageName}, false, null, null, null); //todo: handle other suspend features
 		//clearUsageStatsCache(true); moved out for threading
-		if (limit.toMinutes() > 0)
+		if (limit.minus(getTimeUsed(s)).toMinutes() > 0) //inexact on purpose. min to avoid crash in android is 1min
 			setAppTimer(s, limit, getTimeUsed(s));
-		else
-			onAppTimeout(new String[]{packageName});
+		else if (!limit.isZero())
+			onAppTimeout(s);
 	}
 
 	public void onBootRecieved() {
@@ -294,21 +332,48 @@ public class AppTimersInternal {
 		}
 	}
 
+	//return false -> normal execution of service handlers
+	//start break for app
+	public boolean appTimerSuspendHook(String packageName) {
+		int dialogBreakTime = 1; //TODO
+		String u = new ParsedUoid("AppBreak", 0, new String[]{packageName}).toString();
+		if (!(getTimeUsed(new String[]{packageName}).toMinutes() >= config.getInt(packageName, Integer.MAX_VALUE) - 1 && !isAppOnBreak(packageName)))
+			return false;
+		Duration breakDuration = Duration.ofMinutes(dialogBreakTime);
+		pmd.setPackagesSuspended(new String[]{packageName}, false, null, null, null);
+		if (!prefs.contains(u)) {
+			updatePrefs(u, makeOid());
+		}
+		setAppTimerInternal(u, new String[]{packageName}, breakDuration, Duration.ZERO);
+		return true;
+	}
+
+	public boolean isAppOnBreak(String packageName) {
+		String u = new ParsedUoid("AppBreak", 0, new String[]{packageName}).toString();
+		return prefs.contains(u);
+	}
+
 	public void onBroadcastRecieve(Integer oid, String uoid) {
 		String msg;
 		if (!Objects.equals(prefs.getInt(uoid, -2), oid)) {
-			msg = "AppTimersInternal: unknown oid/uoid - " + oid + " / " + uoid;
+			msg = "Warning: unknown oid/uoid - " + oid + " / " + uoid + " - this might be an bug? Trying to recover.";
 			Toast.makeText(ctx, msg, Toast.LENGTH_LONG).show();
 			Log.e("AppTimersInternal", msg);
-			return;
+			// Attempt to recover, in doubt always trust the oid. Because android is fucking dumb. Thank you.
+			uoid = prefs.getAll().entrySet().stream().filter(a -> oid.equals(a.getValue())).findAny().get().getKey();
 		}
 		ParsedUoid parsed = ParsedUoid.from(uoid);
-		dropAppTimer(parsed);
 		msg = "AppTimersInternal: success oid:" + oid + " action:" + parsed.action + " timeMillis:" + parsed.timeMillis + " pkgs:" + String.join(",", parsed.pkgs);
 		Log.i("AppTimersInternal", msg);
 		// Actual logic starting here please
-		onAppTimeout(parsed.pkgs);
-		//Toast.makeText(ctx, msg, Toast.LENGTH_LONG).show();
+		if (parsed.action.equals("AppTimer") || parsed.action.equals("AppLimit"))
+			onAppTimeout(parsed.pkgs);
+		else if (parsed.action.equals("AppBreak"))
+			endBreak(parsed.pkgs);
+		else
+			Toast.makeText(ctx, msg, Toast.LENGTH_LONG).show();
+
+		dropAppTimer(parsed);
 	}
 	// end AppTimer feature
 }

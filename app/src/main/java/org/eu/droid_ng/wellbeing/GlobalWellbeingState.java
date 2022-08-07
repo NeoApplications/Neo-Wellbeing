@@ -54,7 +54,7 @@ public class GlobalWellbeingState {
 		REASON_FOCUS_MODE,
 		REASON_FOCUS_MODE_BREAK
 	}
-	public Map<String, REASON> reasonMap = new HashMap<>();
+	public Map<String, REASON> reasonMap = new HashMap<>(); //WARN:handle app timers when adding new use!!!
 
 	enum SERVICE_TYPE {
 		TYPE_MANUALLY,
@@ -102,6 +102,8 @@ public class GlobalWellbeingState {
 
 	public void onManuallyUnsuspended(@NonNull String packageName) {
 		REASON suspendReason = reasonMap.getOrDefault(packageName, REASON.REASON_UNKNOWN);
+		if (suspendReason == REASON.REASON_UNKNOWN && AppTimersInternal.get(context).appTimerSuspendHook(packageName))
+			return;
 		if (suspendReason == null)
 			suspendReason = REASON.REASON_UNKNOWN;
 		reasonMap.remove(packageName);

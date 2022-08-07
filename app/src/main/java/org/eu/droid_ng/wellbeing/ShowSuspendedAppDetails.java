@@ -57,41 +57,49 @@ public class ShowSuspendedAppDetails extends Activity {
 		final AtomicReference<Runnable> reset = new AtomicReference<>(() -> {});
 		final Runnable next = () -> {
 			final CardView container;
-			switch (reason.get()) {
-				case REASON_FOCUS_MODE:
-					container = findViewById(R.id.focusMode);
-					findViewById(R.id.takeabreakbtn).setOnClickListener(v -> client.doBindService(boundService -> boundService.state.takeBreakDialog(ShowSuspendedAppDetails.this, true, boundService.state.focusModeAllApps ? null : new String[] { packageName })));
-					findViewById(R.id.disablefocusmode).setOnClickListener(v -> {
-						client.doBindService(boundService -> boundService.state.disableFocusMode(), false, true, true);
-						ShowSuspendedAppDetails.this.finish();
-					});
-					break;
-				case REASON_MANUALLY:
-					container = findViewById(R.id.manually);
-					findViewById(R.id.unsuspendbtn2).setOnClickListener(v -> {
-						client.doBindService(boundService ->
-								boundService.state.manualUnsuspend(new String[] { packageName }, false));
-						ShowSuspendedAppDetails.this.finish();
-					});
-					findViewById(R.id.unsuspendallbtn).setOnClickListener(v -> {
-						client.doBindService(boundService ->
-							boundService.state.manualUnsuspend(null, true));
-						ShowSuspendedAppDetails.this.finish();
-					});
-					break;
-				case REASON_UNKNOWN:
-				default:
-					container = findViewById(R.id.unknown);
-					findViewById(R.id.unsuspendbtn).setOnClickListener(v -> {
-						pmd.setPackagesSuspended(new String[] { packageName }, false, null, null, null);
-						client.doBindService(boundService -> boundService.state.reasonMap.remove(packageName), true);
-						ShowSuspendedAppDetails.this.finish();
-					});
+			boolean isAppTimer = AppTimersInternal.get(this).isAppOnBreak(packageName);
+			if (isAppTimer) {
+				container = findViewById(R.id.apptimer);
+				findViewById(R.id.takeabreakbtn2).setOnClickListener(v ->
+						AppTimersInternal.get(this).appTimerSuspendHook(packageName));
+			} else {
+				switch (reason.get()) {
+					case REASON_FOCUS_MODE:
+						container = findViewById(R.id.focusMode);
+						findViewById(R.id.takeabreakbtn).setOnClickListener(v -> client.doBindService(boundService -> boundService.state.takeBreakDialog(ShowSuspendedAppDetails.this, true, boundService.state.focusModeAllApps ? null : new String[]{packageName})));
+						findViewById(R.id.disablefocusmode).setOnClickListener(v -> {
+							client.doBindService(boundService -> boundService.state.disableFocusMode(), false, true, true);
+							ShowSuspendedAppDetails.this.finish();
+						});
+						break;
+					case REASON_MANUALLY:
+						container = findViewById(R.id.manually);
+						findViewById(R.id.unsuspendbtn2).setOnClickListener(v -> {
+							client.doBindService(boundService ->
+									boundService.state.manualUnsuspend(new String[]{packageName}, false));
+							ShowSuspendedAppDetails.this.finish();
+						});
+						findViewById(R.id.unsuspendallbtn).setOnClickListener(v -> {
+							client.doBindService(boundService ->
+									boundService.state.manualUnsuspend(null, true));
+							ShowSuspendedAppDetails.this.finish();
+						});
+						break;
+					case REASON_UNKNOWN:
+					default:
+						container = findViewById(R.id.unknown);
+						findViewById(R.id.unsuspendbtn).setOnClickListener(v -> {
+							pmd.setPackagesSuspended(new String[]{packageName}, false, null, null, null);
+							client.doBindService(boundService -> boundService.state.reasonMap.remove(packageName), true);
+							ShowSuspendedAppDetails.this.finish();
+						});
+				}
 			}
 			container.setVisibility(View.VISIBLE);
 		};
+		boolean isAppTimer = AppTimersInternal.get(this).isAppOnBreak(packageName);
 		/* If service does not exist, just set UNKNOWN reason. If it exists, use its data */
-		boolean hasService = client.doBindService(boundService -> {
+		boolean hasService = !isAppTimer && client.doBindService(boundService -> {
 			reason.set(boundService.state.reasonMap.getOrDefault(packageName, GlobalWellbeingState.REASON.REASON_UNKNOWN));
 			reset.set(() -> boundService.state.reasonMap.remove(packageName));
 			next.run();

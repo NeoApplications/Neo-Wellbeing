@@ -21,6 +21,9 @@ public class ManuallyUnsuspendBroadcastReciever extends BroadcastReceiver {
 		}
 
 		final WellbeingStateClient client = new WellbeingStateClient(context);
-		client.doBindService(boundService -> boundService.state.onManuallyUnsuspended(packageName), true);
+		if (client.isServiceRunning())
+			client.doBindService(boundService -> boundService.state.onManuallyUnsuspended(packageName), true);
+		else
+			AppTimersInternal.get(context).appTimerSuspendHook(packageName);
 	}
 }
