@@ -2,12 +2,14 @@ package org.eu.droid_ng.wellbeing;
 
 import android.annotation.SuppressLint;
 import android.app.PendingIntent;
+import android.app.usage.UsageEvents;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -18,7 +20,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -43,6 +48,7 @@ public class AppTimersInternal {
 	private final UsageStatsManager usm;
 	private final SharedPreferences prefs; // uoid <-> oid map
 	private final SharedPreferences config;
+	private HashMap<String, Duration> calculatedUsageStats = null;
 
 	private AppTimersInternal(Context ctx) {
 		this.ctx = ctx;
@@ -168,11 +174,87 @@ public class AppTimersInternal {
 		setAppTimer(s, Duration.ofMinutes(config.getInt(packageName, -1)), getTimeUsed(s));
 	}
 
-	private Duration getTimeUsed(String[] packageNames) {
-		ZoneId z = ZoneId.systemDefault();
-		Map<String, UsageStats> m = usm.queryAndAggregateUsageStats(LocalDateTime.of(LocalDate.now(z), LocalTime.MIDNIGHT).atZone(z).toEpochSecond(), System.currentTimeMillis());
-		//TODO: finish this code
-		return null;
+	public Duration getTimeUsed(String[] packageNames) {
+		/*
+		 * When writing this code, I learnt a lesson. UsageStats and UsageEvents APIs are fucking dumb.
+		 * I had cases of user opening the app 3 times and closing it 2 times, cases of user opening the app 2 times without closing it at all...
+		 * But in the very end this works. And it's about 3 trillion times faster than UsageStatsManager queries.
+		 */
+		if (calculatedUsageStats == null) {
+			ZoneId z = ZoneId.systemDefault();
+			long startTime = LocalDateTime.of(LocalDate.now(z), LocalTime.MIDNIGHT).atZone(z).toEpochSecond()*1000;
+			UsageEvents usageEvents = usm.queryEvents(startTime, System.currentTimeMillis());
+			UsageEvents.Event currentEvent;
+			HashMap<String, ArrayList<UsageEvents.Event>> e = new HashMap<>();
+
+			while (usageEvents.hasNextEvent()) {
+				currentEvent = new UsageEvents.Event();
+				usageEvents.getNextEvent(currentEvent);
+				if (currentEvent.getEventType() == UsageEvents.Event.ACTIVITY_PAUSED ||
+						currentEvent.getEventType() == UsageEvents.Event.ACTIVITY_RESUMED) {
+					e.computeIfAbsent(currentEvent.getPackageName(), p -> new ArrayList<>())
+							.add(currentEvent);
+				}
+			}
+
+			calculatedUsageStats = new HashMap<>();
+
+			e.forEach((pkgName, events) -> {
+				for (int i = 0; i < events.size(); i+=2) {
+					int j = 1;
+					if (i+j >= events.size())
+						continue;
+					UsageEvents.Event eventOne = events.get(i);
+					UsageEvents.Event eventTwo = events.get(i+j);
+					if (eventOne.getEventType() == UsageEvents.Event.ACTIVITY_PAUSED) {
+						i -= 1;
+						Log.e("AppTimersInternal", "usm soft assert1 fail!! eventOneType=" + eventOne.getEventType() + " eventTwoType=" + eventTwo.getEventType());
+						continue;
+						// Unlucky case. Skip one. Should never happen, but safe is safe. edit: happens. help me
+					}
+					if (!(eventOne.getEventType() == UsageEvents.Event.ACTIVITY_RESUMED)) { // where tf is start
+						StringBuilder b = new StringBuilder(); //print array, tostring doesnt work, usageevent has no tostring
+						b.append("[");
+						for (UsageEvents.Event element : events) {
+							b.append("el(t=").append(element.getEventType()).append("), ");
+						}
+						b.replace(b.length()-2, b.length()-1, "]");
+						throw new IllegalStateException("usm hard assert1 fail!! pkgName=" + pkgName + " i=" + i + " j=" +  j + " events=" + b);
+					}
+					while ((eventTwo = events.get(i+j)).getEventType() == UsageEvents.Event.ACTIVITY_RESUMED) {
+						j++;
+						if (i+j==events.size()) { //array oob - didnt find ending??
+							StringBuilder b = new StringBuilder(); //print array, tostring doesnt work, usageevent has no tostring
+							b.append("[");
+							for (UsageEvents.Event element : events) {
+								b.append("el(t=").append(element.getEventType()).append("), ");
+							}
+							b.replace(b.length()-2, b.length()-1, "]");
+							throw new IllegalStateException("usm hard assert2 fail!! pkgName=" + pkgName + " i=" + i + " j=" +  j + " events=" + b);
+						}
+					}
+					if (!(eventTwo.getEventType() == UsageEvents.Event.ACTIVITY_PAUSED)) { // didnt find ending
+						StringBuilder b = new StringBuilder(); //print array, tostring doesnt work, usageevent has no tostring
+						b.append("[");
+						for (UsageEvents.Event element : events) {
+							b.append("el(t=").append(element.getEventType()).append("), ");
+						}
+						b.replace(b.length()-2, b.length()-1, "]");
+						throw new IllegalStateException("usm hard assert3 fail!! pkgName=" + pkgName + " i=" + i + " j=" +  j + " events=" + b);
+					}
+
+					calculatedUsageStats.put(pkgName, Objects.requireNonNull(calculatedUsageStats.getOrDefault(pkgName, Duration.ZERO)).plus(Duration.ofMillis(eventTwo.getTimeStamp() - eventOne.getTimeStamp())));
+				}
+			});
+		}
+
+		Duration d = Duration.ZERO;
+		for (String packageName : packageNames) {
+			d = d.plus(calculatedUsageStats.getOrDefault(packageName, Duration.ZERO));
+		}
+		if (d.isNegative())
+			return null;
+		return d;
 	}
 
 	public void onUpdateAppTimerPreference(String packageName, Duration oldLimit, Duration limit) {

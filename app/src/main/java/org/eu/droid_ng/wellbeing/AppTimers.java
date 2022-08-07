@@ -13,7 +13,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -38,10 +40,12 @@ import java.util.stream.Collectors;
 public class AppTimers extends AppCompatActivity {
 
 	private AppTimersInternal ati;
+	private Handler h;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		h = new Handler(getMainLooper());
 		ati = AppTimersInternal.get(this);
 		ActionBar actionBar = getSupportActionBar();
 		if (actionBar != null) {
@@ -50,9 +54,15 @@ public class AppTimers extends AppCompatActivity {
 		setContentView(R.layout.activity_app_timers);
 
 		RecyclerView r = findViewById(R.id.appTimerPkgs);
-		r.setAdapter(
-				new AppTimersRecyclerViewAdapter(this,
-						getPackageManager().getInstalledApplications(PackageManager.GET_META_DATA)));
+		new Thread(() -> {
+			AppTimersRecyclerViewAdapter a = new AppTimersRecyclerViewAdapter(this,
+					getPackageManager().getInstalledApplications(PackageManager.GET_META_DATA));
+			h.post(() -> {
+				findViewById(R.id.appTimerLoading).setVisibility(View.GONE);
+				r.setAdapter(a);
+				r.setVisibility(View.VISIBLE);
+			});
+		}).start();
 	}
 
 	@Override
@@ -67,6 +77,7 @@ public class AppTimers extends AppCompatActivity {
 		private final PackageManager pm;
 		public final SharedPreferences prefs;
 		public final Map<String, Integer> enabledMap = new HashMap<>();
+		public final Map<String, Integer> usedCache = new HashMap<>();
 
 		public AppTimersRecyclerViewAdapter(Context context, List<ApplicationInfo> mData) {
 			this.inflater = LayoutInflater.from(context);
@@ -109,6 +120,7 @@ public class AppTimers extends AppCompatActivity {
 				else
 					return nc.compare(a, b);
 			}).collect(Collectors.toList());
+			mData.forEach(d -> usedCache.put(d.packageName, Math.toIntExact(ati.getTimeUsed(new String[]{d.packageName}).toMinutes())));
 		}
 
 		@NonNull
@@ -160,7 +172,7 @@ public class AppTimers extends AppCompatActivity {
 			public void apply(ApplicationInfo info, int mins) {
 				appIcon.setImageDrawable(pm.getApplicationIcon(info));
 				appName.setText(pm.getApplicationLabel(info));
-				applyText(mins);
+				applyText(mins, usedCache.get(info.packageName));
 				container.setOnClickListener(view -> {
 					int realmins = enabledMap.getOrDefault(info.packageName, 0);
 					NumberPicker numberPicker = new NumberPicker(AppTimers.this);
@@ -182,12 +194,12 @@ public class AppTimers extends AppCompatActivity {
 			private void updateMins(String pkgName, int oldmins, int mins) {
 				enabledMap.put(pkgName, mins);
 				prefs.edit().putInt(pkgName, mins).apply();
-				applyText(mins);
-				ati.onUpdateAppTimerPreference(pkgName, Duration.ofMillis(oldmins), Duration.ofMinutes(mins));
+				applyText(mins, usedCache.get(pkgName));
+				ati.onUpdateAppTimerPreference(pkgName, Duration.ofMinutes(oldmins), Duration.ofMinutes(mins));
 			}
 
-			private void applyText(int mins) {
-				appTimerInfo.setText(mins == 0 ? itemView.getContext().getString(R.string.no_timer) : itemView.getContext().getResources().getQuantityString(R.plurals.break_mins, mins, mins));
+			private void applyText(int mins, int mins2) {
+				appTimerInfo.setText(itemView.getContext().getString(R.string.desc_container, (mins == 0 ? itemView.getContext().getString(R.string.no_timer) : itemView.getContext().getResources().getQuantityString(R.plurals.break_mins, mins, mins)), (itemView.getContext().getResources().getQuantityString(R.plurals.break_mins, mins2, mins2))));
 			}
 		}
 	}
