@@ -77,7 +77,6 @@ public class AppTimers extends AppCompatActivity {
 		private final PackageManager pm;
 		public final SharedPreferences prefs;
 		public final Map<String, Integer> enabledMap = new HashMap<>();
-		public final Map<String, Integer> usedCache = new HashMap<>();
 
 		public AppTimersRecyclerViewAdapter(Context context, List<ApplicationInfo> mData) {
 			this.inflater = LayoutInflater.from(context);
@@ -120,7 +119,6 @@ public class AppTimers extends AppCompatActivity {
 				else
 					return nc.compare(a, b);
 			}).collect(Collectors.toList());
-			mData.forEach(d -> usedCache.put(d.packageName, Math.toIntExact(ati.getTimeUsed(new String[]{d.packageName}).toMinutes())));
 		}
 
 		@NonNull
@@ -172,7 +170,7 @@ public class AppTimers extends AppCompatActivity {
 			public void apply(ApplicationInfo info, int mins) {
 				appIcon.setImageDrawable(pm.getApplicationIcon(info));
 				appName.setText(pm.getApplicationLabel(info));
-				applyText(mins, usedCache.get(info.packageName));
+				applyText(mins, Math.toIntExact(ati.getTimeUsed(new String[]{info.packageName}).toMinutes()));
 				container.setOnClickListener(view -> {
 					int realmins = enabledMap.getOrDefault(info.packageName, 0);
 					NumberPicker numberPicker = new NumberPicker(AppTimers.this);
@@ -194,8 +192,14 @@ public class AppTimers extends AppCompatActivity {
 			private void updateMins(String pkgName, int oldmins, int mins) {
 				enabledMap.put(pkgName, mins);
 				prefs.edit().putInt(pkgName, mins).apply();
-				applyText(mins, usedCache.get(pkgName));
-				ati.onUpdateAppTimerPreference(pkgName, Duration.ofMinutes(oldmins), Duration.ofMinutes(mins));
+				applyText(mins, Math.toIntExact(ati.getTimeUsed(new String[]{pkgName}).toMinutes()));
+				new Thread(() -> {
+					ati.clearUsageStatsCache(true);
+					h.post(() -> {
+						applyText(mins, Math.toIntExact(ati.getTimeUsed(new String[]{pkgName}).toMinutes()));
+						ati.onUpdateAppTimerPreference(pkgName, Duration.ofMinutes(oldmins), Duration.ofMinutes(mins));
+					});
+				}).start();
 			}
 
 			private void applyText(int mins, int mins2) {

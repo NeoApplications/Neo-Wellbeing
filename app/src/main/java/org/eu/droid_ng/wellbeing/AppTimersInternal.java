@@ -171,7 +171,16 @@ public class AppTimersInternal {
 
 	private void resetupAppTimerPreference(String packageName) {
 		String[] s = new String[]{ packageName };
-		setAppTimer(s, Duration.ofMinutes(config.getInt(packageName, -1)), getTimeUsed(s));
+		Duration m = Duration.ofMinutes(config.getInt(packageName, -1));
+		if (m.isNegative() || m.isZero())
+			return;
+		setAppTimer(s, m, getTimeUsed(s));
+	}
+
+	public void clearUsageStatsCache(boolean recalculate) {
+		calculatedUsageStats = null;
+		if (recalculate)
+			getTimeUsed(new String[0]);
 	}
 
 	public Duration getTimeUsed(String[] packageNames) {
@@ -180,7 +189,7 @@ public class AppTimersInternal {
 		 * I had cases of user opening the app 3 times and closing it 2 times, cases of user opening the app 2 times without closing it at all...
 		 * But in the very end this works. And it's about 3 trillion times faster than UsageStatsManager queries.
 		 */
-		if (calculatedUsageStats == null) {
+		if (calculatedUsageStats == null) { // Cache not available. Calculate it once and keep it.
 			ZoneId z = ZoneId.systemDefault();
 			long startTime = LocalDateTime.of(LocalDate.now(z), LocalTime.MIDNIGHT).atZone(z).toEpochSecond()*1000;
 			UsageEvents usageEvents = usm.queryEvents(startTime, System.currentTimeMillis());
@@ -230,7 +239,7 @@ public class AppTimersInternal {
 								b.append("el(t=").append(element.getEventType()).append("), ");
 							}
 							b.replace(b.length()-2, b.length()-1, "]");
-							throw new IllegalStateException("usm hard assert2 fail!! pkgName=" + pkgName + " i=" + i + " j=" +  j + " events=" + b);
+							Log.e("AppTimersInternal", "usm soft assert2 fail!! pkgName=" + pkgName + " i=" + i + " j=" +  j + " events=" + b);
 						}
 					}
 					if (!(eventTwo.getEventType() == UsageEvents.Event.ACTIVITY_PAUSED)) { // didnt find ending
@@ -240,7 +249,7 @@ public class AppTimersInternal {
 							b.append("el(t=").append(element.getEventType()).append("), ");
 						}
 						b.replace(b.length()-2, b.length()-1, "]");
-						throw new IllegalStateException("usm hard assert3 fail!! pkgName=" + pkgName + " i=" + i + " j=" +  j + " events=" + b);
+						throw new IllegalStateException("usm hard assert2 fail!! pkgName=" + pkgName + " i=" + i + " j=" +  j + " events=" + b);
 					}
 
 					calculatedUsageStats.put(pkgName, Objects.requireNonNull(calculatedUsageStats.getOrDefault(pkgName, Duration.ZERO)).plus(Duration.ofMillis(eventTwo.getTimeStamp() - eventOne.getTimeStamp())));
@@ -263,7 +272,8 @@ public class AppTimersInternal {
 		if (!prefs.contains(u.toString()))
 			u = new ParsedUoid("AppLimit", oldLimit.toMillis(), s);
 		dropAppTimer(u);
-		if (limit.toMillis() > 0)
+		//clearUsageStatsCache(true); moved out for threading
+		if (limit.toMinutes() > 0)
 			setAppTimer(s, limit, getTimeUsed(s));
 	}
 
@@ -275,15 +285,20 @@ public class AppTimersInternal {
 	}
 
 	public void onBroadcastRecieve(Integer oid, String uoid) {
+		String msg;
 		if (!Objects.equals(prefs.getInt(uoid, -2), oid)) {
-			Toast.makeText(ctx, "AppTimersInternal: unknown oid/uoid - " + oid + " / " + uoid, Toast.LENGTH_LONG).show();
+			msg = "AppTimersInternal: unknown oid/uoid - " + oid + " / " + uoid;
+			Toast.makeText(ctx, msg, Toast.LENGTH_LONG).show();
+			Log.e("AppTimersInternal", msg);
 			return;
 		}
 		ParsedUoid parsed = ParsedUoid.from(uoid);
 		dropAppTimer(parsed);
+		msg = "AppTimersInternal: success oid:" + oid + " action:" + parsed.action + " timeMillis:" + parsed.timeMillis + " pkgs:" + String.join(",", parsed.pkgs);
+		Log.i("AppTimersInternal", msg);
 		// Actual logic starting here please
 		//TODO: suspend & break logic
-		Toast.makeText(ctx, "AppTimersInternal: success oid:" + oid + " action:" + parsed.action + " timeMillis:" + parsed.timeMillis + " pkgs:" + String.join(",", parsed.pkgs), Toast.LENGTH_LONG).show();
+		Toast.makeText(ctx, msg, Toast.LENGTH_LONG).show();
 	}
 	// end AppTimer feature
 }
