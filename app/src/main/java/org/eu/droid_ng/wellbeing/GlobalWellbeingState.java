@@ -13,6 +13,8 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import org.eu.droid_ng.wellbeing.shim.PackageManagerDelegate;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;

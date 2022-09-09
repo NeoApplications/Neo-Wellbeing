@@ -1,4 +1,4 @@
-package org.eu.droid_ng.wellbeing;
+package org.eu.droid_ng.wellbeing.shim;
 
 import android.annotation.SuppressLint;
 import android.app.PendingIntent;
@@ -149,11 +149,11 @@ public class PackageManagerDelegate {
 	}
 
 	/* Does not belong here, but for one class im not creating a new delegate */
-	interface IColorDisplayManager {
+	public interface IColorDisplayManager {
 		/**
 		 * Returns whether the device has a wide color gamut display.
 		 */
-		boolean isDeviceColorManaged();
+		public boolean isDeviceColorManaged();
 
 		/**
 		 * Set the level of color saturation to apply to the display.
@@ -161,7 +161,7 @@ public class PackageManagerDelegate {
 		 * @param saturationLevel 0-100 (inclusive), where 100 is full saturation
 		 * @return whether the saturation level change was applied successfully
 		 */
-		boolean setSaturationLevel(@IntRange(from = 0, to = 100) int saturationLevel);
+		public boolean setSaturationLevel(@IntRange(from = 0, to = 100) int saturationLevel);
 
 		/**
 		 * Set the level of color saturation to apply to a specific app.
@@ -170,18 +170,18 @@ public class PackageManagerDelegate {
 		 * @param saturationLevel 0-100 (inclusive), where 100 is full saturation
 		 * @return whether the saturation level change was applied successfully
 		 */
-		boolean setAppSaturationLevel(@NonNull String packageName,
+		public boolean setAppSaturationLevel(@NonNull String packageName,
 		                                     @IntRange(from = 0, to = 100) int saturationLevel);
 
 		/**
 		 * Returns {@code true} if Night Display is supported by the device.
 		 */
-		boolean isNightDisplayAvailable(Context context);
+		public boolean isNightDisplayAvailable(Context context);
 
 		/**
 		 * Returns {@code true} if display white balance is supported by the device.
 		 */
-		boolean isDisplayWhiteBalanceAvailable(Context context);
+		public boolean isDisplayWhiteBalanceAvailable(Context context);
 	}
 
 	public static IColorDisplayManager getColorDisplayManager(Context ctx) {

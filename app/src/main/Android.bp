@@ -4,7 +4,7 @@ android_app {
     static_libs: ["androidx.recyclerview_recyclerview", "androidx-constraintlayout_constraintlayout", "androidx.cardview_cardview", "androidx.preference_preference", "androidx.appcompat_appcompat"],
     resource_dirs: ["res"],
 
-    srcs: ["java/**/*.java", "java_real/**/*.java"],
+    srcs: ["java/**/*.java", "java/**/*.kt", "java_real/**/*.java"],
 
     platform_apis: true,
     privileged: true,

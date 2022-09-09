@@ -2,6 +2,7 @@ import java.nio.file.Files
 
 plugins {
 	id 'com.android.application'
+	id 'org.jetbrains.kotlin.android'
 }
 
 android {
@@ -21,41 +22,51 @@ android {
 			proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
 		}
 	}
+
+	sourceSets.main.java.srcDirs += ['src/main/java_magisk']
+
 	compileOptions {
-		sourceCompatibility JavaVersion.VERSION_1_9
-		targetCompatibility JavaVersion.VERSION_1_9
+		sourceCompatibility JavaVersion.VERSION_11
+		targetCompatibility JavaVersion.VERSION_11
+	}
+	kotlinOptions {
+		jvmTarget = '11'
 	}
 	namespace 'org.eu.droid_ng.wellbeing'
 }
 
 dependencies {
+	def lifecycle_version = "2.5.1" // Version needs to match
+	implementation "androidx.lifecycle:lifecycle-viewmodel:$lifecycle_version"
+	implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
+
 	implementation 'androidx.recyclerview:recyclerview:1.2.1'
-	implementation 'androidx.constraintlayout:constraintlayout:2.1.3'
+	implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
 	implementation 'androidx.cardview:cardview:1.0.0'
 	implementation 'androidx.preference:preference:1.2.0'
-	implementation 'androidx.appcompat:appcompat:1.4.1'
-	implementation 'com.google.android.material:material:1.4.0'
-	// For debug builds only
-	debugImplementation 'org.lsposed.hiddenapibypass:hiddenapibypass:4.3'
+	implementation 'androidx.appcompat:appcompat:1.5.0'
+	implementation 'com.google.android.material:material:1.6.1'
+	// For gradle builds only
+	implementation 'org.lsposed.hiddenapibypass:hiddenapibypass:4.3'
 }
 
 def magiskModuleProp = [
 		id           : "open_wellbeing",
-		name         : "OpenWellbeing systemless",
+		name         : "Neo Wellbeing systemless",
 		version      : android.defaultConfig.versionName,
 		versionCode  : android.defaultConfig.versionCode,
-		minSdkVersion: android.defaultConfig.minSdk,
-		support      : "https://github.com/nift4/android_packages_apps_Wellbeing",
+		minApi       : android.defaultConfig.minSdk,
+		support      : "https://github.com/NeoApplications/Neo-Wellbeing",
 		config       : "org.eu.droid_ng.wellbeing",
 		author       : "nift4",
-		description  : "OpenWellbeing is an opensource implementation of Wellbeing"
+		description  : "Neo Wellbeing is an open source reimplementation of Wellbeing"
 ]
 
 def outDir = rootProject.buildDir
 def magiskDir = file("$outDir/magisk_module")
 def zipName = "OpenWellbeing-${android.defaultConfig.versionName}.zip"
 
-task makeMagiskModule(type: Task) {
+task assembleMagiskModule(type: Task) {
 	dependsOn(":app:assembleDebug")
 	doLast {
 		delete(magiskDir)
@@ -83,5 +94,5 @@ task zipMagiskModule(type: Zip) {
 	from magiskDir
 	archiveName zipName
 	destinationDir outDir
-	dependsOn(":app:makeMagiskModule")
+	dependsOn(":app:assembleMagiskModule")
 }

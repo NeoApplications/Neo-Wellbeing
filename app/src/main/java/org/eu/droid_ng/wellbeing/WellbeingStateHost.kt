@@ -1,145 +1,157 @@
-package org.eu.droid_ng.wellbeing;
+package org.eu.droid_ng.wellbeing
 
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.app.Service;
-import android.content.Intent;
-import android.graphics.drawable.Icon;
-import android.os.Binder;
-import android.os.Build;
-import android.os.IBinder;
-import android.util.Log;
+import android.app.*
+import android.content.Intent
+import android.graphics.drawable.Icon
+import android.os.Binder
+import android.os.Build
+import android.os.IBinder
 
 // Fancy class holding GlobalWellbeingState & a notification
-public class WellbeingStateHost extends Service {
-	private static final String CHANNEL_ID = "service_notif";
-	public GlobalWellbeingState state;
-	private boolean lateNotify = false;
+class WellbeingStateHost : Service() {
+    @JvmField
+	var state: GlobalWellbeingState? = null
+    private var lateNotify = false
 
-	// Unique Identification Number for the Notification.
-	private final int NOTIFICATION = 325563;
+    // Unique Identification Number for the Notification.
+    private val NOTIFICATION = 325563
+    private val CHANNEL_ID = "service_notif"
 
-	/**
-	 * Class for clients to access.  Because we know this service always
-	 * runs in the same process as its clients, we don't need to deal with
-	 * IPC.
-	 */
-	public class LocalBinder extends Binder {
-		WellbeingStateHost getService() {
-			return WellbeingStateHost.this;
-		}
-	}
+    /**
+     * Class for clients to access.  Because we know this service always
+     * runs in the same process as its clients, we don't need to deal with
+     * IPC.
+     */
+    inner class LocalBinder : Binder() {
+        val service: WellbeingStateHost
+            get() = this@WellbeingStateHost
+    }
 
-	@Override
-	public void onCreate() {
-		state = new GlobalWellbeingState(getApplicationContext(), this);
-	}
+    override fun onCreate() {
+        state = GlobalWellbeingState(applicationContext, this)
+    }
 
-	@Override
-	public int onStartCommand(Intent intent, int flags, int startId) {
-		NotificationManager notificationManager = getSystemService(NotificationManager.class);
-		if (notificationManager.getNotificationChannel(CHANNEL_ID) == null) {
-			CharSequence name = getString(R.string.channel_name);
-			String description = getString(R.string.channel_description);
-			int importance = NotificationManager.IMPORTANCE_LOW;
-			NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
-			channel.setDescription(description);
-			notificationManager.createNotificationChannel(channel);
-		}
+    override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
+        val notificationManager = getSystemService(
+            NotificationManager::class.java
+        )
+        if (notificationManager.getNotificationChannel(CHANNEL_ID) == null) {
+            val name: CharSequence = getString(R.string.channel_name)
+            val description = getString(R.string.channel_description)
+            val importance = NotificationManager.IMPORTANCE_LOW
+            val channel = NotificationChannel(CHANNEL_ID, name, importance)
+            channel.description = description
+            notificationManager.createNotificationChannel(channel)
+        }
+        lateNotify = intent.getBooleanExtra("lateNotify", lateNotify)
+        val n = buildDefaultNotification()
 
-		if (intent != null) {
-			lateNotify = intent.getBooleanExtra("lateNotify", lateNotify);
-		}
-		Notification n = buildDefaultNotification();
+        // Notification ID cannot be 0.
+        startForeground(NOTIFICATION, n)
+        return START_STICKY
+    }
 
-		// Notification ID cannot be 0.
-		startForeground(NOTIFICATION, n);
+    fun buildAction(
+        actionText: Int,
+        actionIcon: Int,
+        actionIntent: Intent?,
+        isBroadcast: Boolean
+    ): Notification.Action {
+        val pendingIntent = if (isBroadcast) {
+            PendingIntent.getBroadcast(this, 0, actionIntent!!, PendingIntent.FLAG_IMMUTABLE)
+        } else {
+            PendingIntent.getActivity(this, 0, actionIntent, PendingIntent.FLAG_IMMUTABLE)
+        }
+        val builder = Notification.Action.Builder(
+            Icon.createWithResource(applicationContext, actionIcon),
+            getText(actionText),
+            pendingIntent
+        )
+            .setAllowGeneratedReplies(false).setContextual(true)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            builder.setAuthenticationRequired(true)
+        }
+        return builder.build()
+    }
 
-		return START_STICKY;
-	}
+    private fun buildNotification(
+        title: Int,
+        text: String,
+        icon: Int,
+        actions: Array<Notification.Action>,
+        notificationIntent: Intent
+    ): Notification {
+        val pendingIntent =
+            PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE)
+        val b = Notification.Builder(this, CHANNEL_ID)
+            .setSmallIcon(icon) // the status icon
+            .setTicker(text) // the status text
+            .setWhen(System.currentTimeMillis()) // the time stamp
+            .setContentTitle(getText(title)) // the label of the entry
+            .setContentText(text) // the contents of the entry
+            .setContentIntent(pendingIntent) // The intent to send when the entry is clicked
+            .setOnlyAlertOnce(true) // dont headsup/bling twice
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !lateNotify) {
+            b.setForegroundServiceBehavior(Notification.FOREGROUND_SERVICE_IMMEDIATE) // do not wait with showing the notification
+        }
+        if (lateNotify) lateNotify = false
+        for (action in actions) {
+            b.addAction(action)
+        }
+        return b.build()
+    }
 
-	public Notification.Action buildAction(int actionText, int actionIcon, Intent actionIntent, boolean isBroadcast) {
-		final PendingIntent pendingIntent;
-		if (isBroadcast) {
-			pendingIntent = PendingIntent.getBroadcast(this, 0, actionIntent, PendingIntent.FLAG_IMMUTABLE);
-		} else {
-			pendingIntent = PendingIntent.getActivity(this, 0, actionIntent, PendingIntent.FLAG_IMMUTABLE);
-		}
-		Notification.Action.Builder builder = new Notification.Action.Builder(
-				Icon.createWithResource(getApplicationContext(), actionIcon), getText(actionText), pendingIntent)
-				.setAllowGeneratedReplies(false).setContextual(true);
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-			builder.setAuthenticationRequired(true);
-		}
-		return builder.build();
-	}
+    private fun buildDefaultNotification(): Notification {
+        val text = R.string.notification_desc
+        val title = R.string.notification_title
+        val icon = R.drawable.ic_stat_name
+        val notificationIntent = Intent(this, MainActivity::class.java)
+        return buildNotification(title, getString(text), icon, arrayOf(), notificationIntent)
+    }
 
-	private Notification buildNotification(int title, String text, int icon, Notification.Action[] actions, Intent notificationIntent) {
-		PendingIntent pendingIntent =
-				PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
+    private fun updateNotification(n: Notification) {
+        getSystemService(NotificationManager::class.java).notify(NOTIFICATION, n)
+    }
 
-		Notification.Builder b = new Notification.Builder(this, CHANNEL_ID)
-				.setSmallIcon(icon)  // the status icon
-				.setTicker(text)  // the status text
-				.setWhen(System.currentTimeMillis())  // the time stamp
-				.setContentTitle(getText(title))  // the label of the entry
-				.setContentText(text)  // the contents of the entry
-				.setContentIntent(pendingIntent)  // The intent to send when the entry is clicked
-				.setOnlyAlertOnce(true); // dont headsup/bling twice
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !lateNotify) {
-			b.setForegroundServiceBehavior(Notification.FOREGROUND_SERVICE_IMMEDIATE); // do not wait with showing the notification
-		}
-		if (lateNotify)
-			lateNotify = false;
-		for (Notification.Action action : actions) {
-			b.addAction(action);
-		}
-		return b.build();
-	}
+    fun updateNotification(
+        title: Int,
+        text: String,
+        icon: Int,
+        actions: Array<Notification.Action>,
+        notificationIntent: Intent
+    ) {
+        updateNotification(buildNotification(title, text, icon, actions, notificationIntent))
+    }
 
-	private Notification buildDefaultNotification() {
-		int text = R.string.notification_desc;
-		int title = R.string.notification_title;
-		int icon = R.drawable.ic_stat_name;
-		Intent notificationIntent = new Intent(this, MainActivity.class);
-		return buildNotification(title, getString(text), icon, new Notification.Action[]{ }, notificationIntent);
-	}
+    fun updateNotification(
+        title: Int,
+        text: Int,
+        icon: Int,
+        actions: Array<Notification.Action>,
+        notificationIntent: Intent
+    ) {
+        updateNotification(title, getString(text), icon, actions, notificationIntent)
+    }
 
-	private void updateNotification(Notification n) {
-		getSystemService(NotificationManager.class).notify(NOTIFICATION, n);
-	}
+    fun updateDefaultNotification() {
+        updateNotification(buildDefaultNotification())
+    }
 
-	public void updateNotification(int title, String text, int icon, Notification.Action[] actions, Intent notificationIntent) {
-		updateNotification(buildNotification(title, text, icon, actions, notificationIntent));
-	}
+    fun stop() {
+        stopForeground(true)
+        stopSelf()
+    }
 
-	public void updateNotification(int title, int text, int icon, Notification.Action[] actions, Intent notificationIntent) {
-		updateNotification(title, getString(text), icon, actions, notificationIntent);
-	}
+    override fun onDestroy() {
+        super.onDestroy()
+        state!!.onDestroy()
+    }
 
-	public void updateDefaultNotification() {
-		updateNotification(buildDefaultNotification());
-	}
+    override fun onBind(intent: Intent): IBinder? {
+        return mBinder
+    }
 
-	public void stop() {
-		stopForeground(true);
-		stopSelf();
-	}
-
-	@Override
-	public void onDestroy() {
-		super.onDestroy();
-		state.onDestroy();
-	}
-
-	@Override
-	public IBinder onBind(Intent intent) {
-		return mBinder;
-	}
-
-	// This is the object that receives interactions from clients.  See
-	// RemoteService for a more complete example.
-	private final IBinder mBinder = new LocalBinder();
+    // This is the object that receives interactions from clients.  See
+    // RemoteService for a more complete example.
+    private val mBinder: IBinder = LocalBinder()
 }

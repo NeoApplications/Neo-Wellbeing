@@ -14,6 +14,8 @@ import android.widget.Toast;
 
 import androidx.cardview.widget.CardView;
 
+import org.eu.droid_ng.wellbeing.shim.PackageManagerDelegate;
+
 import java.util.concurrent.atomic.AtomicReference;
 
 public class ShowSuspendedAppDetails extends Activity {

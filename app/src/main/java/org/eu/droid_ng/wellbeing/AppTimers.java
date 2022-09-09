@@ -170,7 +170,7 @@ public class AppTimers extends AppCompatActivity {
 			public void apply(ApplicationInfo info, int mins) {
 				appIcon.setImageDrawable(pm.getApplicationIcon(info));
 				appName.setText(pm.getApplicationLabel(info));
-				applyText(mins, Math.toIntExact(ati.getTimeUsed(new String[]{info.packageName}).toMinutes()));
+				applyText(mins, Math.toIntExact(Utils.getTimeUsed(ati.usm, new String[]{info.packageName}).toMinutes()));
 				container.setOnClickListener(view -> {
 					int realmins = enabledMap.getOrDefault(info.packageName, 0);
 					NumberPicker numberPicker = new NumberPicker(AppTimers.this);
@@ -192,11 +192,11 @@ public class AppTimers extends AppCompatActivity {
 			private void updateMins(String pkgName, int oldmins, int mins) {
 				enabledMap.put(pkgName, mins);
 				prefs.edit().putInt(pkgName, mins).apply();
-				applyText(mins, Math.toIntExact(ati.getTimeUsed(new String[]{pkgName}).toMinutes()));
+				applyText(mins, Math.toIntExact(Utils.getTimeUsed(ati.usm, new String[]{pkgName}).toMinutes()));
 				new Thread(() -> {
-					ati.clearUsageStatsCache(true);
+					Utils.clearUsageStatsCache(ati.usm, true);
 					h.post(() -> {
-						applyText(mins, Math.toIntExact(ati.getTimeUsed(new String[]{pkgName}).toMinutes()));
+						applyText(mins, Math.toIntExact(Utils.getTimeUsed(ati.usm, new String[]{pkgName}).toMinutes()));
 						ati.onUpdateAppTimerPreference(pkgName, Duration.ofMinutes(oldmins), Duration.ofMinutes(mins));
 					});
 				}).start();

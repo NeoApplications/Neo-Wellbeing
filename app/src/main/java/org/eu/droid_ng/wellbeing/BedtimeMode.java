@@ -3,15 +3,10 @@ package org.eu.droid_ng.wellbeing;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.app.PendingIntent;
-import android.app.usage.UsageStatsManager;
-import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Toast;
 
-import java.util.Random;
-import java.util.concurrent.TimeUnit;
+import org.eu.droid_ng.wellbeing.shim.PackageManagerDelegate;
 
 public class BedtimeMode extends AppCompatActivity {
 

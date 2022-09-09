@@ -2,8 +2,6 @@ package org.eu.droid_ng.wellbeing;
 
 import android.annotation.SuppressLint;
 import android.app.PendingIntent;
-import android.app.usage.UsageEvents;
-import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.content.Intent;
@@ -15,20 +13,13 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import org.eu.droid_ng.wellbeing.shim.PackageManagerDelegate;
+
 import java.time.Duration;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 /**
  * Load AppTimers state from disk and hold it in a instance. Allow easy configuration with API calls and make this handle all the specifics.
@@ -47,10 +38,9 @@ public class AppTimersInternal {
 	private final Context ctx;
 	private final PackageManager pm;
 	private final PackageManagerDelegate pmd;
-	private final UsageStatsManager usm;
+	public final UsageStatsManager usm;
 	private final SharedPreferences prefs; // uoid <-> oid map
 	private final SharedPreferences config;
-	private HashMap<String, Duration> calculatedUsageStats = null;
 
 	private AppTimersInternal(Context ctx) {
 		this.ctx = ctx;
@@ -174,13 +164,13 @@ public class AppTimersInternal {
 	private void resetupAppTimerPreference(String packageName) {
 		String[] s = new String[]{ packageName };
 		int i = config.getInt(packageName, -1);
-		Duration m = Duration.ofMinutes(i).minus(getTimeUsed(s));
+		Duration m = Duration.ofMinutes(i).minus(Utils.getTimeUsed(usm, s));
 		if (i <= 0)
 			return;
 		if (m.isNegative() || m.isZero())
 			onAppTimeout(new String[]{packageName}); //time already over on boot/updating pref, make sure app sleeps
 		else
-			setAppTimer(s, m, getTimeUsed(s));
+			setAppTimer(s, m, Utils.getTimeUsed(usm, s));
 	}
 
 	private void onAppTimeout(String[] packageNames) {
@@ -213,98 +203,6 @@ public class AppTimersInternal {
 
 	//public api:
 
-	public void clearUsageStatsCache(boolean recalculate) {
-		calculatedUsageStats = null;
-		if (recalculate)
-			getTimeUsed(new String[0]);
-	}
-
-	public Duration getTimeUsed(String[] packageNames) {
-		/*
-		 * When writing this code, I learnt a lesson. UsageStats and UsageEvents APIs are fucking dumb.
-		 * I had cases of user opening the app 3 times and closing it 2 times, cases of user opening the app 2 times without closing it at all...
-		 * But in the very end this works. And it's about 3 trillion times faster than UsageStatsManager queries.
-		 */
-		if (calculatedUsageStats == null) { // Cache not available. Calculate it once and keep it.
-			ZoneId z = ZoneId.systemDefault();
-			long startTime = LocalDateTime.of(LocalDate.now(z), LocalTime.MIDNIGHT).atZone(z).toEpochSecond()*1000;
-			UsageEvents usageEvents = usm.queryEvents(startTime, System.currentTimeMillis());
-			UsageEvents.Event currentEvent;
-			HashMap<String, ArrayList<UsageEvents.Event>> e = new HashMap<>();
-
-			while (usageEvents.hasNextEvent()) {
-				currentEvent = new UsageEvents.Event();
-				usageEvents.getNextEvent(currentEvent);
-				if (currentEvent.getEventType() == UsageEvents.Event.ACTIVITY_PAUSED ||
-						currentEvent.getEventType() == UsageEvents.Event.ACTIVITY_RESUMED) {
-					e.computeIfAbsent(currentEvent.getPackageName(), p -> new ArrayList<>())
-							.add(currentEvent);
-				}
-			}
-
-			calculatedUsageStats = new HashMap<>();
-
-			e.forEach((pkgName, events) -> {
-				for (int i = 0; i < events.size(); i+=2) {
-					int j = 1;
-					if (i+j >= events.size())
-						continue;
-					UsageEvents.Event eventOne = events.get(i);
-					UsageEvents.Event eventTwo = events.get(i+j);
-					if (eventOne.getEventType() == UsageEvents.Event.ACTIVITY_PAUSED) {
-						i -= 1;
-						Log.e("AppTimersInternal", "usm soft assert1 fail!! eventOneType=" + eventOne.getEventType() + " eventTwoType=" + eventTwo.getEventType());
-						continue;
-						// Unlucky case. Skip one. Should never happen, but safe is safe. edit: happens. help me
-					}
-					if (!(eventOne.getEventType() == UsageEvents.Event.ACTIVITY_RESUMED)) { // where tf is start
-						StringBuilder b = new StringBuilder(); //print array, tostring doesnt work, usageevent has no tostring
-						b.append("[");
-						for (UsageEvents.Event element : events) {
-							b.append("el(t=").append(element.getEventType()).append("), ");
-						}
-						b.replace(b.length()-2, b.length()-1, "]");
-						Log.e("AppTimersInternal","usm soft assert2 fail!! pkgName=" + pkgName + " i=" + i + " j=" +  j + " events=" + b);
-						continue;
-					}
-					while ((eventTwo = events.get(i+j)).getEventType() == UsageEvents.Event.ACTIVITY_RESUMED) {
-						j++;
-						if (i+j==events.size()) { //array oob - didnt find ending??
-							StringBuilder b = new StringBuilder(); //print array, tostring doesnt work, usageevent has no tostring
-							b.append("[");
-							for (UsageEvents.Event element : events) {
-								b.append("el(t=").append(element.getEventType()).append("), ");
-							}
-							b.replace(b.length()-2, b.length()-1, "]");
-							Log.e("AppTimersInternal", "usm soft assert3 fail!! pkgName=" + pkgName + " i=" + i + " j=" +  j + " events=" + b);
-							break;
-						}
-					}
-					if (!(eventTwo.getEventType() == UsageEvents.Event.ACTIVITY_PAUSED)) { // didnt find ending
-						StringBuilder b = new StringBuilder(); //print array, tostring doesnt work, usageevent has no tostring
-						b.append("[");
-						for (UsageEvents.Event element : events) {
-							b.append("el(t=").append(element.getEventType()).append("), ");
-						}
-						b.replace(b.length()-2, b.length()-1, "]");
-						Log.e("AppTimersInternal","usm soft assert4 fail!! pkgName=" + pkgName + " i=" + i + " j=" +  j + " events=" + b);
-						continue;
-					}
-
-					calculatedUsageStats.put(pkgName, Objects.requireNonNull(calculatedUsageStats.getOrDefault(pkgName, Duration.ZERO)).plus(Duration.ofMillis(eventTwo.getTimeStamp() - eventOne.getTimeStamp())));
-				}
-			});
-		}
-
-		Duration d = Duration.ZERO;
-		for (String packageName : packageNames) {
-			d = d.plus(calculatedUsageStats.getOrDefault(packageName, Duration.ZERO));
-		}
-		if (d.isNegative())
-			return null;
-		return d;
-	}
-
 	public void onUpdateAppTimerPreference(String packageName, Duration oldLimit, Duration limit) {
 		String[] s = new String[]{ packageName };
 		ParsedUoid u = new ParsedUoid("AppTimer", oldLimit.toMillis(), s);
@@ -318,9 +216,9 @@ public class AppTimersInternal {
 			dropAppTimer(u);
 		// unsuspend app if needed
 		pmd.setPackagesSuspended(new String[]{packageName}, false, null, null, null); //todo: handle other suspend features
-		//clearUsageStatsCache(true); moved out for threading
-		if (limit.minus(getTimeUsed(s)).toMinutes() > 0) //inexact on purpose. min to avoid crash in android is 1min
-			setAppTimer(s, limit, getTimeUsed(s));
+		//Utils.clearUsageStatsCache(usm, true); moved out for threading
+		if (limit.minus(Utils.getTimeUsed(usm, s)).toMinutes() > 0) //inexact on purpose. min to avoid crash in android is 1min
+			setAppTimer(s, limit, Utils.getTimeUsed(usm, s));
 		else if (!limit.isZero())
 			onAppTimeout(s);
 	}
@@ -337,7 +235,7 @@ public class AppTimersInternal {
 	public boolean appTimerSuspendHook(String packageName) {
 		int dialogBreakTime = 1; //TODO
 		String u = new ParsedUoid("AppBreak", 0, new String[]{packageName}).toString();
-		if (!(getTimeUsed(new String[]{packageName}).toMinutes() >= config.getInt(packageName, Integer.MAX_VALUE) - 1 && !isAppOnBreak(packageName)))
+		if (!(Utils.getTimeUsed(usm, new String[]{packageName}).toMinutes() >= config.getInt(packageName, Integer.MAX_VALUE) - 1 && !isAppOnBreak(packageName)))
 			return false;
 		Duration breakDuration = Duration.ofMinutes(dialogBreakTime);
 		pmd.setPackagesSuspended(new String[]{packageName}, false, null, null, null);

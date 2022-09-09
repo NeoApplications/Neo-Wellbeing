@@ -7,6 +7,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 
+import org.eu.droid_ng.wellbeing.shim.PackageManagerDelegate;
+
 import java.util.Objects;
 
 public class SettingsActivity extends AppCompatActivity {

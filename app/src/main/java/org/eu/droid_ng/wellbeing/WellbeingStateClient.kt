@@ -1,125 +1,135 @@
-package org.eu.droid_ng.wellbeing;
+package org.eu.droid_ng.wellbeing
 
-import android.app.ActivityManager;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
-import android.os.IBinder;
-import android.widget.Toast;
-
-import java.util.function.Consumer;
+import android.app.ActivityManager
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.ServiceConnection
+import android.os.IBinder
+import android.widget.Toast
+import org.eu.droid_ng.wellbeing.WellbeingStateHost.LocalBinder
+import java.util.function.Consumer
 
 // Helper to connect to WellbeingStateHost
-public class WellbeingStateClient {
-	// Our context
-	private final Context context;
+class WellbeingStateClient(context: Context) {
+    // Our context
+    private val context: Context
 
-	// Don't attempt to unbind from the service unless the client has received some
-	// information about the service's state.
-	private boolean mShouldUnbind;
+    // Don't attempt to unbind from the service unless the client has received some
+    // information about the service's state.
+    private var mShouldUnbind = false
 
-	// To invoke the bound service, first make sure that this value
-	// is not null.
-	private WellbeingStateHost mBoundService;
+    // To invoke the bound service, first make sure that this value
+    // is not null.
+    private var mBoundService: WellbeingStateHost? = null
 
-	// Callback when service is connected
-	private Consumer<WellbeingStateHost> callback;
+    // Callback when service is connected
+    private var callback: Consumer<WellbeingStateHost?>? = null
 
-	// Connection callback utility
-	private final ServiceConnection mConnection = new ServiceConnection() {
-		public void onServiceConnected(ComponentName className, IBinder service) {
-			try {
-				mBoundService = ((WellbeingStateHost.LocalBinder) service).getService();
-			} catch (ClassCastException ignored) {
-				Toast.makeText(context, "Assertion failure (0xAE): Service is in another process. Please report this to the developers!",
-						Toast.LENGTH_SHORT).show();
-				return;
-			}
-			WellbeingStateClient.this.callback.accept(mBoundService);
-		}
+    // Connection callback utility
+    private val mConnection: ServiceConnection = object : ServiceConnection {
+        override fun onServiceConnected(className: ComponentName, service: IBinder) {
+            mBoundService = try {
+                (service as LocalBinder).service
+            } catch (ignored: ClassCastException) {
+                Toast.makeText(
+                    context,
+                    "Assertion failure (0xAE): Service is in another process. Please report this to the developers!",
+                    Toast.LENGTH_SHORT
+                ).show()
+                return
+            }
+            callback!!.accept(mBoundService)
+        }
 
-		public void onServiceDisconnected(ComponentName className) {
-			mBoundService = null;
-		}
+        override fun onServiceDisconnected(className: ComponentName) {
+            mBoundService = null
+        }
 
-		/*@Override
-		public void onNullBinding(ComponentName name) {
+        /*override fun onNullBinding(className: ComponentName) {
 			Toast.makeText(context, "Assertion failure (0xAF): Service is null. Please report this to the developers!",
 					Toast.LENGTH_SHORT).show();
 		}*/
-	};
+    }
 
-	public WellbeingStateClient(Context context) {
-		this.context = context.getApplicationContext();
-	}
+    //backward compatibility does what we want, so ignore warning
+    @SuppressWarnings("deprecation")
+    fun isServiceRunning(): Boolean {
+            val manager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+            for (service in manager.getRunningServices(Int.MAX_VALUE)) {
+                if (WellbeingStateHost::class.java.name == service.service.className) {
+                    return true
+                }
+            }
+            return false
+        }
 
-	@SuppressWarnings("deprecation") //backward compatibility does what we want
-	public boolean isServiceRunning() {
-		ActivityManager manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
-		for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-			if (WellbeingStateHost.class.getName().equals(service.service.getClassName())) {
-				return true;
-			}
-		}
-		return false;
-	}
+    @JvmOverloads
+    fun doBindService(
+        callback: Consumer<WellbeingStateHost?>,
+        canHandleFailure: Boolean,
+        maybeStartService: Boolean = false,
+        lateNotify: Boolean = false
+    ): Boolean {
+        this.callback = callback
+        if (mBoundService != null) {
+            callback.accept(mBoundService)
+            return true
+        }
+        return if (isServiceRunning() && context.bindService(
+                Intent(context, WellbeingStateHost::class.java),
+                mConnection, Context.BIND_IMPORTANT
+            )
+        ) {
+            mShouldUnbind = true
+            true
+        } else {
+            if (maybeStartService) {
+                startService(lateNotify)
+                if (doBindService(callback, canHandleFailure = true, maybeStartService = false, lateNotify)) {
+                    return true
+                } else if (!canHandleFailure) {
+                    Toast.makeText(
+                        context,
+                        "Assertion failure (0xAA): Failed to start service. Please report this to the developers!",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            } else if (!canHandleFailure) {
+                Toast.makeText(
+                    context,
+                    "Assertion failure (0xAD): Failed to find service. Please report this to the developers!",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+            false
+        }
+    }
 
-	public boolean doBindService(Consumer<WellbeingStateHost> callback, boolean canHandleFailure, boolean maybeStartService, boolean lateNotify) {
-		this.callback = callback;
-		if (mBoundService != null) {
-			callback.accept(mBoundService);
-			return true;
-		}
+    fun doBindService(callback: Consumer<WellbeingStateHost?>) {
+        doBindService(callback, false)
+    }
 
-		if (isServiceRunning() && context.bindService(new Intent(context, WellbeingStateHost.class),
-				mConnection, Context.BIND_IMPORTANT)) {
-			mShouldUnbind = true;
-			return true;
-		} else {
-			if (maybeStartService) {
-				startService(lateNotify);
-				if (doBindService(callback, true, false, lateNotify)) {
-					return true;
-				} else if (!canHandleFailure) {
-					Toast.makeText(context, "Assertion failure (0xAA): Failed to start service. Please report this to the developers!",
-							Toast.LENGTH_SHORT).show();
-				}
-			} else if (!canHandleFailure) {
-				Toast.makeText(context, "Assertion failure (0xAD): Failed to find service. Please report this to the developers!",
-						Toast.LENGTH_SHORT).show();
-			}
-			return false;
-		}
-	}
+    fun doUnbindService() {
+        if (mShouldUnbind) {
+            // Release information about the service's state.
+            context.unbindService(mConnection)
+            mShouldUnbind = false
+        }
+    }
 
-	public boolean doBindService(Consumer<WellbeingStateHost> callback, boolean canHandleFailure) {
-		return doBindService(callback, canHandleFailure, false, false);
-	}
+    @JvmOverloads
+    fun startService(lateNotify: Boolean = false) {
+        val i = Intent(context, WellbeingStateHost::class.java)
+        i.putExtra("lateNotify", lateNotify)
+        context.startForegroundService(i)
+    }
 
-	public void doBindService(Consumer<WellbeingStateHost> callback) {
-		doBindService(callback, false);
-	}
+    fun killService() {
+        context.stopService(Intent(context, WellbeingStateHost::class.java))
+    }
 
-	public void doUnbindService() {
-		if (mShouldUnbind) {
-			// Release information about the service's state.
-			context.unbindService(mConnection);
-			mShouldUnbind = false;
-		}
-	}
-
-	public void startService(boolean lateNotify) {
-		Intent i = new Intent(context, WellbeingStateHost.class);
-		i.putExtra("lateNotify", lateNotify);
-		context.startForegroundService(i);
-	}
-
-	public void startService() {
-		startService(false);
-	}
-
-	public void killService() {
-		context.stopService(new Intent(context, WellbeingStateHost.class));
-	}
+    init {
+        this.context = context.applicationContext
+    }
 }
