@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class GlobalWellbeingState {
@@ -74,6 +75,8 @@ public class GlobalWellbeingState {
 	private String[] manualSuspendPkgList = new String[0];
 	private final List<Runnable> tempOneAppSuspendCallbacks = new ArrayList<>();
 
+	public List<String> appTimerBlacklist = new ArrayList<>();
+
 
 	public GlobalWellbeingState(Context context, WellbeingStateHost service) {
 		this.context = context;
@@ -100,6 +103,10 @@ public class GlobalWellbeingState {
 	}
 
 	public void onDestroy() {
+	}
+
+	private String[] filter(String[] in) {
+		return Arrays.stream(in).filter(e -> !appTimerBlacklist.contains(e)).toArray(String[]::new);
 	}
 
 	public void onManuallyUnsuspended(@NonNull String packageName) {
@@ -130,11 +137,12 @@ public class GlobalWellbeingState {
 		}
 	}
 
-	private void takeBreak(String[] packageNames, int forMinutes) {
-		if (packageNames == null) {
+	private void takeBreak(String[] packageNamesI, int forMinutes) {
+		if (packageNamesI == null) {
 			takeBreak(forMinutes);
 			return;
 		}
+		String[] packageNames = filter(packageNamesI);
 		int forMs = forMinutes * 60 * 1000;
 		String[] failed = packageManagerDelegate.setPackagesSuspended(packageNames, false, null, null, null);
 		for (String packageName : failed) {
@@ -224,6 +232,7 @@ public class GlobalWellbeingState {
 	}
 
 	private void focusModeSuspend(String[] process, boolean enable) {
+		process = filter(process);
 		for (String packageName : process) {
 			if (enable)
 				reasonMap.put(packageName, REASON.REASON_FOCUS_MODE);
@@ -251,7 +260,7 @@ public class GlobalWellbeingState {
 
 	private void focusModeUnsuspend(boolean disable) {
 		// All packages in focus mode setting + all packages marked as suspended due to FOCUS_MODE (catch now-removed apps & other bugs)
-		String[] process = Stream.concat(focusModePackages.stream(), reasonMap.keySet().stream().filter(packageName -> reasonMap.get(packageName) == REASON.REASON_FOCUS_MODE)).distinct().toArray(String[]::new);
+		String[] process = filter(Stream.concat(focusModePackages.stream(), reasonMap.keySet().stream().filter(packageName -> reasonMap.get(packageName) == REASON.REASON_FOCUS_MODE)).distinct().toArray(String[]::new));
 		String[] failed = packageManagerDelegate.setPackagesSuspended(process, false, null, null, null);
 		for (String packageName : failed) {
 			Log.e("OpenWellbeing", "failed to unsuspend " + packageName);
@@ -270,6 +279,7 @@ public class GlobalWellbeingState {
 		if (pkgNames != null) {
 			packageNames = Stream.concat(Arrays.stream(pkgNames), Arrays.stream(packageNames)).distinct().toArray(String[]::new);
 		}
+		packageNames = filter(packageNames);
 		manualSuspendPkgList = Stream.concat(Arrays.stream(manualSuspendPkgList), Arrays.stream(packageNames)).distinct().toArray(String[]::new);
 		if (type == SERVICE_TYPE.TYPE_UNKNOWN) {
 			type = SERVICE_TYPE.TYPE_MANUALLY;
@@ -301,6 +311,7 @@ public class GlobalWellbeingState {
 		if (pkgNames != null) {
 			packageNames = Stream.concat(Arrays.stream(pkgNames), Arrays.stream(packageNames)).distinct().toArray(String[]::new);
 		}
+		packageNames = filter(packageNames);
 		String[] failed = packageManagerDelegate.setPackagesSuspended(packageNames, false, null, null, null);
 		for (String packageName : failed) {
 			Log.e("OpenWellbeing", "failed to unsuspend " + packageName);

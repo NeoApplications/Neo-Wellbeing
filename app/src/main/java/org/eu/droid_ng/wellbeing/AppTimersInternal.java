@@ -215,7 +215,15 @@ public class AppTimersInternal {
 		if (prefs.contains(u.toString()))
 			dropAppTimer(u);
 		// unsuspend app if needed
-		pmd.setPackagesSuspended(new String[]{packageName}, false, null, null, null); //todo: handle other suspend features
+		WellbeingStateClient client = new WellbeingStateClient(ctx);
+		if (client.isServiceRunning())
+			client.doBindService(service -> {
+				GlobalWellbeingState.REASON r = service.state.reasonMap.getOrDefault(packageName, GlobalWellbeingState.REASON.REASON_UNKNOWN);
+				if (r == null || r == GlobalWellbeingState.REASON.REASON_UNKNOWN)
+					return;
+				service.state.appTimerBlacklist.add(packageName);
+			}, true);
+		pmd.setPackagesSuspended(new String[]{packageName}, false, null, null, null);
 		//Utils.clearUsageStatsCache(usm, true); moved out for threading
 		if (limit.minus(Utils.getTimeUsed(usm, s)).toMinutes() > 0) //inexact on purpose. min to avoid crash in android is 1min
 			setAppTimer(s, limit, Utils.getTimeUsed(usm, s));
@@ -255,7 +263,7 @@ public class AppTimersInternal {
 		String msg;
 		if (!Objects.equals(prefs.getInt(uoid, -2), oid)) {
 			msg = "Warning: unknown oid/uoid - " + oid + " / " + uoid + " - this might be an bug? Trying to recover.";
-			Toast.makeText(ctx, msg, Toast.LENGTH_LONG).show();
+			//Toast.makeText(ctx, msg, Toast.LENGTH_LONG).show(); this should really be shown. but the underlying problem lies in android code :(
 			Log.e("AppTimersInternal", msg);
 			// Attempt to recover, in doubt always trust the oid. Because android is fucking dumb. Thank you.
 			uoid = prefs.getAll().entrySet().stream().filter(a -> oid.equals(a.getValue())).findAny().get().getKey();
