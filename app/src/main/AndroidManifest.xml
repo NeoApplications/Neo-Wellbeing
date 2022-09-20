@@ -178,7 +178,7 @@
 			android:exported="false" />
 
 		<service
-			android:name=".WellbeingStateHost"
+			android:name=".lib.WellbeingStateHost"
 			android:enabled="true"
 			android:exported="false" />
 	</application>

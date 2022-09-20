@@ -1,4 +1,4 @@
-package org.eu.droid_ng.wellbeing;
+package org.eu.droid_ng.wellbeing.lib;
 
 import android.annotation.SuppressLint;
 import android.app.PendingIntent;
@@ -13,6 +13,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import org.eu.droid_ng.wellbeing.AppTimersBroadcastReciever;
+import org.eu.droid_ng.wellbeing.R;
 import org.eu.droid_ng.wellbeing.shim.PackageManagerDelegate;
 
 import java.time.Duration;
@@ -21,6 +23,7 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
+//TODO: make package-private
 /**
  * Load AppTimers state from disk and hold it in a instance. Allow easy configuration with API calls and make this handle all the specifics.
  * Architecture notes:
@@ -217,11 +220,11 @@ public class AppTimersInternal {
 		// unsuspend app if needed
 		WellbeingStateClient client = new WellbeingStateClient(ctx);
 		if (client.isServiceRunning())
-			client.doBindService(service -> {
-				GlobalWellbeingState.REASON r = service.state.reasonMap.getOrDefault(packageName, GlobalWellbeingState.REASON.REASON_UNKNOWN);
+			client.doBindService(state -> {
+				GlobalWellbeingState.REASON r = state.reasonMap.getOrDefault(packageName, GlobalWellbeingState.REASON.REASON_UNKNOWN);
 				if (r == null || r == GlobalWellbeingState.REASON.REASON_UNKNOWN)
 					return;
-				service.state.appTimerBlacklist.add(packageName);
+				state.appTimerBlacklist.add(packageName);
 			}, true);
 		pmd.setPackagesSuspended(new String[]{packageName}, false, null, null, null);
 		//Utils.clearUsageStatsCache(usm, true); moved out for threading

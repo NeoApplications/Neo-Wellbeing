@@ -1,6 +1,6 @@
 package org.eu.droid_ng.wellbeing;
 
-import static org.eu.droid_ng.wellbeing.GlobalWellbeingState.breakTimeOptions;
+import static org.eu.droid_ng.wellbeing.lib.GlobalWellbeingState.breakTimeOptions;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -11,7 +11,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.Toast;
+
+import org.eu.droid_ng.wellbeing.lib.WellbeingStateClient;
 
 import java.util.Arrays;
 
@@ -21,7 +22,7 @@ public class TakeBreakDialogActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		WellbeingStateClient client = new WellbeingStateClient(this);
-		client.doBindService(boundService -> {
+		client.doBindService(state -> {
 			String[] optionsS = Arrays.stream(breakTimeOptions).mapToObj(i -> getResources().getQuantityString(R.plurals.break_mins, i, i)).toArray(String[]::new);
 			ArrayAdapter<String> a = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, optionsS) {
 				@NonNull
@@ -29,7 +30,7 @@ public class TakeBreakDialogActivity extends Activity {
 				public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
 					View v = super.getView(position, convertView, parent);
 					v.setOnClickListener(view -> {
-						boundService.state.takeBreak(breakTimeOptions[position]);
+						state.takeBreak(breakTimeOptions[position]);
 						TakeBreakDialogActivity.this.finish();
 					});
 					return v;

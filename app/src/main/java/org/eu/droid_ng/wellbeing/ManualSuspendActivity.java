@@ -8,6 +8,8 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.widget.Button;
 
+import org.eu.droid_ng.wellbeing.lib.WellbeingStateClient;
+
 import java.util.HashSet;
 
 public class ManualSuspendActivity extends AppCompatActivity {
@@ -29,8 +31,8 @@ public class ManualSuspendActivity extends AppCompatActivity {
 				a = new PackageRecyclerViewAdapter(this,
 						getPackageManager().getInstalledApplications(PackageManager.GET_META_DATA),
 						"manual_suspend"));
-		suspendbtn.setOnClickListener(v -> client.doBindService(b -> b.state.manualSuspend(null), false, true, false));
-		unsuspendbtn.setOnClickListener(v -> client.doBindService(b -> b.state.manualUnsuspend(a.prefs.getStringSet("manual_suspend", new HashSet<>()).toArray(new String[0]), false)));
+		suspendbtn.setOnClickListener(v -> client.doBindService(state -> state.manualSuspend(null), false, true, false));
+		unsuspendbtn.setOnClickListener(v -> client.doBindService(state -> state.manualUnsuspend(a.prefs.getStringSet("manual_suspend", new HashSet<>()).toArray(new String[0]), false)));
 	}
 
 	@Override

@@ -1,4 +1,4 @@
-package org.eu.droid_ng.wellbeing
+package org.eu.droid_ng.wellbeing.lib
 
 import android.app.usage.UsageEvents
 import android.app.usage.UsageStatsManager
@@ -47,7 +47,7 @@ object Utils {
                 ) {
                     e.computeIfAbsent(
                         currentEvent.packageName
-                    ) { p: String? -> ArrayList() }
+                    ) { ArrayList() }
                         .add(currentEvent)
                 }
             }

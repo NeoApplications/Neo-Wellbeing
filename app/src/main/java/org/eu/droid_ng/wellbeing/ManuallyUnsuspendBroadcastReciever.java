@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.widget.Toast;
 
+import org.eu.droid_ng.wellbeing.lib.TransistentWellbeingState;
+
 public class ManuallyUnsuspendBroadcastReciever extends BroadcastReceiver {
 
 	@Override
@@ -20,10 +22,7 @@ public class ManuallyUnsuspendBroadcastReciever extends BroadcastReceiver {
 			return;
 		}
 
-		final WellbeingStateClient client = new WellbeingStateClient(context);
-		if (client.isServiceRunning())
-			client.doBindService(boundService -> boundService.state.onManuallyUnsuspended(packageName), true);
-		else
-			AppTimersInternal.get(context).appTimerSuspendHook(packageName);
+		final TransistentWellbeingState wellbeingState = new TransistentWellbeingState(context);
+		wellbeingState.onManuallyUnsuspended(packageName);
 	}
 }

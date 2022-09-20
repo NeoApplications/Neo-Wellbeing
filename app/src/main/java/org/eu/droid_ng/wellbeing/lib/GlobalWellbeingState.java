@@ -1,4 +1,4 @@
-package org.eu.droid_ng.wellbeing;
+package org.eu.droid_ng.wellbeing.lib;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -13,6 +13,10 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import org.eu.droid_ng.wellbeing.MainActivity;
+import org.eu.droid_ng.wellbeing.NotificationBroadcastReciever;
+import org.eu.droid_ng.wellbeing.R;
+import org.eu.droid_ng.wellbeing.TakeBreakDialogActivity;
 import org.eu.droid_ng.wellbeing.shim.PackageManagerDelegate;
 
 import java.util.ArrayList;
@@ -23,9 +27,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+//TODO: make package-private
 public class GlobalWellbeingState {
 
 	public static final String INTENT_ACTION_TAKE_BREAK = "org.eu.droid_ng.wellbeing.TAKE_BREAK";
@@ -51,7 +55,7 @@ public class GlobalWellbeingState {
 	// use dialog for manual unsuspend? (activity allows to choose between unsuspend all and unsuspend only this)
 	public boolean manualUnsuspendDialog = false;
 
-	enum REASON {
+	public enum REASON {
 		REASON_MANUALLY,
 		REASON_UNKNOWN,
 		REASON_FOCUS_MODE,
@@ -59,7 +63,7 @@ public class GlobalWellbeingState {
 	}
 	public Map<String, REASON> reasonMap = new HashMap<>(); //WARN:handle app timers when adding new use!!!
 
-	enum SERVICE_TYPE {
+	public enum SERVICE_TYPE {
 		TYPE_MANUALLY,
 		TYPE_UNKNOWN,
 		TYPE_FOCUS_MODE

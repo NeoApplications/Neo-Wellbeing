@@ -12,9 +12,10 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import java.util.Random;
+import org.eu.droid_ng.wellbeing.lib.GlobalWellbeingState;
+import org.eu.droid_ng.wellbeing.lib.WellbeingStateClient;
+
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class FocusModeActivity extends AppCompatActivity {
@@ -39,25 +40,25 @@ public class FocusModeActivity extends AppCompatActivity {
 			TextView takeBreak = findViewById(R.id.focusModeBreak);
 			if (!focusMode.get()) {
 				toggle.setText(R.string.enable);
-				toggle.setOnClickListener(v -> client.doBindService(boundService -> {
-					boundService.state.stateChangeCallbacks.add(() -> {
-						focusMode.set(boundService.state.type == GlobalWellbeingState.SERVICE_TYPE.TYPE_FOCUS_MODE);
-						focusModeBreak.set(boundService.state.focusModeBreak);
+				toggle.setOnClickListener(v -> client.doBindService(state -> {
+					state.stateChangeCallbacks.add(() -> {
+						focusMode.set(state.type == GlobalWellbeingState.SERVICE_TYPE.TYPE_FOCUS_MODE);
+						focusModeBreak.set(state.focusModeBreak);
 						next.run();
 					});
-					boundService.state.enableFocusMode();
+					state.enableFocusMode();
 				}, false, true, false));
 				takeBreak.setVisibility(View.GONE);
 				takeBreak.setOnClickListener(null);
 			} else {
 				toggle.setText(R.string.disable);
-				toggle.setOnClickListener(v -> client.doBindService(boundService -> boundService.state.disableFocusMode(), false, true, true));
+				toggle.setOnClickListener(v -> client.doBindService(GlobalWellbeingState::disableFocusMode, false, true, true));
 				takeBreak.setVisibility(View.VISIBLE);
 				if (focusModeBreak.get()) {
-					takeBreak.setOnClickListener(v -> client.doBindService(boundService -> boundService.state.endBreak()));
+					takeBreak.setOnClickListener(v -> client.doBindService(GlobalWellbeingState::endBreak));
 					takeBreak.setText(R.string.focus_mode_break_end);
 				} else {
-					takeBreak.setOnClickListener(v -> client.doBindService(boundService -> boundService.state.takeBreakDialog(FocusModeActivity.this, false, null)));
+					takeBreak.setOnClickListener(v -> client.doBindService(state -> state.takeBreakDialog(FocusModeActivity.this, false, null)));
 					takeBreak.setText(R.string.focus_mode_break);
 				}
 			}
@@ -67,13 +68,13 @@ public class FocusModeActivity extends AppCompatActivity {
 			focusModeBreak.set(false);
 			next.run();
 		} else {
-			client.doBindService(boundService -> {
+			client.doBindService(state -> {
 				Runnable r = () -> {
-					focusMode.set(boundService.state.type == GlobalWellbeingState.SERVICE_TYPE.TYPE_FOCUS_MODE);
-					focusModeBreak.set(boundService.state.focusModeBreak);
+					focusMode.set(state.type == GlobalWellbeingState.SERVICE_TYPE.TYPE_FOCUS_MODE);
+					focusModeBreak.set(state.focusModeBreak);
 					next.run();
 				};
-				boundService.state.stateChangeCallbacks.add(r);
+				state.stateChangeCallbacks.add(r);
 				r.run();
 			});
 		}

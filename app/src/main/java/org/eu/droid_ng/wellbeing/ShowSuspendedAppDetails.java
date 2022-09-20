@@ -14,6 +14,9 @@ import android.widget.Toast;
 
 import androidx.cardview.widget.CardView;
 
+import org.eu.droid_ng.wellbeing.lib.AppTimersInternal;
+import org.eu.droid_ng.wellbeing.lib.GlobalWellbeingState;
+import org.eu.droid_ng.wellbeing.lib.WellbeingStateClient;
 import org.eu.droid_ng.wellbeing.shim.PackageManagerDelegate;
 
 import java.util.concurrent.atomic.AtomicReference;
@@ -49,8 +52,7 @@ public class ShowSuspendedAppDetails extends Activity {
 			appInfo = pm.getApplicationInfo(packageName, 0);
 			icon = pm.getApplicationIcon(appInfo);
 			name = pm.getApplicationLabel(appInfo);
-		} catch (PackageManager.NameNotFoundException ignored) {
-		}
+		} catch (PackageManager.NameNotFoundException ignored) {}
 		if (appInfo != null && icon != null && name != null) {
 			iconView.setImageDrawable(icon);
 			nameView.setText(name);
@@ -68,22 +70,22 @@ public class ShowSuspendedAppDetails extends Activity {
 				switch (reason.get()) {
 					case REASON_FOCUS_MODE:
 						container = findViewById(R.id.focusMode);
-						findViewById(R.id.takeabreakbtn).setOnClickListener(v -> client.doBindService(boundService -> boundService.state.takeBreakDialog(ShowSuspendedAppDetails.this, true, boundService.state.focusModeAllApps ? null : new String[]{packageName})));
+						findViewById(R.id.takeabreakbtn).setOnClickListener(v -> client.doBindService(state -> state.takeBreakDialog(ShowSuspendedAppDetails.this, true, state.focusModeAllApps ? null : new String[]{packageName})));
 						findViewById(R.id.disablefocusmode).setOnClickListener(v -> {
-							client.doBindService(boundService -> boundService.state.disableFocusMode(), false, true, true);
+							client.doBindService(GlobalWellbeingState::disableFocusMode, false, true, true);
 							ShowSuspendedAppDetails.this.finish();
 						});
 						break;
 					case REASON_MANUALLY:
 						container = findViewById(R.id.manually);
 						findViewById(R.id.unsuspendbtn2).setOnClickListener(v -> {
-							client.doBindService(boundService ->
-									boundService.state.manualUnsuspend(new String[]{packageName}, false));
+							client.doBindService(state ->
+									state.manualUnsuspend(new String[]{packageName}, false));
 							ShowSuspendedAppDetails.this.finish();
 						});
 						findViewById(R.id.unsuspendallbtn).setOnClickListener(v -> {
-							client.doBindService(boundService ->
-									boundService.state.manualUnsuspend(null, true));
+							client.doBindService(state ->
+									state.manualUnsuspend(null, true));
 							ShowSuspendedAppDetails.this.finish();
 						});
 						break;
@@ -92,7 +94,7 @@ public class ShowSuspendedAppDetails extends Activity {
 						container = findViewById(R.id.unknown);
 						findViewById(R.id.unsuspendbtn).setOnClickListener(v -> {
 							pmd.setPackagesSuspended(new String[]{packageName}, false, null, null, null);
-							client.doBindService(boundService -> boundService.state.reasonMap.remove(packageName), true);
+							client.doBindService(state -> state.reasonMap.remove(packageName), true);
 							ShowSuspendedAppDetails.this.finish();
 						});
 				}
@@ -101,9 +103,9 @@ public class ShowSuspendedAppDetails extends Activity {
 		};
 		boolean isAppTimer = AppTimersInternal.get(this).isAppOnBreak(packageName);
 		/* If service does not exist, just set UNKNOWN reason. If it exists, use its data */
-		boolean hasService = !isAppTimer && client.doBindService(boundService -> {
-			reason.set(boundService.state.reasonMap.getOrDefault(packageName, GlobalWellbeingState.REASON.REASON_UNKNOWN));
-			reset.set(() -> boundService.state.reasonMap.remove(packageName));
+		boolean hasService = !isAppTimer && client.doBindService(state -> {
+			reason.set(state.reasonMap.getOrDefault(packageName, GlobalWellbeingState.REASON.REASON_UNKNOWN));
+			reset.set(() -> state.reasonMap.remove(packageName));
 			next.run();
 		}, false);
 		if (!hasService)
