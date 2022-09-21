@@ -1,6 +1,6 @@
-package org.eu.droid_ng.wellbeing;
+package org.eu.droid_ng.wellbeing.ui;
 
-import static org.eu.droid_ng.wellbeing.lib.GlobalWellbeingState.breakTimeOptions;
+import static org.eu.droid_ng.wellbeing.lib.TransistentWellbeingState.breakTimeOptions;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import org.eu.droid_ng.wellbeing.R;
 import org.eu.droid_ng.wellbeing.lib.WellbeingStateClient;
 
 import java.util.Arrays;

@@ -13,7 +13,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import org.eu.droid_ng.wellbeing.AppTimersBroadcastReciever;
+import org.eu.droid_ng.wellbeing.broadcast.AppTimersBroadcastReciever;
 import org.eu.droid_ng.wellbeing.R;
 import org.eu.droid_ng.wellbeing.shim.PackageManagerDelegate;
 
@@ -205,6 +205,14 @@ public class AppTimersInternal {
 	}
 
 	//public api:
+
+	public @Nullable Duration getTimeLimitForApp(String packageName) {
+		int timeLimit = prefs.getInt(packageName, 0);
+		if (timeLimit > 1) {
+			return Duration.ofMinutes(timeLimit);
+		}
+		return null;
+	}
 
 	public void onUpdateAppTimerPreference(String packageName, Duration oldLimit, Duration limit) {
 		String[] s = new String[]{ packageName };

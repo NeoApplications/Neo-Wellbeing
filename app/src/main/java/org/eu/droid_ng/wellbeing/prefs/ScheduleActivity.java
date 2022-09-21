@@ -1,8 +1,10 @@
-package org.eu.droid_ng.wellbeing;
+package org.eu.droid_ng.wellbeing.prefs;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+
+import org.eu.droid_ng.wellbeing.R;
 
 public class ScheduleActivity extends AppCompatActivity {
 

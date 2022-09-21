@@ -1,5 +1,11 @@
 package org.eu.droid_ng.wellbeing.lib;
 
+import static org.eu.droid_ng.wellbeing.lib.TransistentWellbeingState.INTENT_ACTION_QUIT_BREAK;
+import static org.eu.droid_ng.wellbeing.lib.TransistentWellbeingState.INTENT_ACTION_QUIT_FOCUS;
+import static org.eu.droid_ng.wellbeing.lib.TransistentWellbeingState.INTENT_ACTION_TAKE_BREAK;
+import static org.eu.droid_ng.wellbeing.lib.TransistentWellbeingState.INTENT_ACTION_UNSUSPEND_ALL;
+import static org.eu.droid_ng.wellbeing.lib.TransistentWellbeingState.breakTimeOptions;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Notification;
@@ -13,10 +19,10 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import org.eu.droid_ng.wellbeing.MainActivity;
-import org.eu.droid_ng.wellbeing.NotificationBroadcastReciever;
+import org.eu.droid_ng.wellbeing.prefs.MainActivity;
+import org.eu.droid_ng.wellbeing.broadcast.NotificationBroadcastReciever;
 import org.eu.droid_ng.wellbeing.R;
-import org.eu.droid_ng.wellbeing.TakeBreakDialogActivity;
+import org.eu.droid_ng.wellbeing.ui.TakeBreakDialogActivity;
 import org.eu.droid_ng.wellbeing.shim.PackageManagerDelegate;
 
 import java.util.ArrayList;
@@ -32,11 +38,7 @@ import java.util.stream.Stream;
 //TODO: make package-private
 public class GlobalWellbeingState {
 
-	public static final String INTENT_ACTION_TAKE_BREAK = "org.eu.droid_ng.wellbeing.TAKE_BREAK";
-	public static final String INTENT_ACTION_QUIT_BREAK = "org.eu.droid_ng.wellbeing.QUIT_BREAK";
-	public static final String INTENT_ACTION_QUIT_FOCUS = "org.eu.droid_ng.wellbeing.QUIT_FOCUS";
-	public static final String INTENT_ACTION_UNSUSPEND_ALL = "org.eu.droid_ng.wellbeing.UNSUSPEND_ALL";
-	public static final int[] breakTimeOptions = new int[] { 1, 3, 5, 10, 15 };
+
 
 	private final Context context;
 	private final Handler handler;
@@ -55,11 +57,28 @@ public class GlobalWellbeingState {
 	// use dialog for manual unsuspend? (activity allows to choose between unsuspend all and unsuspend only this)
 	public boolean manualUnsuspendDialog = false;
 
+	@Deprecated
 	public enum REASON {
 		REASON_MANUALLY,
 		REASON_UNKNOWN,
 		REASON_FOCUS_MODE,
-		REASON_FOCUS_MODE_BREAK
+		REASON_FOCUS_MODE_BREAK;
+
+		public int toState() {
+			if (this == REASON_MANUALLY) {
+				return TransistentWellbeingState.STATE_SUSPEND_MANUAL;
+			}
+			if (this == REASON_UNKNOWN) {
+				return TransistentWellbeingState.STATE_SUSPEND_UNKNOWN_REASON;
+			}
+			if (this == REASON_FOCUS_MODE) {
+				return TransistentWellbeingState.STATE_SUSPEND_FOCUS_MODE;
+			}
+			if (this == REASON_FOCUS_MODE_BREAK) {
+				return TransistentWellbeingState.STATE_UNSUSPEND_FOCUS_MODE_BREAK;
+			}
+			return 0;
+		}
 	}
 	public Map<String, REASON> reasonMap = new HashMap<>(); //WARN:handle app timers when adding new use!!!
 
@@ -207,15 +226,15 @@ public class GlobalWellbeingState {
 		service.updateNotification(R.string.focus_mode, R.string.notification_focus_mode, R.drawable.ic_stat_name, new Notification.Action[]{
 				notificationBreakTime == -1 ?
 				service.buildAction(R.string.focus_mode_break, R.drawable.ic_take_break, new Intent(context, TakeBreakDialogActivity.class), false)
-				: service.buildAction(R.string.focus_mode_break, R.drawable.ic_take_break, new Intent(context, NotificationBroadcastReciever.class).setAction(GlobalWellbeingState.INTENT_ACTION_TAKE_BREAK), true),
-				service.buildAction(R.string.focus_mode_off, R.drawable.ic_stat_name, new Intent(context, NotificationBroadcastReciever.class).setAction(GlobalWellbeingState.INTENT_ACTION_QUIT_FOCUS), true)
+				: service.buildAction(R.string.focus_mode_break, R.drawable.ic_take_break, new Intent(context, NotificationBroadcastReciever.class).setAction(INTENT_ACTION_TAKE_BREAK), true),
+				service.buildAction(R.string.focus_mode_off, R.drawable.ic_stat_name, new Intent(context, NotificationBroadcastReciever.class).setAction(INTENT_ACTION_QUIT_FOCUS), true)
 		}, new Intent(context, MainActivity.class));
 	}
 
 	private void makeFocusModeBreakNotification() {
 		service.updateNotification(R.string.focus_mode, R.string.notification_focus_mode_break, R.drawable.ic_stat_name, new Notification.Action[]{
-				service.buildAction(R.string.focus_mode_break_end, R.drawable.ic_take_break, new Intent(context, NotificationBroadcastReciever.class).setAction(GlobalWellbeingState.INTENT_ACTION_QUIT_BREAK), true),
-				service.buildAction(R.string.focus_mode_off, R.drawable.ic_stat_name, new Intent(context, NotificationBroadcastReciever.class).setAction(GlobalWellbeingState.INTENT_ACTION_QUIT_FOCUS), true)
+				service.buildAction(R.string.focus_mode_break_end, R.drawable.ic_take_break, new Intent(context, NotificationBroadcastReciever.class).setAction(INTENT_ACTION_QUIT_BREAK), true),
+				service.buildAction(R.string.focus_mode_off, R.drawable.ic_stat_name, new Intent(context, NotificationBroadcastReciever.class).setAction(INTENT_ACTION_QUIT_FOCUS), true)
 		}, new Intent(context, MainActivity.class));
 	}
 
@@ -288,7 +307,7 @@ public class GlobalWellbeingState {
 		if (type == SERVICE_TYPE.TYPE_UNKNOWN) {
 			type = SERVICE_TYPE.TYPE_MANUALLY;
 			service.updateNotification(R.string.notification_title, R.string.notification_manual, R.drawable.ic_stat_name, new Notification.Action[]{
-					service.buildAction(R.string.unsuspend_all, R.drawable.ic_stat_name, new Intent(context, NotificationBroadcastReciever.class).setAction(GlobalWellbeingState.INTENT_ACTION_UNSUSPEND_ALL), true)
+					service.buildAction(R.string.unsuspend_all, R.drawable.ic_stat_name, new Intent(context, NotificationBroadcastReciever.class).setAction(INTENT_ACTION_UNSUSPEND_ALL), true)
 			}, new Intent(context, MainActivity.class));
 		}
 		String[] failed = packageManagerDelegate.setPackagesSuspended(packageNames, true, null, null, new PackageManagerDelegate.SuspendDialogInfo.Builder()

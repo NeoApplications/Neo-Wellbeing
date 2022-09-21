@@ -1,4 +1,4 @@
-package org.eu.droid_ng.wellbeing;
+package org.eu.droid_ng.wellbeing.prefs;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
@@ -13,8 +13,10 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import org.eu.droid_ng.wellbeing.R;
 import org.eu.droid_ng.wellbeing.lib.GlobalWellbeingState;
 import org.eu.droid_ng.wellbeing.lib.WellbeingStateClient;
+import org.eu.droid_ng.wellbeing.ui.PackageRecyclerViewAdapter;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 

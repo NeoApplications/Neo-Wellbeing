@@ -10,7 +10,7 @@ import android.os.Binder
 import android.os.Build
 import android.os.IBinder
 import android.widget.Toast
-import org.eu.droid_ng.wellbeing.MainActivity
+import org.eu.droid_ng.wellbeing.prefs.MainActivity
 import org.eu.droid_ng.wellbeing.R
 import org.eu.droid_ng.wellbeing.lib.WellbeingStateHost.LocalBinder
 import java.util.function.Consumer
@@ -140,7 +140,7 @@ class WellbeingStateClient(context: Context) {
 }
 
 // Fancy class holding GlobalWellbeingState & a notification
-private class WellbeingStateHost : Service() {
+class WellbeingStateHost : Service() {
     @JvmField
     var state: GlobalWellbeingState? = null
     private var lateNotify = false
@@ -163,7 +163,7 @@ private class WellbeingStateHost : Service() {
         state = GlobalWellbeingState(applicationContext, this)
     }
 
-    override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val notificationManager = getSystemService(
             NotificationManager::class.java
         )
@@ -175,7 +175,9 @@ private class WellbeingStateHost : Service() {
             channel.description = description
             notificationManager.createNotificationChannel(channel)
         }
-        lateNotify = intent.getBooleanExtra("lateNotify", lateNotify)
+        if (intent != null) {
+            lateNotify = intent.getBooleanExtra("lateNotify", lateNotify)
+        }
         val n = buildDefaultNotification()
 
         // Notification ID cannot be 0.

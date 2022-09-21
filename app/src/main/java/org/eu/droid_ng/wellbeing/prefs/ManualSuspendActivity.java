@@ -1,4 +1,4 @@
-package org.eu.droid_ng.wellbeing;
+package org.eu.droid_ng.wellbeing.prefs;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
@@ -8,7 +8,9 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.widget.Button;
 
+import org.eu.droid_ng.wellbeing.R;
 import org.eu.droid_ng.wellbeing.lib.WellbeingStateClient;
+import org.eu.droid_ng.wellbeing.ui.PackageRecyclerViewAdapter;
 
 import java.util.HashSet;
 

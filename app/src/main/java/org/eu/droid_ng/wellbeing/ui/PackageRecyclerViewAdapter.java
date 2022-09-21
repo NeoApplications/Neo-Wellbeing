@@ -1,4 +1,4 @@
-package org.eu.droid_ng.wellbeing;
+package org.eu.droid_ng.wellbeing.ui;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +15,8 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import org.eu.droid_ng.wellbeing.R;
 
 import java.text.Collator;
 import java.util.ArrayList;

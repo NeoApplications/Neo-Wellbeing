@@ -1,4 +1,4 @@
-package org.eu.droid_ng.wellbeing;
+package org.eu.droid_ng.wellbeing.prefs;
 
 import android.os.Bundle;
 
@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 
+import org.eu.droid_ng.wellbeing.R;
 import org.eu.droid_ng.wellbeing.shim.PackageManagerDelegate;
 
 import java.util.Objects;

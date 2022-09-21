@@ -96,7 +96,7 @@
 		tools:targetApi="s">
 
 		<activity
-			android:name=".MainActivity"
+			android:name=".prefs.MainActivity"
 			android:exported="true"
 			android:theme="@style/Theme.AppCompat.DayNight">
 			<intent-filter>
@@ -106,33 +106,33 @@
 			</intent-filter>
 		</activity>
 		<activity
-			android:name=".FocusModeActivity"
+			android:name=".prefs.FocusModeActivity"
 			android:exported="false"
 			android:theme="@style/Theme.AppCompat.DayNight" />
 		<activity
-			android:name=".ManualSuspendActivity"
+			android:name=".prefs.ManualSuspendActivity"
 			android:exported="false"
 			android:theme="@style/Theme.AppCompat.DayNight" />
 		<activity
-			android:name=".SettingsActivity"
+			android:name=".prefs.SettingsActivity"
 			android:exported="false"
 			android:label="@string/title_activity_settings"
 			android:theme="@style/Theme.AppCompat.DayNight" />
 		<activity
-			android:name=".BedtimeMode"
+			android:name=".prefs.BedtimeMode"
 			android:exported="false"
 			android:theme="@style/Theme.AppCompat.DayNight" />
 		<activity
-			android:name=".AppTimers"
+			android:name=".prefs.AppTimers"
 			android:exported="false"
 			android:theme="@style/Theme.AppCompat.DayNight" />
 		<activity
-			android:name=".ScheduleActivity"
+			android:name=".prefs.ScheduleActivity"
 			android:exported="false"
 			android:theme="@style/Theme.AppCompat.DayNight" /> <!-- Runtime UI -->
 		<!-- to-do: On A13, implement com.google.android.apps.wellbeing.action.ACTION_WIND_DOWN_STATE_CHANGED -->
 		<activity
-			android:name=".ShowSuspendedAppDetails"
+			android:name=".ui.ShowSuspendedAppDetails"
 			android:excludeFromRecents="true"
 			android:exported="true"
 			android:permission="android.permission.SEND_SHOW_SUSPENDED_APP_DETAILS"
@@ -144,14 +144,14 @@
 			</intent-filter>
 		</activity>
 		<activity
-			android:name=".TakeBreakDialogActivity"
+			android:name=".ui.TakeBreakDialogActivity"
 			android:excludeFromRecents="true"
 			android:exported="false"
 			android:label="@string/focus_mode_break"
 			android:taskAffinity="" />
 
 		<receiver
-			android:name=".ManuallyUnsuspendBroadcastReciever"
+			android:name=".broadcast.ManuallyUnsuspendBroadcastReciever"
 			android:enabled="true"
 			android:exported="true">
 			<intent-filter>
@@ -161,7 +161,7 @@
 			</intent-filter>
 		</receiver>
 		<receiver
-			android:name=".BootReciever"
+			android:name=".broadcast.BootReciever"
 			android:enabled="true"
 			android:exported="true">
 			<intent-filter>
@@ -169,11 +169,11 @@
 			</intent-filter>
 		</receiver>
 		<receiver
-			android:name=".AppTimersBroadcastReciever"
+			android:name=".broadcast.AppTimersBroadcastReciever"
 			android:enabled="true"
 			android:exported="false" />
 		<receiver
-			android:name=".NotificationBroadcastReciever"
+			android:name=".broadcast.NotificationBroadcastReciever"
 			android:enabled="true"
 			android:exported="false" />
 

@@ -1,4 +1,4 @@
-package org.eu.droid_ng.wellbeing;
+package org.eu.droid_ng.wellbeing.prefs;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
@@ -24,6 +24,7 @@ import android.widget.ImageView;
 import android.widget.NumberPicker;
 import android.widget.TextView;
 
+import org.eu.droid_ng.wellbeing.R;
 import org.eu.droid_ng.wellbeing.lib.AppTimersInternal;
 import org.eu.droid_ng.wellbeing.lib.Utils;
 

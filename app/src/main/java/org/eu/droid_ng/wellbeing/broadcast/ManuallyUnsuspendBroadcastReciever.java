@@ -1,4 +1,4 @@
-package org.eu.droid_ng.wellbeing;
+package org.eu.droid_ng.wellbeing.broadcast;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -22,7 +22,6 @@ public class ManuallyUnsuspendBroadcastReciever extends BroadcastReceiver {
 			return;
 		}
 
-		final TransistentWellbeingState wellbeingState = new TransistentWellbeingState(context);
-		wellbeingState.onManuallyUnsuspended(packageName);
+		TransistentWellbeingState.use(context, tw -> tw.onManuallyUnsuspended(packageName));
 	}
 }

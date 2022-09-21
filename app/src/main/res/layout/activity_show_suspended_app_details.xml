@@ -6,7 +6,7 @@
 	android:layout_height="match_parent"
 	android:orientation="vertical"
 	android:padding="5dp"
-	tools:context=".ShowSuspendedAppDetails">
+	tools:context=".ui.ShowSuspendedAppDetails">
 
 	<androidx.constraintlayout.widget.ConstraintLayout
 		android:id="@+id/appLayout"
