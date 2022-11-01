@@ -15,13 +15,9 @@ import android.widget.Toast;
 import androidx.cardview.widget.CardView;
 
 import org.eu.droid_ng.wellbeing.R;
-import org.eu.droid_ng.wellbeing.lib.AppTimersInternal;
-import org.eu.droid_ng.wellbeing.lib.GlobalWellbeingState;
+import org.eu.droid_ng.wellbeing.lib.State;
 import org.eu.droid_ng.wellbeing.lib.TransistentWellbeingState;
-import org.eu.droid_ng.wellbeing.lib.WellbeingStateClient;
 import org.eu.droid_ng.wellbeing.shim.PackageManagerDelegate;
-
-import java.util.concurrent.atomic.AtomicReference;
 
 public class ShowSuspendedAppDetails extends Activity {
 	private TransistentWellbeingState tw;
@@ -37,8 +33,7 @@ public class ShowSuspendedAppDetails extends Activity {
 			finish();
 			return;
 		}
-		TransistentWellbeingState.get(this, tw -> {
-			this.tw = tw;
+		TransistentWellbeingState.use(this, tw -> {
 			PackageManager pm = getPackageManager();
 			pmd = new PackageManagerDelegate(pm);
 
@@ -60,31 +55,34 @@ public class ShowSuspendedAppDetails extends Activity {
 				iconView.setImageDrawable(icon);
 				nameView.setText(name);
 			}
-			final int reason = tw.getAppState(packageName);
+			final State reason = tw.getAppState(packageName);
 			CardView container;
+			/*
 			if ((reason & TransistentWellbeingState.STATE_SUSPEND_APP_TIMER_EXPIRED) > 0) {
 				container = findViewById(R.id.apptimer);
 				findViewById(R.id.takeabreakbtn2).setOnClickListener(v ->
 						AppTimersInternal.get(this).appTimerSuspendHook(packageName));
 				container.setVisibility(View.VISIBLE);
 			}
-			if ((reason & TransistentWellbeingState.STATE_SUSPEND_FOCUS_MODE) > 0) {
+			*/
+			if (reason.isFocusModeEnabled()) {
 				container = findViewById(R.id.focusMode);
-				findViewById(R.id.takeabreakbtn).setOnClickListener(v -> tw.requireState().takeBreakDialog(ShowSuspendedAppDetails.this, true, tw.requireState().focusModeAllApps ? null : new String[]{packageName}));
+				findViewById(R.id.takeabreakbtn).setOnClickListener(v -> tw.takeFocusModeBreakWithDialog(ShowSuspendedAppDetails.this, true, tw.getBoolSetting("focusModeAllApps") ? null : new String[]{packageName}));
 				findViewById(R.id.disablefocusmode).setOnClickListener(v -> {
-					tw.requireState().disableFocusMode();
+					tw.disableFocusMode();
 					ShowSuspendedAppDetails.this.finish();
 				});
 				container.setVisibility(View.VISIBLE);
 			}
+			/*
 			if ((reason & TransistentWellbeingState.STATE_SUSPEND_MANUAL) > 0) {
 				container = findViewById(R.id.manually);
 				findViewById(R.id.unsuspendbtn2).setOnClickListener(v -> {
-					tw.requireState().manualUnsuspend(new String[]{packageName}, false);
+					tw..manualUnsuspend(new String[]{packageName}, false);
 					ShowSuspendedAppDetails.this.finish();
 				});
 				findViewById(R.id.unsuspendallbtn).setOnClickListener(v -> {
-					tw.requireState().manualUnsuspend(null, true);
+					tw..manualUnsuspend(null, true);
 					ShowSuspendedAppDetails.this.finish();
 				});
 				container.setVisibility(View.VISIBLE);
@@ -97,7 +95,7 @@ public class ShowSuspendedAppDetails extends Activity {
 					ShowSuspendedAppDetails.this.finish();
 				});
 				container.setVisibility(View.VISIBLE);
-			}
+			}*/
 		});
 	}
 
@@ -105,11 +103,5 @@ public class ShowSuspendedAppDetails extends Activity {
 	public boolean onNavigateUp() {
 		finish();
 		return true;
-	}
-
-	@Override
-	protected void onDestroy() {
-		super.onDestroy();
-		tw.doUnbindService();
 	}
 }

@@ -4,7 +4,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-import org.eu.droid_ng.wellbeing.lib.AppTimersInternal;
 import org.eu.droid_ng.wellbeing.lib.TransistentWellbeingState;
 
 public class AppTimersBroadcastReciever extends BroadcastReceiver {

@@ -56,7 +56,8 @@
 		android:name="android.permission.SET_WALLPAPER_COMPONENT"
 		tools:ignore="ProtectedPermissions" />
 	<uses-permission android:name="android.permission.SET_WALLPAPER" />
-	<uses-permission android:name="android.permission.SET_WALLPAPER_DIM_AMOUNT" />
+	<uses-permission android:name="android.permission.SET_WALLPAPER_DIM_AMOUNT"
+		tools:ignore="ProtectedPermissions" />
 	<uses-permission android:name="android.permission.GET_PACKAGE_SIZE" />
 	<uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
 	<uses-permission android:name="android.permission.VIBRATE" />
@@ -70,7 +71,8 @@
 	<uses-permission
 		android:name="android.permission.MANAGE_ROLE_HOLDERS"
 		tools:ignore="ProtectedPermissions" />
-	<uses-permission android:name="android.permission.LAUNCH_MULTI_PANE_SETTINGS_DEEP_LINK" />
+	<uses-permission android:name="android.permission.LAUNCH_MULTI_PANE_SETTINGS_DEEP_LINK"
+		tools:ignore="ProtectedPermissions" />
 	<uses-permission
 		android:name="android.permission.REAL_GET_TASKS"
 		tools:ignore="ProtectedPermissions" />
@@ -81,10 +83,12 @@
 		android:name="android.permission.MODIFY_DAY_NIGHT_MODE"
 		tools:ignore="ProtectedPermissions" />
 	<uses-permission android:name="android.permission.ACCESS_AMBIENT_CONTEXT_EVENT" />
-	<uses-permission android:name="android.permission.START_CROSS_PROFILE_ACTIVITIES" />
+	<uses-permission android:name="android.permission.START_CROSS_PROFILE_ACTIVITIES"
+		tools:ignore="ProtectedPermissions" />
 
 	<application
 		android:allowBackup="false"
+		android:name=".Wellbeing"
 		android:dataExtractionRules="@xml/data_extraction_rules"
 		android:fullBackupContent="@xml/backup_rules"
 		android:icon="@mipmap/ic_launcher"

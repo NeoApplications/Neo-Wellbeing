@@ -46,4 +46,21 @@
 
 	</PreferenceCategory>
 
+	<PreferenceCategory app:title="@string/about">
+
+		<Preference
+			app:key="app_about1"
+			app:summary="@string/about_1_desc"
+			app:title="@string/about_1_title" />
+
+		<Preference
+			app:key="bugs"
+			app:isPreferenceVisible="false"
+			app:summary="@string/bug_desc"
+			app:title="@string/bug_title" />
+
+
+	</PreferenceCategory>
+
+
 </PreferenceScreen>

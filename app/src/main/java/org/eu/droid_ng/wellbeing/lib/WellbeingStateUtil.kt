@@ -29,7 +29,7 @@ class WellbeingStateClient(context: Context) {
     private var mBoundService: WellbeingStateHost? = null
 
     // Callback when service is connected
-    private var callback: Consumer<GlobalWellbeingState?>? = null
+    private var callback: Consumer<WellbeingService?>? = null
 
     // Connection callback utility
     private val mConnection: ServiceConnection = object : ServiceConnection {
@@ -71,7 +71,7 @@ class WellbeingStateClient(context: Context) {
 
     @JvmOverloads
     fun doBindService(
-        callback: Consumer<GlobalWellbeingState?>,
+        callback: Consumer<WellbeingService?>,
         canHandleFailure: Boolean,
         maybeStartService: Boolean = false,
         lateNotify: Boolean = false
@@ -111,7 +111,7 @@ class WellbeingStateClient(context: Context) {
         }
     }
 
-    fun doBindService(callback: Consumer<GlobalWellbeingState?>) {
+    fun doBindService(callback: Consumer<WellbeingService?>) {
         doBindService(callback, false)
     }
 
@@ -139,10 +139,10 @@ class WellbeingStateClient(context: Context) {
     }
 }
 
-// Fancy class holding GlobalWellbeingState & a notification
+// Fancy class holding WellbeingService & a notification
 class WellbeingStateHost : Service() {
     @JvmField
-    var state: GlobalWellbeingState? = null
+    var state: WellbeingService? = null
     private var lateNotify = false
 
     // Unique Identification Number for the Notification.
@@ -160,7 +160,7 @@ class WellbeingStateHost : Service() {
     }
 
     override fun onCreate() {
-        state = GlobalWellbeingState(applicationContext, this)
+        state = WellbeingService(applicationContext, this)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {

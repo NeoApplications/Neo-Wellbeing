@@ -1,6 +1,13 @@
 package org.eu.droid_ng.wellbeing.prefs;
 
+import android.app.AlertDialog;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
+import android.widget.ArrayAdapter;
+import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
@@ -8,8 +15,11 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 
 import org.eu.droid_ng.wellbeing.R;
+import org.eu.droid_ng.wellbeing.lib.BugUtils;
 import org.eu.droid_ng.wellbeing.shim.PackageManagerDelegate;
 
+import java.util.Arrays;
+import java.util.Map;
 import java.util.Objects;
 
 public class SettingsActivity extends AppCompatActivity {
@@ -44,6 +54,43 @@ public class SettingsActivity extends AppCompatActivity {
 			if (!PackageManagerDelegate.canSetNeutralButtonAction()) {
 				((Preference) Objects.requireNonNull(findPreference("manual_dialog"))).setEnabled(false);
 				((Preference) Objects.requireNonNull(findPreference("focus_dialog"))).setEnabled(false);
+			}
+			if (Objects.requireNonNull(BugUtils.get()).hasBugs()) {
+				Map<String, String> bugMap = Objects.requireNonNull(BugUtils.get()).getBugs();
+				String[] a = bugMap.keySet().toArray(new String[0]);
+				Preference bp = Objects.requireNonNull(findPreference("bugs"));
+				bp.setVisible(true);
+				bp.setOnPreferenceClickListener(p -> {
+					new AlertDialog.Builder(getActivity())
+							.setTitle(R.string.bug_viewer)
+							.setAdapter(new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_1, a), (dialog, pos) -> {
+								String key = a[pos];
+								String value = bugMap.get(a[pos]);
+								new AlertDialog.Builder(getActivity())
+										.setTitle(key)
+										.setMessage(value)
+										.setPositiveButton(R.string.share, (d, which) -> {
+											Intent sendIntent = new Intent();
+											sendIntent.setAction(Intent.ACTION_SEND);
+											sendIntent.putExtra(Intent.EXTRA_TEXT, value);
+											sendIntent.setType("text/plain");
+
+											Intent shareIntent = Intent.createChooser(sendIntent, null);
+											startActivity(shareIntent);
+										})
+										.setNeutralButton(R.string.copy, (d, which) -> {
+											ClipboardManager clipboard = (ClipboardManager) requireActivity().getSystemService(Context.CLIPBOARD_SERVICE);
+											ClipData clip = ClipData.newPlainText("Bug report", value);
+											clipboard.setPrimaryClip(clip);
+											Toast.makeText(getActivity(), R.string.copied, Toast.LENGTH_LONG).show();
+										})
+										.setNegativeButton(R.string.cancel, (d, which) -> d.dismiss())
+										.show();
+							})
+							.setNegativeButton(R.string.cancel, (d, which) -> d.dismiss())
+							.show();
+					return true;
+				});
 			}
 		}
 	}

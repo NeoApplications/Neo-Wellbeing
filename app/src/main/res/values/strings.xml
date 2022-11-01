@@ -59,4 +59,13 @@
 	<string name="desc_container">%s (used %s)</string>
 	<string name="app_timer_exceed">The app timer for this app has elapsed.</string>
 	<string name="app_timer_exceed_f">The app timer for %s has elapsed.</string>
+	<string name="about">About</string>
+	<string name="about_1_title">Neo Wellbeing</string>
+	<string name="about_1_desc">An project by the Neo Applications Collective</string>
+	<string name="bug_title">Open bug viewer</string>
+	<string name="bug_desc">That you found this hidden entry means that you found an bug in the program. Please click here for more details. Thank you for using Neo Wellbeing :)</string>
+	<string name="share">Share</string>
+	<string name="copy">Copy</string>
+	<string name="copied">Copied to clipboard</string>
+	<string name="bug_viewer">Bug viewer</string>
 </resources>

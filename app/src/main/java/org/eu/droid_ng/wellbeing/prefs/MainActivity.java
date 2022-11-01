@@ -8,6 +8,7 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 
 import org.eu.droid_ng.wellbeing.R;
+import org.eu.droid_ng.wellbeing.lib.BugUtils;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -33,22 +34,11 @@ public class MainActivity extends AppCompatActivity {
 				startActivity(new Intent(getActivity(), FocusModeActivity.class));
 				return true;
 			});
+			/*
 			Preference sleepMode = findPreference("bedtime_mode");
 			assert sleepMode != null;
 			sleepMode.setOnPreferenceClickListener(p -> {
 				startActivity(new Intent(getActivity(), BedtimeMode.class));
-				return true;
-			});
-			Preference timers = findPreference("timers");
-			assert timers != null;
-			timers.setOnPreferenceClickListener(p -> {
-				startActivity(new Intent(getActivity(), AppTimers.class));
-				return true;
-			});
-			Preference settings = findPreference("settings");
-			assert settings != null;
-			settings.setOnPreferenceClickListener(p -> {
-				startActivity(new Intent(getActivity(), SettingsActivity.class));
 				return true;
 			});
 			Preference manual = findPreference("manual");
@@ -57,6 +47,19 @@ public class MainActivity extends AppCompatActivity {
 			manual.setVisible(show);
 			manual.setOnPreferenceClickListener(p -> {
 				startActivity(new Intent(getActivity(), ManualSuspendActivity.class));
+				return true;
+			});
+			Preference timers = findPreference("timers");
+			assert timers != null;
+			timers.setOnPreferenceClickListener(p -> {
+				startActivity(new Intent(getActivity(), AppTimers.class));
+				return true;
+			});
+			*/
+			Preference settings = findPreference("settings");
+			assert settings != null;
+			settings.setOnPreferenceClickListener(p -> {
+				startActivity(new Intent(getActivity(), SettingsActivity.class));
 				return true;
 			});
 		}
