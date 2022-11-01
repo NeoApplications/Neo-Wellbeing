@@ -1,4 +1,4 @@
-package org.eu.droid_ng.wellbeing.ui;
+package org.eu.droid_ng.wellbeing.prefs;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class PackageRecyclerViewAdapter extends RecyclerView.Adapter<PackageRecyclerViewAdapter.PackageNameViewHolder> {
+class PackageRecyclerViewAdapter extends RecyclerView.Adapter<PackageRecyclerViewAdapter.PackageNameViewHolder> {
 	private final LayoutInflater inflater;
 	private final List<ApplicationInfo> mData;
 	private final List<String> enabledArr;

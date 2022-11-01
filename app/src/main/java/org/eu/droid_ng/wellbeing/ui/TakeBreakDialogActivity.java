@@ -13,7 +13,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import org.eu.droid_ng.wellbeing.R;
-import org.eu.droid_ng.wellbeing.lib.WellbeingStateClient;
+import org.eu.droid_ng.wellbeing.lib.TransistentWellbeingState;
 
 import java.util.Arrays;
 
@@ -22,8 +22,8 @@ public class TakeBreakDialogActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		WellbeingStateClient client = new WellbeingStateClient(this);
-		client.doBindService(state -> {
+
+		TransistentWellbeingState.use(this, tw -> {
 			String[] optionsS = Arrays.stream(breakTimeOptions).mapToObj(i -> getResources().getQuantityString(R.plurals.break_mins, i, i)).toArray(String[]::new);
 			ArrayAdapter<String> a = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, optionsS) {
 				@NonNull
@@ -31,7 +31,7 @@ public class TakeBreakDialogActivity extends Activity {
 				public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
 					View v = super.getView(position, convertView, parent);
 					v.setOnClickListener(view -> {
-						state.takeBreak(breakTimeOptions[position]);
+						tw.requireState().takeBreak(breakTimeOptions[position]);
 						TakeBreakDialogActivity.this.finish();
 					});
 					return v;
@@ -39,10 +39,11 @@ public class TakeBreakDialogActivity extends Activity {
 			};
 			ListView lv = new ListView(this);
 			lv.setAdapter(a);
+			getActionBar().setDisplayHomeAsUpEnabled(true);
+			getActionBar().setHomeAsUpIndicator(R.drawable.ic_baseline_close_24);
 			setContentView(lv);
 		});
-		getActionBar().setDisplayHomeAsUpEnabled(true);
-		getActionBar().setHomeAsUpIndicator(R.drawable.ic_baseline_close_24);
+
 	}
 
 	@Override

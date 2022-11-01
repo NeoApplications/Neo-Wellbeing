@@ -16,7 +16,6 @@ import android.widget.TextView;
 import org.eu.droid_ng.wellbeing.R;
 import org.eu.droid_ng.wellbeing.lib.GlobalWellbeingState;
 import org.eu.droid_ng.wellbeing.lib.WellbeingStateClient;
-import org.eu.droid_ng.wellbeing.ui.PackageRecyclerViewAdapter;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 

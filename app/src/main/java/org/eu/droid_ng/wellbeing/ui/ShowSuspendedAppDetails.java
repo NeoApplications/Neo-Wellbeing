@@ -55,14 +55,13 @@ public class ShowSuspendedAppDetails extends Activity {
 				appInfo = pm.getApplicationInfo(packageName, 0);
 				icon = pm.getApplicationIcon(appInfo);
 				name = pm.getApplicationLabel(appInfo);
-			} catch (PackageManager.NameNotFoundException ignored) {
-			}
+			} catch (PackageManager.NameNotFoundException ignored) {}
 			if (appInfo != null && icon != null && name != null) {
 				iconView.setImageDrawable(icon);
 				nameView.setText(name);
 			}
 			final int reason = tw.getAppState(packageName);
-			CardView container = null;
+			CardView container;
 			if ((reason & TransistentWellbeingState.STATE_SUSPEND_APP_TIMER_EXPIRED) > 0) {
 				container = findViewById(R.id.apptimer);
 				findViewById(R.id.takeabreakbtn2).setOnClickListener(v ->

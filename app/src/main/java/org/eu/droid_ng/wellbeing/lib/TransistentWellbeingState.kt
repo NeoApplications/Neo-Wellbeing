@@ -6,7 +6,7 @@ import android.content.pm.PackageManager
 import org.eu.droid_ng.wellbeing.shim.PackageManagerDelegate
 import java.util.function.Consumer
 
-class TransistentWellbeingState private constructor(val context: Context, val state: GlobalWellbeingState?, val client: WellbeingStateClient) {
+class TransistentWellbeingState private constructor(val context: Context, private val state: GlobalWellbeingState?, val client: WellbeingStateClient) {
 
 	companion object {
 		const val STATE_SUSPEND_UNKNOWN_REASON = 1
@@ -71,12 +71,11 @@ class TransistentWellbeingState private constructor(val context: Context, val st
 	}
 
 	fun onManuallyUnsuspended(packageName: String) {
-		val client = WellbeingStateClient(context)
-		if (client.isServiceRunning()) client.doBindService({ state ->
-			state!!.onManuallyUnsuspended(
-				packageName
-			)
-		}, true) else ati.appTimerSuspendHook(packageName)
+		if (state != null) {
+			state.onManuallyUnsuspended(packageName)
+		} else {
+			ati.appTimerSuspendHook(packageName)
+		}
 	}
 
 	fun onAppTimerExpired(oid: Int, uoid: String) {
