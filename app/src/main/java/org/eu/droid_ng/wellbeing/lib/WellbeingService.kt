@@ -155,7 +155,7 @@ class WellbeingService(private val context: Context) {
 		}
 
 		/* apply app timer flags */
-		if (config.contains(packageName)) {
+		if (config.getInt(packageName, -1) > 0) {
 			value = value or State.STATE_APP_TIMER_SET
 		}
 		if ((value and State.STATE_APP_TIMER_SET) > 0 && Duration.ofMinutes(config.getInt(packageName, 0).toLong()).minus(getTimeUsed(usm, arrayOf(packageName))).toMinutes() <= 0) {

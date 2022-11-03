@@ -66,14 +66,14 @@ public class ShowSuspendedAppDetails extends AppCompatActivity {
 		final State reason = tw.getAppState(packageName);
 		CardView container;
 		int hasReason = 0;
-		if (reason.isAppTimerExpired()) {
+		if (reason.isAppTimerExpired() && !reason.isAppTimerBreak()) {
 			hasReason++;
 			container = findViewById(R.id.apptimer);
 			findViewById(R.id.takeabreakbtn2).setOnClickListener(v ->
 					tw.takeAppTimerBreakWithDialog(ShowSuspendedAppDetails.this, true, new String[] {packageName}));
 			container.setVisibility(View.VISIBLE);
 		}
-		if (reason.isFocusModeEnabled()) {
+		if (reason.isFocusModeEnabled() && !(reason.isOnFocusModeBreakGlobal() || reason.isOnFocusModeBreakPartial())) {
 			hasReason++;
 			container = findViewById(R.id.focusMode);
 			findViewById(R.id.takeabreakbtn).setOnClickListener(v -> tw.takeFocusModeBreakWithDialog(ShowSuspendedAppDetails.this, true, tw.focusModeAllApps ? null : new String[]{packageName}));
