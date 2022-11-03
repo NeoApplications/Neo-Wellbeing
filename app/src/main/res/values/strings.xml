@@ -71,4 +71,6 @@
 	<string name="bug_viewer">Bug viewer</string>
 	<string name="bed_icon_content_desc">Bedtime mode</string>
 	<string name="greyscale">Greyscale</string>
+	<string name="sched_charging">Based on schedule, only while charging</string>
+	<string name="schedule2">Based on schedule</string>
 </resources>
