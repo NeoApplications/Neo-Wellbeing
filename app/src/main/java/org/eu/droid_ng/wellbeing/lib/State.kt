@@ -12,6 +12,12 @@ class State(private val value: Int) {
 		const val STATE_FOCUS_MODE_APP_BREAK = 8
 		/* Manual suspension */
 		const val STATE_MANUAL_SUSPEND = 16
+		/* App timer set */
+		const val STATE_APP_TIMER_SET = 32
+		/* App timer expired */
+		const val STATE_APP_TIMER_EXPIRED = 64
+		/* App timer break */
+		const val STATE_APP_TIMER_BREAK = 128
 	}
 
 	private var valid: Boolean = true
@@ -58,5 +64,17 @@ class State(private val value: Int) {
 
 	fun isSuspendedManually(): Boolean {
 		return isPresent(STATE_MANUAL_SUSPEND)
+	}
+
+	fun isAppTimerSet(): Boolean {
+		return isPresent(STATE_APP_TIMER_SET)
+	}
+
+	fun isAppTimerExpired(): Boolean {
+		return isPresent(STATE_APP_TIMER_EXPIRED)
+	}
+
+	fun isAppTimerBreak(): Boolean {
+		return isPresent(STATE_APP_TIMER_BREAK)
 	}
 }

@@ -22,6 +22,9 @@ import org.eu.droid_ng.wellbeing.lib.State;
 import org.eu.droid_ng.wellbeing.lib.WellbeingService;
 import org.eu.droid_ng.wellbeing.shim.PackageManagerDelegate;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class ShowSuspendedAppDetails extends AppCompatActivity {
 	private WellbeingService tw;
 	private PackageManagerDelegate pmd;
@@ -62,15 +65,16 @@ public class ShowSuspendedAppDetails extends AppCompatActivity {
 		}
 		final State reason = tw.getAppState(packageName);
 		CardView container;
-		/*
-		if ((reason & TransistentWellbeingState.STATE_SUSPEND_APP_TIMER_EXPIRED) > 0) {
+		int hasReason = 0;
+		if (reason.isAppTimerExpired()) {
+			hasReason++;
 			container = findViewById(R.id.apptimer);
 			findViewById(R.id.takeabreakbtn2).setOnClickListener(v ->
-					AppTimersInternal.get(this).appTimerSuspendHook(packageName));
+					tw.takeAppTimerBreakWithDialog(ShowSuspendedAppDetails.this, true, new String[] {packageName}));
 			container.setVisibility(View.VISIBLE);
 		}
-		*/
 		if (reason.isFocusModeEnabled()) {
+			hasReason++;
 			container = findViewById(R.id.focusMode);
 			findViewById(R.id.takeabreakbtn).setOnClickListener(v -> tw.takeFocusModeBreakWithDialog(ShowSuspendedAppDetails.this, true, tw.focusModeAllApps ? null : new String[]{packageName}));
 			findViewById(R.id.disablefocusmode).setOnClickListener(v -> {
@@ -80,6 +84,7 @@ public class ShowSuspendedAppDetails extends AppCompatActivity {
 			container.setVisibility(View.VISIBLE);
 		}
 		if (reason.isSuspendedManually()) {
+			hasReason++;
 			container = findViewById(R.id.manually);
 			findViewById(R.id.unsuspendbtn2).setOnClickListener(v -> {
 				tw.manualUnsuspend(new String[]{packageName});
@@ -91,7 +96,7 @@ public class ShowSuspendedAppDetails extends AppCompatActivity {
 			});
 			container.setVisibility(View.VISIBLE);
 		}
-		if (reason.hasUpdateFailed()) {
+		if (hasReason < 1 || reason.hasUpdateFailed()) {
 			container = findViewById(R.id.unknown);
 			findViewById(R.id.unsuspendbtn).setOnClickListener(v -> {
 				BUG("Used unknown unsuspend!!");

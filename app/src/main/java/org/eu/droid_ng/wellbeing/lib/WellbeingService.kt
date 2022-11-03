@@ -1,21 +1,29 @@
 package org.eu.droid_ng.wellbeing.lib
 
 import android.app.Activity
+import android.app.PendingIntent
+import android.app.usage.UsageStatsManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Handler
 import android.util.Log
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import org.eu.droid_ng.wellbeing.R
 import org.eu.droid_ng.wellbeing.Wellbeing
+import org.eu.droid_ng.wellbeing.broadcast.AppTimersBroadcastReciever
 import org.eu.droid_ng.wellbeing.broadcast.NotificationBroadcastReciever
+import org.eu.droid_ng.wellbeing.join
 import org.eu.droid_ng.wellbeing.lib.BugUtils.Companion.BUG
+import org.eu.droid_ng.wellbeing.lib.Utils.getTimeUsed
 import org.eu.droid_ng.wellbeing.prefs.MainActivity
 import org.eu.droid_ng.wellbeing.shim.PackageManagerDelegate
 import org.eu.droid_ng.wellbeing.shim.PackageManagerDelegate.SuspendDialogInfo
 import org.eu.droid_ng.wellbeing.ui.TakeBreakDialogActivity
+import java.time.Duration
 import java.util.*
+import java.util.concurrent.TimeUnit
 import java.util.function.Consumer
 
 
@@ -57,7 +65,6 @@ class WellbeingService(private val context: Context) {
 	}
 
 	private fun startServiceAnd(lateNotify: Boolean = false, callback: Runnable? = null) {
-		loadSettings()
 		if (host != null) {
 			callback?.run()
 			return
@@ -88,8 +95,9 @@ class WellbeingService(private val context: Context) {
 	}
 
 	private val handler = Handler.createAsync(context.mainLooper)
-	private val pm: PackageManager = context.packageManager
-	private val pmd: PackageManagerDelegate = PackageManagerDelegate(pm)
+	private val pm = context.packageManager
+	private val pmd = PackageManagerDelegate(pm)
+	@JvmField val usm = context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
 
 	@JvmField var focusModeAllApps = true
 	@JvmField var focusModeBreakTimeDialog = -1
@@ -107,12 +115,16 @@ class WellbeingService(private val context: Context) {
 	}
 
 	init {
+		Utils.clearUsageStatsCache(usm, true)
 		loadSettings()
 	}
 
 	private var isFocusModeEnabled = false
 	private var isFocusModeBreak /* global break */ = false
-	private var perAppState: HashMap<String /* packageName */, Int /* does NOT contain global flags like FOCUS_MODE_ENABLED or FOCUS_MODE_GLOBAL_BREAK, so always use getAppState() when reading */> = HashMap()
+	private val perAppState: HashMap<String /* packageName */, Int /* does NOT contain global flags like FOCUS_MODE_ENABLED or FOCUS_MODE_GLOBAL_BREAK, so always use getAppState() when reading */> = HashMap()
+
+	private val oidMap = context.getSharedPreferences("AppTimersInternal", 0)
+	private val config = context.getSharedPreferences("appTimers", 0)
 
 	// Service / Global state. Do not confuse with per-app state, that's using the same values.
 	@JvmOverloads
@@ -121,7 +133,11 @@ class WellbeingService(private val context: Context) {
 			(if (isFocusModeEnabled) State.STATE_FOCUS_MODE_ENABLED else 0) or
 			(if (isFocusModeBreak) State.STATE_FOCUS_MODE_GLOBAL_BREAK else 0) or
 			(if (appShim && (perAppState.entries.stream().filter { (it.value and State.STATE_FOCUS_MODE_APP_BREAK) > 0 }.findAny().isPresent)) State.STATE_FOCUS_MODE_APP_BREAK else 0) or
-			(if (appShim && (perAppState.entries.stream().filter { (it.value and State.STATE_MANUAL_SUSPEND) > 0 }.findAny().isPresent)) State.STATE_MANUAL_SUSPEND else 0)
+			(if (appShim && (perAppState.entries.stream().filter { (it.value and State.STATE_MANUAL_SUSPEND) > 0 }.findAny().isPresent)) State.STATE_MANUAL_SUSPEND else 0) or
+			(if (appShim && (perAppState.entries.stream().filter { (it.value and State.STATE_APP_TIMER_SET) > 0 }.findAny().isPresent)) State.STATE_APP_TIMER_SET else 0) or
+			(if (appShim && (perAppState.entries.stream().filter { (it.value and State.STATE_APP_TIMER_EXPIRED) > 0 }.findAny().isPresent)) State.STATE_APP_TIMER_EXPIRED else 0) or
+			(if (appShim && (perAppState.entries.stream().filter { (it.value and State.STATE_APP_TIMER_BREAK) > 0 }.findAny().isPresent)) State.STATE_APP_TIMER_BREAK else 0)
+
 		return State(value)
 	}
 
@@ -134,18 +150,126 @@ class WellbeingService(private val context: Context) {
 			value = value or (global and State.STATE_FOCUS_MODE_GLOBAL_BREAK)
 		}
 
+		/* apply app timer flags */
+		if (config.contains(packageName)) {
+			value = value or State.STATE_APP_TIMER_SET
+		}
+		if ((value and State.STATE_APP_TIMER_SET) > 0 && Duration.ofMinutes(config.getInt(packageName, 0).toLong()).minus(getTimeUsed(usm, arrayOf(packageName))).toMinutes() <= 0) {
+			value = value or State.STATE_APP_TIMER_EXPIRED
+		}
+		if ((value and State.STATE_APP_TIMER_SET) > 0 && oidMap.contains(ParsedUoid("AppBreak", 0, arrayOf(packageName)).toString())) {
+			value = value or State.STATE_APP_TIMER_BREAK
+		}
+
 		return State(value)
 	}
 
 	fun onAppTimerExpired(observerId: Int, uniqueObserverId: String) {
-		TODO("$observerId$uniqueObserverId")
+		var msg: String
+		var uoid: String = uniqueObserverId
+		if (oidMap.getInt(uoid, -2) != observerId) {
+			msg = "Warning: unknown oid/uoid - $observerId / $uoid - this might be an bug? Trying to recover."
+			//Toast.makeText(ctx, msg, Toast.LENGTH_LONG).show(); this should really be shown. but the underlying problem lies in android code :(
+			Log.e("AppTimersInternal", msg)
+			// Attempt to recover, in doubt always trust the oid. Because android is fucking dumb. Thank you.
+			uoid = oidMap.all.entries.stream().filter { a -> observerId == a.value }
+				.findAny().get().key
+		}
+
+		val parsed = ParsedUoid.from(uoid)
+		msg = "AppTimersInternal: success oid:" + observerId + " action:" + parsed.action + " timeMillis:" + parsed.timeMillis + " pkgs:" + String.join(",", parsed.pkgs)
+		Log.i("AppTimersInternal", msg)
+
+		when (parsed.action) {
+			"AppTimer", "AppLimit" -> {
+				dropAppTimer(parsed)
+				parsed.pkgs.forEach {
+					if (it != null) {
+						updateSuspendStatusForApp(it)
+					}
+				}
+			}
+			"AppBreak" -> endBreak(parsed.pkgs)
+			else -> {
+				Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
+				dropAppTimer(parsed)
+			}
+		}
+	}
+
+	private fun endBreak(pkgs: Array<String?>) {
+		val u = ParsedUoid("AppBreak", 0, pkgs)
+		if (!oidMap.contains(u.toString())) return
+		Log.i("AppTimersInternal", "end break for " + pkgs.contentToString())
+		dropAppTimer(u)
+		pkgs.forEach {
+			if (it != null) {
+				updateSuspendStatusForApp(it)
+			}
+		}
+	}
+
+	private fun loadAppTimer(packageName: String) {
+		val s = arrayOf<String?>(packageName)
+		val i = config.getInt(packageName, -1)
+		val m = Duration.ofMinutes(i.toLong()).minus(getTimeUsed(usm, s))
+		if (i > 0 && m.toMinutes() > 0)
+			setAppTimer(s, m, getTimeUsed(usm, s))
+		updateSuspendStatusForApp(packageName)
+	}
+
+	private fun takeAppTimerBreak(packageNames: Array<String?>, breakMins: Int) {
+		val u = ParsedUoid("AppBreak", 0, packageNames).toString()
+		if (!oidMap.contains(u)) {
+			updatePrefs(u, makeOid())
+		}
+		setAppTimerInternal(u, packageNames, Duration.ofMinutes(breakMins.toLong()), null)
+		packageNames.forEach {
+			if (it != null) {
+				updateSuspendStatusForApp(it)
+			}
+		}
+	}
+
+	fun takeAppTimerBreakWithDialog(activityContext: Activity, endActivity: Boolean, packageNames: Array<String?>) {
+		val optionsS: Array<String> = Arrays.stream(breakTimeOptions).mapToObj { i ->
+			context.resources.getQuantityString(R.plurals.break_mins, i, i)
+		}.toArray { arrayOfNulls<String>(it) }
+		val b = AlertDialog.Builder(activityContext)
+			.setTitle(R.string.focus_mode_break)
+			.setNegativeButton(R.string.cancel) { d, _ -> d.dismiss() }
+			.setItems(optionsS) { _, i ->
+				val breakMins = breakTimeOptions[i]
+				takeAppTimerBreak(packageNames, breakMins)
+				if (endActivity) activityContext.finish()
+			}
+		b.show()
+	}
+
+	private fun loadAppTimers() {
+		oidMap.edit().clear().apply()
+		for (pkg in config.all.keys) {
+			loadAppTimer(pkg)
+		}
+	}
+
+	fun onUpdateAppTimerPreference(pkgName: String, oldLimit: Duration) {
+		val s = arrayOf<String?>(pkgName)
+		var u = ParsedUoid("AppTimer", oldLimit.toMillis(), s)
+		if (oidMap.contains(u.toString())) dropAppTimer(u)
+		u = ParsedUoid("AppLimit", oldLimit.toMillis(), s)
+		if (oidMap.contains(u.toString())) dropAppTimer(u)
+		u = ParsedUoid("AppBreak", 0, s)
+		if (oidMap.contains(u.toString())) dropAppTimer(u)
+		loadAppTimer(pkgName)
 	}
 
 	fun onBootCompleted() {
-
+		loadAppTimers()
 	}
 
-	fun updateServiceStatus() {
+	private fun updateServiceStatus() {
+		loadSettings()
 		val state = getState()
 		val needServiceRunning = state.isFocusModeEnabled() || state.isSuspendedManually()
 		val next = {
@@ -274,16 +398,7 @@ class WellbeingService(private val context: Context) {
 
 	private fun updateSuspendStatusForApp(packageName: String) {
 		val state = getAppState(packageName)
-		val f: Array<String> = if (state.isSuspendedManually()) {
-			val di = SuspendDialogInfo.Builder()
-				.setTitle(R.string.dialog_title)
-				.setMessage(R.string.dialog_message)
-				.setIcon(R.drawable.ic_baseline_app_blocking_24)
-				.setNeutralButtonText(if (!manualSuspendDialog) R.string.dialog_btn_settings else (if (manualSuspendAllApps) R.string.unsuspend_all else R.string.unsuspend))
-				.setNeutralButtonAction(if (!manualSuspendDialog) SuspendDialogInfo.BUTTON_ACTION_MORE_DETAILS else SuspendDialogInfo.BUTTON_ACTION_UNSUSPEND)
-				.build()
-			pmd.setPackagesSuspended(arrayOf(packageName), true, null, null, di)
-		} else if (state.isFocusModeEnabled() && !(state.isOnFocusModeBreakGlobal() || state.isOnFocusModeBreakPartial())) {
+		val f: Array<String> = if (state.isFocusModeEnabled() && !(state.isOnFocusModeBreakGlobal() || state.isOnFocusModeBreakPartial())) {
 			val label: CharSequence = try {
 				pm.getApplicationLabel(pm.getApplicationInfo(packageName, 0))
 			} catch (e: PackageManager.NameNotFoundException) {
@@ -298,6 +413,25 @@ class WellbeingService(private val context: Context) {
 				.setNeutralButtonAction(if (focusModeBreakTimeDialog == -1) SuspendDialogInfo.BUTTON_ACTION_MORE_DETAILS else SuspendDialogInfo.BUTTON_ACTION_UNSUSPEND)
 				.build()
 			pmd.setPackagesSuspended(arrayOf(packageName), true, null, null, di)
+		} else if (state.isSuspendedManually()) {
+			val di = SuspendDialogInfo.Builder()
+				.setTitle(R.string.dialog_title)
+				.setMessage(R.string.dialog_message)
+				.setIcon(R.drawable.ic_baseline_app_blocking_24)
+				.setNeutralButtonText(if (!manualSuspendDialog) R.string.dialog_btn_settings else (if (manualSuspendAllApps) R.string.unsuspend_all else R.string.unsuspend))
+				.setNeutralButtonAction(if (!manualSuspendDialog) SuspendDialogInfo.BUTTON_ACTION_MORE_DETAILS else SuspendDialogInfo.BUTTON_ACTION_UNSUSPEND)
+				.build()
+			pmd.setPackagesSuspended(arrayOf(packageName), true, null, null, di)
+		} else if (state.isAppTimerExpired() && !state.isAppTimerBreak()) {
+			val dialogBreakTime = -1 //TODO
+			pmd.setPackagesSuspended(
+				arrayOf(packageName), true, null, null, SuspendDialogInfo.Builder()
+					.setTitle(R.string.app_timers)
+					.setMessage(context.getString(R.string.app_timer_exceed_f, pm.getApplicationLabel(pm.getApplicationInfo(packageName, 0))))
+					.setNeutralButtonText(if (dialogBreakTime == -1) R.string.dialog_btn_settings else context.resources.getIdentifier("break_dialog_$dialogBreakTime", "string", context.packageName))
+					.setNeutralButtonAction(if (dialogBreakTime == -1) SuspendDialogInfo.BUTTON_ACTION_MORE_DETAILS else SuspendDialogInfo.BUTTON_ACTION_UNSUSPEND)
+					.setIcon(R.drawable.ic_focus_mode).build()
+			)
 		} else {
 			pmd.setPackagesSuspended(arrayOf(packageName), false, null, null, null)
 		}
@@ -423,7 +557,7 @@ class WellbeingService(private val context: Context) {
 
 	private val oneAppUnsuspendCallbacks = ArrayList<Runnable>()
 
-	fun takeFocusModeBreak(packageNames: Array<String>?, breakMins: Int) {
+	private fun takeFocusModeBreak(packageNames: Array<String>?, breakMins: Int) {
 		if (packageNames == null) {
 			takeFocusModeBreak(breakMins)
 			return
@@ -518,4 +652,136 @@ class WellbeingService(private val context: Context) {
 
 		onStateChanged()
 	}
+
+
+	// start time limit core
+	private fun updatePrefs(key: String, value: Int) {
+		if (value < 0) {
+			oidMap.edit().remove(key).apply()
+		} else {
+			oidMap.edit().putInt(key, value).apply()
+		}
+	}
+
+	private fun makeOid(): Int {
+		val vals: Collection<*> = oidMap.all.values
+		// try to save time by starting at size value
+		for (i in vals.size..999) {
+			if (!vals.contains(i)) return i
+		}
+		// if all high values are used up, try all values
+		for (i in 0..999) {
+			if (!vals.contains(i)) return i
+		}
+		throw IllegalStateException("more than 1000 observers registered")
+	}
+
+	private class ParsedUoid(val action: String, val timeMillis: Long, val pkgs: Array<String?>) {
+		override fun toString(): String {
+			return action + ":" + timeMillis + "//" + java.lang.String.join(":", *pkgs)
+		}
+
+		companion object {
+			fun from(uoid: String): ParsedUoid {
+				val l = uoid.indexOf(":")
+				val ll = uoid.indexOf("//")
+				val action = uoid.substring(0, l)
+				val timeMillis = uoid.substring(l + 1, ll).toLong()
+				val pkgs: Array<String?> =
+					uoid.substring(ll + 2).split(":".toRegex()).dropLastWhile { it.isEmpty() }
+						.toTypedArray()
+				return ParsedUoid(action, timeMillis, pkgs)
+			}
+		}
+	}
+
+	private fun setUnhintedAppTimerInternal(
+		oid: Int,
+		uoid: String,
+		toObserve: Array<String?>,
+		timeLimit: Duration
+	) {
+		val i = Intent(context, AppTimersBroadcastReciever::class.java)
+		i.putExtra("observerId", oid)
+		i.putExtra("uniqueObserverId", uoid)
+		val pintent: PendingIntent =
+			PendingIntent.getBroadcast(context, oid, i, PendingIntent.FLAG_IMMUTABLE)
+		PackageManagerDelegate.registerAppUsageObserver(
+			usm,
+			oid,
+			toObserve,
+			timeLimit.toMillis(),
+			TimeUnit.MILLISECONDS,
+			pintent
+		)
+	}
+
+	private fun setHintedAppTimerInternal(
+		oid: Int,
+		uoid: String,
+		toObserve: Array<String?>,
+		timeLimit: Duration,
+		timeUsed: Duration
+	) {
+		val i = Intent(context, AppTimersBroadcastReciever::class.java)
+		i.putExtra("observerId", oid)
+		i.putExtra("uniqueObserverId", uoid)
+		val pintent: PendingIntent =
+			PendingIntent.getBroadcast(context, oid, i, PendingIntent.FLAG_IMMUTABLE)
+		PackageManagerDelegate.registerAppUsageLimitObserver(
+			usm,
+			oid,
+			toObserve,
+			timeLimit,
+			timeUsed,
+			pintent
+		)
+	}
+
+	private fun setAppTimerInternal(
+		uoid: String,
+		toObserve: Array<String?>,
+		timeLimit: Duration,
+		timeUsed: Duration?
+	) {
+		val oid: Int = oidMap.getInt(uoid, -1)
+		if (timeUsed == null) {
+			setUnhintedAppTimerInternal(oid, uoid, toObserve, timeLimit)
+		} else {
+			setHintedAppTimerInternal(oid, uoid, toObserve, timeLimit, timeUsed)
+		}
+	}
+
+	private fun dropAppTimer(parsedUoid: ParsedUoid) {
+		val uoid = parsedUoid.toString()
+		updatePrefs(uoid, -1) //delete pref
+		if (parsedUoid.action != "AppLimit") {
+			PackageManagerDelegate.unregisterAppUsageLimitObserver(usm, oidMap.getInt(uoid, -1))
+		} else {
+			PackageManagerDelegate.unregisterAppUsageObserver(usm, oidMap.getInt(uoid, -1))
+		}
+	}
+
+	private fun setAppTimer(
+		toObserve: Array<String?>,
+		timeLimit: Duration,
+		timeUsed: Duration?
+	) {
+		// AppLimit: do not provide info to launcher, use registerAppUsageObserver
+		// AppTimer: provide info to launcher, use registerAppUsageLimitObserver
+		val uoid = ParsedUoid(
+			if (timeUsed == null) "AppLimit" else "AppTimer",
+			timeLimit.toMillis(),
+			toObserve
+		).toString()
+		var timeLimitInternal = timeLimit
+		if (timeUsed != null) {
+			timeLimitInternal = timeLimitInternal.minus(timeUsed)
+		}
+		if (!oidMap.contains(uoid)) {
+			updatePrefs(uoid, makeOid())
+		}
+		setAppTimerInternal(uoid, toObserve, timeLimitInternal, timeUsed)
+	}
+	// end time limit core
 }
