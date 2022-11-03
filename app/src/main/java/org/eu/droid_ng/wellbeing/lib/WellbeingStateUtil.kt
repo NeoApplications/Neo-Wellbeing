@@ -60,14 +60,14 @@ class WellbeingStateClient(context: Context) {
     //backward compatibility does what we want, so ignore warning
     @SuppressWarnings("deprecation")
     fun isServiceRunning(): Boolean {
-            val manager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-            for (service in manager.getRunningServices(Int.MAX_VALUE)) {
-                if (WellbeingStateHost::class.java.name == service.service.className) {
-                    return true
-                }
+        val manager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        for (service in manager.getRunningServices(Int.MAX_VALUE)) {
+            if (WellbeingStateHost::class.java.name == service.service.className) {
+                return true
             }
-            return false
         }
+        return false
+    }
 
     @JvmOverloads
     fun doBindService(
@@ -160,7 +160,8 @@ class WellbeingStateHost : Service() {
     }
 
     override fun onCreate() {
-        state = WellbeingService(applicationContext, this)
+        state = WellbeingService.get()
+        state?.bindToHost(this)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -278,7 +279,7 @@ class WellbeingStateHost : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
-        state!!.onDestroy()
+        state?.bindToHost(null)
     }
 
     override fun onBind(intent: Intent): IBinder {

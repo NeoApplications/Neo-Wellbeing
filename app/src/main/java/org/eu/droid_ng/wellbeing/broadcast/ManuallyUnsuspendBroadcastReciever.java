@@ -5,7 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.widget.Toast;
 
-import org.eu.droid_ng.wellbeing.lib.TransistentWellbeingState;
+import org.eu.droid_ng.wellbeing.lib.WellbeingService;
 
 public class ManuallyUnsuspendBroadcastReciever extends BroadcastReceiver {
 
@@ -22,6 +22,7 @@ public class ManuallyUnsuspendBroadcastReciever extends BroadcastReceiver {
 			return;
 		}
 
-		TransistentWellbeingState.use(context, tw -> tw.onManuallyUnsuspended(packageName));
+		WellbeingService tw = WellbeingService.get();
+		tw.onManuallyUnsuspended(packageName);
 	}
 }

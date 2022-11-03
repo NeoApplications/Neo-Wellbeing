@@ -16,9 +16,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import org.eu.droid_ng.wellbeing.R;
 import org.eu.droid_ng.wellbeing.lib.State;
-import org.eu.droid_ng.wellbeing.lib.TransistentWellbeingState;
+import org.eu.droid_ng.wellbeing.lib.WellbeingService;
+
+import java.util.function.Consumer;
 
 public class FocusModeActivity extends AppCompatActivity {
+	private final Consumer<WellbeingService> sc = service -> updateUi();
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -42,32 +45,40 @@ public class FocusModeActivity extends AppCompatActivity {
 						getPackageManager().getInstalledApplications(PackageManager.GET_META_DATA),
 						"focus_mode"));
 
-		updateUiAsync();
+		WellbeingService tw = WellbeingService.get();
+		tw.addStateCallback(sc);
+		updateUi();
 	}
 
-	private void updateUiAsync() {
-		TransistentWellbeingState.use(this, tw -> {
-			State state = tw.getState();
-			Button toggle = findViewById(R.id.focusModeToggle);
-			TextView takeBreak = findViewById(R.id.focusModeBreak);
-			if (!state.isFocusModeEnabled()) {
-				toggle.setText(R.string.enable);
-				toggle.setOnClickListener(v -> tw.later(tw::enableFocusMode));
-				takeBreak.setVisibility(View.GONE);
-				takeBreak.setOnClickListener(null);
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		WellbeingService tw = WellbeingService.get();
+		tw.removeStateCallback(sc);
+	}
+
+	private void updateUi() {
+		WellbeingService tw = WellbeingService.get();
+		State state = tw.getState();
+		Button toggle = findViewById(R.id.focusModeToggle);
+		TextView takeBreak = findViewById(R.id.focusModeBreak);
+		if (!state.isFocusModeEnabled()) {
+			toggle.setText(R.string.enable);
+			toggle.setOnClickListener(v -> tw.enableFocusMode());
+			takeBreak.setVisibility(View.GONE);
+			takeBreak.setOnClickListener(null);
+		} else {
+			toggle.setText(R.string.disable);
+			toggle.setOnClickListener(v -> tw.disableFocusMode());
+			takeBreak.setVisibility(View.VISIBLE);
+			if (state.isOnFocusModeBreakGlobal()) {
+				takeBreak.setOnClickListener(v -> tw.endFocusModeBreak());
+				takeBreak.setText(R.string.focus_mode_break_end);
 			} else {
-				toggle.setText(R.string.disable);
-				toggle.setOnClickListener(v -> tw.later(tw::disableFocusMode));
-				takeBreak.setVisibility(View.VISIBLE);
-				if (state.isOnFocusModeBreakGlobal()) {
-					takeBreak.setOnClickListener(v -> tw.later(tw::endFocusModeBreak));
-					takeBreak.setText(R.string.focus_mode_break_end);
-				} else {
-					takeBreak.setOnClickListener(v -> tw.later(() -> tw.takeFocusModeBreakWithDialog(FocusModeActivity.this, false, null)));
-					takeBreak.setText(R.string.focus_mode_break);
-				}
+				takeBreak.setOnClickListener(v -> tw.takeFocusModeBreakWithDialog(FocusModeActivity.this, false, null));
+				takeBreak.setText(R.string.focus_mode_break);
 			}
-		});
+		}
 	}
 
 	@Override

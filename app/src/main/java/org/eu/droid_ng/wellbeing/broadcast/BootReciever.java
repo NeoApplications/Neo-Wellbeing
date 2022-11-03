@@ -4,7 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-import org.eu.droid_ng.wellbeing.lib.TransistentWellbeingState;
+import org.eu.droid_ng.wellbeing.lib.WellbeingService;
 
 public class BootReciever extends BroadcastReceiver {
 
@@ -14,6 +14,7 @@ public class BootReciever extends BroadcastReceiver {
 			/* Make sure no one is trying to fool us */
 			return;
 		}
-		TransistentWellbeingState.use(context, TransistentWellbeingState::onBootCompleted);
+		WellbeingService tw = WellbeingService.get();
+		tw.onBootCompleted();
 	}
 }

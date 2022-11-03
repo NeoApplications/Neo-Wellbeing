@@ -1,20 +1,62 @@
 package org.eu.droid_ng.wellbeing.lib
 
+import android.app.Activity
 import android.content.Context
+import org.eu.droid_ng.wellbeing.Wellbeing
 import org.eu.droid_ng.wellbeing.lib.BugUtils.Companion.BUG
 import java.util.function.Consumer
 
-class WellbeingService(private val context: Context, private val host: WellbeingStateHost) {
-	private var destroyed = false
-	fun onDestroy() {
-		destroyed = true
+class WellbeingService(private val context: Context) {
+	companion object {
+		@JvmStatic
+		fun get(): WellbeingService {
+			return Wellbeing.getService()
+		}
 	}
-	fun isDestroyed(): Boolean {
-		return destroyed
+	private var host: WellbeingStateHost? = null
+
+	fun bindToHost(newhost: WellbeingStateHost?) {
+		host = newhost
+		if (host != null) {
+			onServiceStartedCallbacks.toArray(arrayOf<Runnable>()).forEach {
+				it.run()
+				onServiceStartedCallbacks.remove(it)
+			}
+		}
 	}
-	val stateCallbacks: List<Consumer<WellbeingService>> = ArrayList()
+	private val stateCallbacks: ArrayList<Consumer<WellbeingService>> = ArrayList()
+
+	fun addStateCallback(callback: Consumer<WellbeingService>) {
+		stateCallbacks.add(callback)
+	}
+
+	fun removeStateCallback(callback: Consumer<WellbeingService>) {
+		stateCallbacks.remove(callback)
+	}
+
 	private fun onStateChanged() {
 		stateCallbacks.forEach { it.accept(this) }
+	}
+
+	private val onServiceStartedCallbacks: ArrayList<Runnable> = ArrayList()
+
+	fun startService(lateNotify: Boolean = false) {
+		if (host != null) {
+			return
+		}
+		val client = WellbeingStateClient(context)
+		client.startService(lateNotify)
+	}
+
+	fun startServiceAnd(lateNotify: Boolean = false, callback: Runnable? = null) {
+		if (host != null) {
+			callback?.run()
+			return
+		}
+		if (callback != null) {
+			onServiceStartedCallbacks.add(callback)
+		}
+		startService(lateNotify)
 	}
 
 	/* **** main part **** */
@@ -30,15 +72,48 @@ class WellbeingService(private val context: Context, private val host: Wellbeing
 		return State(value)
 	}
 
-	fun setFocusMode(new: Boolean) {
-		if (isFocusModeEnabled == new) {
-			BUG("Focus mode value not changed in setFocusMode. current / new = $new")
-			return
-		}
+	fun getAppState(packageName: String): State {
+		TODO("Not yet implemented")
+	}
+
+
+	fun onAppTimerExpired(observerId: Int, uniqueObserverId: String) {
 		TODO()
 	}
 
-	fun getAppState(packageName: String): State {
-		TODO("Not yet implemented")
+	fun onBootCompleted() {
+
+	}
+
+	fun onManuallyUnsuspended(packageName: String) {
+		TODO()
+	}
+
+	fun onNotificationActionClick(action: String) {
+		TODO()
+	}
+
+	fun enableFocusMode() {
+		TODO()
+	}
+
+	fun disableFocusMode() {
+		TODO()
+	}
+
+	fun endFocusModeBreak() {
+		TODO()
+	}
+
+	fun takeFocusModeBreakWithDialog(activityContext: Activity, endActivity: Boolean, packageNames: Array<String>?) {
+		TODO()
+	}
+
+	fun takeFocusModeBreak(breakMins: Int) {
+		TODO()
+	}
+
+	fun getBoolSetting(setting: String): Boolean {
+		TODO()
 	}
 }

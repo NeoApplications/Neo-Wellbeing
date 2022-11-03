@@ -55,8 +55,7 @@ class BugUtils(val bugFolder: File) {
 	}
 
 	fun onBugAdded(message: Throwable, date: Long) {
-		val ll = Log.getStackTraceString(message).split("\n")
-		val l = ll[0] + "\n" + ll.subList(2, ll.size - 1).joinToString("\n")
+		val l = Log.getStackTraceString(message)
 		val o = File(bugFolder, date.toString()).outputStream()
 		o.write(l.toByteArray(Charset.defaultCharset()))
 		o.close()

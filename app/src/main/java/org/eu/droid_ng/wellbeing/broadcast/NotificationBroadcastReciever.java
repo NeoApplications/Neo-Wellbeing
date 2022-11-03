@@ -4,13 +4,13 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-import org.eu.droid_ng.wellbeing.lib.TransistentWellbeingState;
+import org.eu.droid_ng.wellbeing.lib.WellbeingService;
 
 public class NotificationBroadcastReciever extends BroadcastReceiver {
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
-		TransistentWellbeingState.use(context, tw ->
-				tw.onNotificationActionClick(intent.getAction()));
+		WellbeingService tw = WellbeingService.get();
+		tw.onNotificationActionClick(intent.getAction());
 	}
 }
