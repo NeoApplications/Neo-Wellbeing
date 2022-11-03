@@ -3,6 +3,7 @@ package org.eu.droid_ng.wellbeing.prefs;
 import static org.eu.droid_ng.wellbeing.lib.BugUtils.BUG;
 
 import android.animation.LayoutTransition;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.View;
@@ -35,18 +36,18 @@ public class FocusModeActivity extends AppCompatActivity {
 
 		TextView schedule = findViewById(R.id.schedule);
 		schedule.setOnClickListener(v -> {
-			BUG("Tried to use schedule which is not supported at the moment");
-			//startActivity(new Intent(this, ScheduleActivity.class).putExtra("type", "focus_mode"));
+			startActivity(new Intent(this, ScheduleActivity.class).putExtra("type", "focus_mode"));
 		});
+
+		WellbeingService tw = WellbeingService.get();
+		tw.addStateCallback(sc);
 
 		RecyclerView r = findViewById(R.id.focusModePkgs);
 		r.setAdapter(
 				new PackageRecyclerViewAdapter(this,
 						getPackageManager().getInstalledApplications(PackageManager.GET_META_DATA),
-						"focus_mode"));
+						"focus_mode", tw::onFocusModePreferenceChanged));
 
-		WellbeingService tw = WellbeingService.get();
-		tw.addStateCallback(sc);
 		updateUi();
 	}
 

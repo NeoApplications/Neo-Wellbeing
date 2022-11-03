@@ -1,7 +1,8 @@
 package org.eu.droid_ng.wellbeing.ui;
 
+import static org.eu.droid_ng.wellbeing.lib.BugUtils.BUG;
+
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -12,6 +13,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 
 import org.eu.droid_ng.wellbeing.R;
@@ -19,7 +22,7 @@ import org.eu.droid_ng.wellbeing.lib.State;
 import org.eu.droid_ng.wellbeing.lib.WellbeingService;
 import org.eu.droid_ng.wellbeing.shim.PackageManagerDelegate;
 
-public class ShowSuspendedAppDetails extends Activity {
+public class ShowSuspendedAppDetails extends AppCompatActivity {
 	private WellbeingService tw;
 	private PackageManagerDelegate pmd;
 
@@ -38,8 +41,10 @@ public class ShowSuspendedAppDetails extends Activity {
 		pmd = new PackageManagerDelegate(pm);
 
 		setContentView(R.layout.activity_show_suspended_app_details);
-		getActionBar().setDisplayHomeAsUpEnabled(true);
-		getActionBar().setHomeAsUpIndicator(R.drawable.ic_baseline_close_24);
+		ActionBar actionBar = getSupportActionBar();
+		if (actionBar != null) {
+			actionBar.setDisplayHomeAsUpEnabled(true);
+		}
 
 		final ImageView iconView = findViewById(R.id.appIcon);
 		final TextView nameView = findViewById(R.id.appName);
@@ -67,39 +72,38 @@ public class ShowSuspendedAppDetails extends Activity {
 		*/
 		if (reason.isFocusModeEnabled()) {
 			container = findViewById(R.id.focusMode);
-			findViewById(R.id.takeabreakbtn).setOnClickListener(v -> tw.takeFocusModeBreakWithDialog(ShowSuspendedAppDetails.this, true, tw.getBoolSetting("focusModeAllApps") ? null : new String[]{packageName}));
+			findViewById(R.id.takeabreakbtn).setOnClickListener(v -> tw.takeFocusModeBreakWithDialog(ShowSuspendedAppDetails.this, true, tw.focusModeAllApps ? null : new String[]{packageName}));
 			findViewById(R.id.disablefocusmode).setOnClickListener(v -> {
 				tw.disableFocusMode();
 				ShowSuspendedAppDetails.this.finish();
 			});
 			container.setVisibility(View.VISIBLE);
 		}
-		/*
-		if ((reason & TransistentWellbeingState.STATE_SUSPEND_MANUAL) > 0) {
+		if (reason.isSuspendedManually()) {
 			container = findViewById(R.id.manually);
 			findViewById(R.id.unsuspendbtn2).setOnClickListener(v -> {
-				tw..manualUnsuspend(new String[]{packageName}, false);
+				tw.manualUnsuspend(new String[]{packageName});
 				ShowSuspendedAppDetails.this.finish();
 			});
 			findViewById(R.id.unsuspendallbtn).setOnClickListener(v -> {
-				tw..manualUnsuspend(null, true);
+				tw.manualUnsuspend(null);
 				ShowSuspendedAppDetails.this.finish();
 			});
 			container.setVisibility(View.VISIBLE);
 		}
-		if ((reason & TransistentWellbeingState.STATE_SUSPEND_UNKNOWN_REASON) > 0) {
+		if (reason.hasUpdateFailed()) {
 			container = findViewById(R.id.unknown);
 			findViewById(R.id.unsuspendbtn).setOnClickListener(v -> {
+				BUG("Used unknown unsuspend!!");
 				pmd.setPackagesSuspended(new String[]{packageName}, false, null, null, null);
-				tw.requireState().reasonMap.remove(packageName);
 				ShowSuspendedAppDetails.this.finish();
 			});
 			container.setVisibility(View.VISIBLE);
-		}*/
+		}
 	}
 
 	@Override
-	public boolean onNavigateUp() {
+	public boolean onSupportNavigateUp() {
 		finish();
 		return true;
 	}

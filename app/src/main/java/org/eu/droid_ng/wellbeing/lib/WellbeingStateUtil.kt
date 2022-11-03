@@ -144,6 +144,7 @@ class WellbeingStateHost : Service() {
     @JvmField
     var state: WellbeingService? = null
     private var lateNotify = false
+    private var mStopped = false
 
     // Unique Identification Number for the Notification.
     private val NOTIFICATION = 325563
@@ -161,7 +162,6 @@ class WellbeingStateHost : Service() {
 
     override fun onCreate() {
         state = WellbeingService.get()
-        state?.bindToHost(this)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -179,10 +179,14 @@ class WellbeingStateHost : Service() {
         if (intent != null) {
             lateNotify = intent.getBooleanExtra("lateNotify", lateNotify)
         }
+
         val n = buildDefaultNotification()
 
         // Notification ID cannot be 0.
         startForeground(NOTIFICATION, n)
+
+        state?.bindToHost(this)
+
         return START_STICKY
     }
 
@@ -213,7 +217,7 @@ class WellbeingStateHost : Service() {
         title: Int,
         text: String,
         icon: Int,
-        actions: Array<Notification.Action>,
+        actions: Array<Notification.Action?>,
         notificationIntent: Intent
     ): Notification {
         val pendingIntent =
@@ -231,7 +235,8 @@ class WellbeingStateHost : Service() {
         }
         if (lateNotify) lateNotify = false
         for (action in actions) {
-            b.addAction(action)
+            if (action != null)
+                b.addAction(action)
         }
         return b.build()
     }
@@ -245,6 +250,7 @@ class WellbeingStateHost : Service() {
     }
 
     private fun updateNotification(n: Notification) {
+        if (mStopped) return
         getSystemService(NotificationManager::class.java).notify(NOTIFICATION, n)
     }
 
@@ -252,7 +258,7 @@ class WellbeingStateHost : Service() {
         title: Int,
         text: String,
         icon: Int,
-        actions: Array<Notification.Action>,
+        actions: Array<Notification.Action?>,
         notificationIntent: Intent
     ) {
         updateNotification(buildNotification(title, text, icon, actions, notificationIntent))
@@ -262,7 +268,7 @@ class WellbeingStateHost : Service() {
         title: Int,
         text: Int,
         icon: Int,
-        actions: Array<Notification.Action>,
+        actions: Array<Notification.Action?>,
         notificationIntent: Intent
     ) {
         updateNotification(title, getString(text), icon, actions, notificationIntent)
@@ -273,6 +279,7 @@ class WellbeingStateHost : Service() {
     }
 
     fun stop() {
+        mStopped = true
         stopForeground(true)
         stopSelf()
     }

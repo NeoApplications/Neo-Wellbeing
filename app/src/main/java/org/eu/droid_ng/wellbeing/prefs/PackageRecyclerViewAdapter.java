@@ -14,6 +14,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.eu.droid_ng.wellbeing.R;
@@ -24,6 +25,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 class PackageRecyclerViewAdapter extends RecyclerView.Adapter<PackageRecyclerViewAdapter.PackageNameViewHolder> {
@@ -33,10 +35,12 @@ class PackageRecyclerViewAdapter extends RecyclerView.Adapter<PackageRecyclerVie
 	private final PackageManager pm;
 	public final SharedPreferences prefs;
 	private final String settingsKey;
+	private final Consumer<String> callback;
 
-	public PackageRecyclerViewAdapter(Context context, List<ApplicationInfo> mData, String settingsKey) {
+	public PackageRecyclerViewAdapter(Context context, List<ApplicationInfo> mData, String settingsKey, @Nullable Consumer<String> callback) {
 		this.inflater = LayoutInflater.from(context);
 		this.pm = context.getPackageManager();
+		this.callback = callback;
 		prefs = context.getSharedPreferences("appLists", 0);
 		this.settingsKey = settingsKey;
 		Set<String> focusAppsS = prefs.getStringSet(this.settingsKey, new HashSet<>());
@@ -126,6 +130,9 @@ class PackageRecyclerViewAdapter extends RecyclerView.Adapter<PackageRecyclerVie
 					enabledArr.remove(info.packageName);
 				}
 				prefs.edit().putStringSet(settingsKey, new HashSet<>(enabledArr)).commit();
+				if (callback != null) {
+					callback.accept(info.packageName);
+				}
 			});
 		}
 	}

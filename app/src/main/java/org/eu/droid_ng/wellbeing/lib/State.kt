@@ -10,12 +10,8 @@ class State(private val value: Int) {
 		const val STATE_FOCUS_MODE_GLOBAL_BREAK = 4
 		/* Focus mode currently: Break (Per-App) */
 		const val STATE_FOCUS_MODE_APP_BREAK = 8
-
-		const val INTENT_ACTION_TAKE_BREAK = "org.eu.droid_ng.wellbeing.TAKE_BREAK"
-		const val INTENT_ACTION_QUIT_BREAK = "org.eu.droid_ng.wellbeing.QUIT_BREAK"
-		const val INTENT_ACTION_QUIT_FOCUS = "org.eu.droid_ng.wellbeing.QUIT_FOCUS"
-		const val INTENT_ACTION_UNSUSPEND_ALL = "org.eu.droid_ng.wellbeing.UNSUSPEND_ALL"
-		@JvmField val breakTimeOptions = intArrayOf(1, 3, 5, 10, 15)
+		/* Manual suspension */
+		const val STATE_MANUAL_SUSPEND = 16
 	}
 
 	private var valid: Boolean = true
@@ -58,5 +54,9 @@ class State(private val value: Int) {
 
 	fun isOnFocusModeBreakPartial(): Boolean {
 		return isPresent(STATE_FOCUS_MODE_APP_BREAK)
+	}
+
+	fun isSuspendedManually(): Boolean {
+		return isPresent(STATE_MANUAL_SUSPEND)
 	}
 }
