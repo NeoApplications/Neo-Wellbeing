@@ -53,6 +53,7 @@
 	<string name="suspend">Suspend</string>
 	<string name="schedule">Schedule</string>
 	<string name="bedtime_mode">Bedtime mode</string>
+	<string name="bedtime_desc">You should go to sleep now!</string>
 	<string name="no_timer">No timer set</string>
 	<string name="app_timers">App timers</string>
 	<string name="ok">OK</string>
@@ -68,4 +69,6 @@
 	<string name="copy">Copy</string>
 	<string name="copied">Copied to clipboard</string>
 	<string name="bug_viewer">Bug viewer</string>
+	<string name="bed_icon_content_desc">Bedtime mode</string>
+	<string name="greyscale">Greyscale</string>
 </resources>

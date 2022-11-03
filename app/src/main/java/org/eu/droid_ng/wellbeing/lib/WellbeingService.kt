@@ -89,6 +89,7 @@ class WellbeingService(private val context: Context) {
 
 		const val INTENT_ACTION_TAKE_BREAK = "org.eu.droid_ng.wellbeing.TAKE_BREAK"
 		const val INTENT_ACTION_QUIT_BREAK = "org.eu.droid_ng.wellbeing.QUIT_BREAK"
+		const val INTENT_ACTION_QUIT_BED = "org.eu.droid_ng.wellbeing.QUIT_BED"
 		const val INTENT_ACTION_QUIT_FOCUS = "org.eu.droid_ng.wellbeing.QUIT_FOCUS"
 		const val INTENT_ACTION_UNSUSPEND_ALL = "org.eu.droid_ng.wellbeing.UNSUSPEND_ALL"
 		@JvmField val breakTimeOptions = intArrayOf(1, 3, 5, 10, 15)
@@ -97,6 +98,7 @@ class WellbeingService(private val context: Context) {
 	private val handler = Handler.createAsync(context.mainLooper)
 	private val pm = context.packageManager
 	private val pmd = PackageManagerDelegate(pm)
+	private val cdm = PackageManagerDelegate.getColorDisplayManager(context)
 	@JvmField val usm = context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
 
 	@JvmField var focusModeAllApps = true
@@ -119,6 +121,7 @@ class WellbeingService(private val context: Context) {
 		loadSettings()
 	}
 
+	private var bedtimeModeEnabled = false
 	private var isFocusModeEnabled = false
 	private var isFocusModeBreak /* global break */ = false
 	private val perAppState: HashMap<String /* packageName */, Int /* does NOT contain global flags like FOCUS_MODE_ENABLED or FOCUS_MODE_GLOBAL_BREAK, so always use getAppState() when reading */> = HashMap()
@@ -128,15 +131,16 @@ class WellbeingService(private val context: Context) {
 
 	// Service / Global state. Do not confuse with per-app state, that's using the same values.
 	@JvmOverloads
-	fun getState(appShim: Boolean = true): State {
+	fun getState(includeAppState: Boolean = true): State {
 		val value =
+			(if (bedtimeModeEnabled) State.STATE_BED_MODE else 0) or
 			(if (isFocusModeEnabled) State.STATE_FOCUS_MODE_ENABLED else 0) or
 			(if (isFocusModeBreak) State.STATE_FOCUS_MODE_GLOBAL_BREAK else 0) or
-			(if (appShim && (perAppState.entries.stream().filter { (it.value and State.STATE_FOCUS_MODE_APP_BREAK) > 0 }.findAny().isPresent)) State.STATE_FOCUS_MODE_APP_BREAK else 0) or
-			(if (appShim && (perAppState.entries.stream().filter { (it.value and State.STATE_MANUAL_SUSPEND) > 0 }.findAny().isPresent)) State.STATE_MANUAL_SUSPEND else 0) or
-			(if (appShim && (perAppState.entries.stream().filter { (it.value and State.STATE_APP_TIMER_SET) > 0 }.findAny().isPresent)) State.STATE_APP_TIMER_SET else 0) or
-			(if (appShim && (perAppState.entries.stream().filter { (it.value and State.STATE_APP_TIMER_EXPIRED) > 0 }.findAny().isPresent)) State.STATE_APP_TIMER_EXPIRED else 0) or
-			(if (appShim && (perAppState.entries.stream().filter { (it.value and State.STATE_APP_TIMER_BREAK) > 0 }.findAny().isPresent)) State.STATE_APP_TIMER_BREAK else 0)
+			(if (includeAppState && (perAppState.entries.stream().filter { (it.value and State.STATE_FOCUS_MODE_APP_BREAK) > 0 }.findAny().isPresent)) State.STATE_FOCUS_MODE_APP_BREAK else 0) or
+			(if (includeAppState && (perAppState.entries.stream().filter { (it.value and State.STATE_MANUAL_SUSPEND) > 0 }.findAny().isPresent)) State.STATE_MANUAL_SUSPEND else 0) or
+			(if (includeAppState && (perAppState.entries.stream().filter { (it.value and State.STATE_APP_TIMER_SET) > 0 }.findAny().isPresent)) State.STATE_APP_TIMER_SET else 0) or
+			(if (includeAppState && (perAppState.entries.stream().filter { (it.value and State.STATE_APP_TIMER_EXPIRED) > 0 }.findAny().isPresent)) State.STATE_APP_TIMER_EXPIRED else 0) or
+			(if (includeAppState && (perAppState.entries.stream().filter { (it.value and State.STATE_APP_TIMER_BREAK) > 0 }.findAny().isPresent)) State.STATE_APP_TIMER_BREAK else 0)
 
 		return State(value)
 	}
@@ -162,6 +166,23 @@ class WellbeingService(private val context: Context) {
 		}
 
 		return State(value)
+	}
+
+	fun setBedtimeMode(enable: Boolean) {
+		bedtimeModeEnabled = enable
+
+		val prefs = context.getSharedPreferences("bedtime_mode", 0)
+		if (enable) {
+			if (prefs.getBoolean("greyscale", false)) {
+				cdm.setSaturationLevel(0)
+			}
+		} else {
+			if (prefs.getBoolean("greyscale", false)) {
+				cdm.setSaturationLevel(100)
+			}
+		}
+
+		onStateChanged()
 	}
 
 	fun onAppTimerExpired(observerId: Int, uniqueObserverId: String) {
@@ -271,7 +292,7 @@ class WellbeingService(private val context: Context) {
 	private fun updateServiceStatus() {
 		loadSettings()
 		val state = getState()
-		val needServiceRunning = state.isFocusModeEnabled() || state.isSuspendedManually()
+		val needServiceRunning = state.isFocusModeEnabled() || state.isSuspendedManually() || state.isBedtimeModeEnabled()
 		val next = {
 			if (state.isFocusModeEnabled()) {
 				if (state.isOnFocusModeBreakGlobal()) {
@@ -337,6 +358,21 @@ class WellbeingService(private val context: Context) {
 					),
 					Intent(context, MainActivity::class.java)
 				)
+			} else if (state.isBedtimeModeEnabled()) {
+				host?.updateNotification(
+					R.string.bedtime_mode,
+					R.string.bedtime_desc,
+					R.drawable.baseline_bedtime_24,
+					arrayOf(
+						host?.buildAction(
+							R.string.disable, R.drawable.baseline_cancel_24, Intent(
+								context,
+								NotificationBroadcastReciever::class.java
+							).setAction(INTENT_ACTION_QUIT_BED), true
+						)
+					),
+					Intent(context, MainActivity::class.java)
+				)
 			} else {
 				host?.updateDefaultNotification()
 			}
@@ -389,6 +425,9 @@ class WellbeingService(private val context: Context) {
 			}
 			INTENT_ACTION_QUIT_FOCUS -> {
 				disableFocusMode()
+			}
+			INTENT_ACTION_QUIT_BED -> {
+				setBedtimeMode(false)
 			}
 			else -> {
 				BUG("invalid notification action")

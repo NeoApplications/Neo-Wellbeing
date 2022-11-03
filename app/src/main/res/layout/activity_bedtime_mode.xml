@@ -6,21 +6,129 @@
 	android:layout_height="match_parent"
 	tools:context=".prefs.BedtimeMode">
 
-	<Button
-		android:id="@+id/button"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:backgroundTint="?android:attr/colorAccent"
-		android:text="greyscale"
-		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toTopOf="parent" />
 
-	<Button
-		android:id="@+id/button2"
-		android:layout_width="wrap_content"
+	<androidx.constraintlayout.widget.ConstraintLayout
+		android:id="@+id/constraintLayout3"
+		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
-		android:backgroundTint="?android:attr/colorAccent"
-		android:text="color"
-		app:layout_constraintStart_toEndOf="@+id/button"
-		app:layout_constraintTop_toTopOf="parent" />
+		android:animateLayoutChanges="true"
+		android:background="@color/cardview_daynight_background"
+		android:padding="10dp"
+		app:layout_constraintEnd_toEndOf="parent"
+		app:layout_constraintStart_toStartOf="parent"
+		app:layout_constraintTop_toTopOf="parent">
+
+		<androidx.constraintlayout.widget.ConstraintLayout
+			android:id="@+id/bedModeHeader"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			app:layout_constraintStart_toStartOf="parent"
+			app:layout_constraintTop_toTopOf="parent">
+
+			<ImageView
+				android:id="@+id/bedModeIco"
+				android:layout_width="48dp"
+				android:layout_height="48dp"
+				android:contentDescription="@string/bed_icon_content_desc"
+				android:src="@drawable/baseline_bedtime_24"
+				app:layout_constraintBottom_toBottomOf="parent"
+				app:layout_constraintStart_toStartOf="parent"
+				app:layout_constraintTop_toTopOf="parent" />
+
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="@string/bedtime_mode"
+				android:textAppearance="@style/TextAppearance.AppCompat.Headline"
+				android:textColor="?android:attr/colorAccent"
+				app:layout_constraintBottom_toBottomOf="parent"
+				app:layout_constraintEnd_toEndOf="parent"
+				app:layout_constraintStart_toEndOf="@+id/bedModeIco"
+				app:layout_constraintTop_toTopOf="parent" />
+		</androidx.constraintlayout.widget.ConstraintLayout>
+
+		<Button
+			android:id="@+id/bedModeToggle"
+			style="@style/Widget.AppCompat.Button.Colored"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="@string/enable"
+			android:layout_marginTop="40dp"
+			android:animateLayoutChanges="true"
+			app:layout_constraintBottom_toBottomOf="parent"
+			app:layout_constraintEnd_toEndOf="parent"
+			app:layout_constraintHorizontal_bias="0.2"
+			app:layout_constraintStart_toStartOf="parent"
+			app:layout_constraintTop_toBottomOf="@+id/bedModeHeader"/>
+
+		<androidx.constraintlayout.widget.ConstraintLayout
+			android:id="@+id/constraintLayout2"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="54dp"
+			android:animateLayoutChanges="true"
+			app:layout_constraintEnd_toEndOf="parent"
+			app:layout_constraintStart_toEndOf="@+id/bedModeToggle"
+			app:layout_constraintTop_toBottomOf="@+id/bedModeHeader">
+
+			<TextView
+				android:id="@+id/schedule1"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="@string/schedule"
+				android:textColor="?android:attr/colorAccent"
+				app:layout_constraintBottom_toBottomOf="parent"
+				app:layout_constraintEnd_toEndOf="parent"
+				app:layout_constraintHorizontal_bias="0.0"
+				app:layout_constraintStart_toStartOf="parent"
+				app:layout_constraintTop_toTopOf="parent"
+				app:layout_constraintVertical_bias="0.0" />
+		</androidx.constraintlayout.widget.ConstraintLayout>
+
+	</androidx.constraintlayout.widget.ConstraintLayout>
+
+	<androidx.constraintlayout.widget.ConstraintLayout
+		android:id="@+id/constraintLayout4"
+		android:layout_width="match_parent"
+		android:layout_height="0dp"
+		android:orientation="horizontal"
+		app:layout_constraintBottom_toBottomOf="parent"
+		app:layout_constraintTop_toBottomOf="@+id/constraintLayout3">
+
+		<LinearLayout
+			android:id="@+id/greyscaleCheckbox"
+			android:clickable="true"
+			android:layout_width="match_parent"
+			android:layout_height="0dp"
+			android:gravity="start|center_vertical"
+			android:orientation="horizontal"
+			app:layout_constraintEnd_toEndOf="parent"
+			app:layout_constraintStart_toStartOf="parent"
+			app:layout_constraintTop_toTopOf="parent">
+
+			<ImageView
+				android:id="@+id/imageView"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_weight="0"
+				app:srcCompat="@drawable/baseline_gradient_24" />
+
+			<TextView
+				android:id="@+id/textView2"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_weight="1"
+				android:textSize="20sp"
+				android:text="@string/greyscale" />
+
+			<CheckBox
+				android:id="@+id/checkBox2"
+				android:clickable="false"
+				android:layout_width="32dp"
+				android:layout_height="32dp"
+				android:button="@null"
+				android:background="?android:attr/listChoiceIndicatorMultiple"
+				android:layout_weight="0" />
+		</LinearLayout>
+	</androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -18,6 +18,8 @@ class State(private val value: Int) {
 		const val STATE_APP_TIMER_EXPIRED = 64
 		/* App timer break */
 		const val STATE_APP_TIMER_BREAK = 128
+		/* Bedtime mode enabled */
+		const val STATE_BED_MODE = 256
 	}
 
 	private var valid: Boolean = true
@@ -76,5 +78,9 @@ class State(private val value: Int) {
 
 	fun isAppTimerBreak(): Boolean {
 		return isPresent(STATE_APP_TIMER_BREAK)
+	}
+
+	fun isBedtimeModeEnabled(): Boolean {
+		return isPresent(STATE_BED_MODE)
 	}
 }
