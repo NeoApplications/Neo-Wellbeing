@@ -48,14 +48,10 @@ public class BedtimeMode extends AppCompatActivity {
 			boolean b = !prefs.getBoolean("greyscale", false);
 			c.setChecked(b);
 			boolean g = tw.getState(false).isBedtimeModeEnabled();
-			if (g) {
-				tw.setBedtimeMode(false);
-			}
 			prefs.edit().putBoolean("greyscale", b).apply();
 			if (g) {
-				tw.setBedtimeMode(true);
+				tw.getCdm().setSaturationLevel(b ? 0 : 100);
 			}
-
 		});
 		TextView schedule = findViewById(R.id.schedule1);
 		schedule.setOnClickListener(v -> {

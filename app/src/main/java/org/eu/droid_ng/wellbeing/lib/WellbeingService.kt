@@ -92,13 +92,13 @@ class WellbeingService(private val context: Context) {
 		const val INTENT_ACTION_QUIT_BED = "org.eu.droid_ng.wellbeing.QUIT_BED"
 		const val INTENT_ACTION_QUIT_FOCUS = "org.eu.droid_ng.wellbeing.QUIT_FOCUS"
 		const val INTENT_ACTION_UNSUSPEND_ALL = "org.eu.droid_ng.wellbeing.UNSUSPEND_ALL"
-		@JvmField val breakTimeOptions = intArrayOf(1, 3, 5, 10, 15)
+		@JvmField val breakTimeOptions = intArrayOf(1, 3, 5, 10, 15) // keep in sync with getUseAppForString
 	}
 
 	private val handler = Handler.createAsync(context.mainLooper)
 	private val pm = context.packageManager
 	private val pmd = PackageManagerDelegate(pm)
-	private val cdm = PackageManagerDelegate.getColorDisplayManager(context)
+	val cdm: PackageManagerDelegate.IColorDisplayManager = PackageManagerDelegate.getColorDisplayManager(context)
 	@JvmField val usm = context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
 
 	@JvmField var focusModeAllApps = true
@@ -106,6 +106,7 @@ class WellbeingService(private val context: Context) {
 	@JvmField var focusModeBreakTimeNotification = -1
 	@JvmField var manualSuspendDialog = true
 	@JvmField var manualSuspendAllApps = true
+	@JvmField var appTimerDialogBreakTime = -1
 
 	private fun loadSettings() {
 		val prefs = context.getSharedPreferences("service", 0)
@@ -114,6 +115,7 @@ class WellbeingService(private val context: Context) {
 		manualSuspendDialog = prefs.getBoolean("manual_dialog", manualSuspendDialog)
 		manualSuspendAllApps = prefs.getBoolean("manual_all", manualSuspendAllApps)
 		focusModeAllApps = prefs.getBoolean("focus_all", focusModeAllApps)
+		appTimerDialogBreakTime = Integer.parseInt(prefs.getString("app_timer_dialog", appTimerDialogBreakTime.toString()) ?: appTimerDialogBreakTime.toString())
 	}
 
 	init {
@@ -412,6 +414,20 @@ class WellbeingService(private val context: Context) {
 		}
 	}
 
+	private fun getUseAppForString(time: Int): Int {
+		// keep in sync with breakTimeOptions
+		return when (time) {
+			1 -> R.string.break_dialog_1
+			3 -> R.string.break_dialog_3
+			5 -> R.string.break_dialog_5
+			10 -> R.string.break_dialog_10
+			15 -> R.string.break_dialog_15
+			else -> {
+				throw IllegalArgumentException("$time needs to be in breakTimeOptions list")
+			}
+		}
+	}
+
 	fun onNotificationActionClick(action: String) {
 		when (action) {
 			INTENT_ACTION_UNSUSPEND_ALL -> {
@@ -430,7 +446,7 @@ class WellbeingService(private val context: Context) {
 				setBedtimeMode(false)
 			}
 			else -> {
-				BUG("invalid notification action")
+				BUG("invalid notification action: $action")
 			}
 		}
 	}
@@ -448,7 +464,7 @@ class WellbeingService(private val context: Context) {
 				.setTitle(R.string.focus_mode_enabled)
 				.setMessage(context.getString(R.string.focus_mode_dialog, label))
 				.setIcon(R.drawable.ic_focus_mode)
-				.setNeutralButtonText(if (focusModeBreakTimeDialog == -1) R.string.dialog_btn_settings else context.resources.getIdentifier("break_dialog_$focusModeBreakTimeDialog", "string", context.packageName))
+				.setNeutralButtonText(if (focusModeBreakTimeDialog == -1) R.string.dialog_btn_settings else getUseAppForString(focusModeBreakTimeDialog))
 				.setNeutralButtonAction(if (focusModeBreakTimeDialog == -1) SuspendDialogInfo.BUTTON_ACTION_MORE_DETAILS else SuspendDialogInfo.BUTTON_ACTION_UNSUSPEND)
 				.build()
 			pmd.setPackagesSuspended(arrayOf(packageName), true, null, null, di)
@@ -462,13 +478,12 @@ class WellbeingService(private val context: Context) {
 				.build()
 			pmd.setPackagesSuspended(arrayOf(packageName), true, null, null, di)
 		} else if (state.isAppTimerExpired() && !state.isAppTimerBreak()) {
-			val dialogBreakTime = -1 //TODO
 			pmd.setPackagesSuspended(
 				arrayOf(packageName), true, null, null, SuspendDialogInfo.Builder()
 					.setTitle(R.string.app_timers)
 					.setMessage(context.getString(R.string.app_timer_exceed_f, pm.getApplicationLabel(pm.getApplicationInfo(packageName, 0))))
-					.setNeutralButtonText(if (dialogBreakTime == -1) R.string.dialog_btn_settings else context.resources.getIdentifier("break_dialog_$dialogBreakTime", "string", context.packageName))
-					.setNeutralButtonAction(if (dialogBreakTime == -1) SuspendDialogInfo.BUTTON_ACTION_MORE_DETAILS else SuspendDialogInfo.BUTTON_ACTION_UNSUSPEND)
+					.setNeutralButtonText(if (appTimerDialogBreakTime == -1) R.string.dialog_btn_settings else getUseAppForString(appTimerDialogBreakTime))
+					.setNeutralButtonAction(if (appTimerDialogBreakTime == -1) SuspendDialogInfo.BUTTON_ACTION_MORE_DETAILS else SuspendDialogInfo.BUTTON_ACTION_UNSUSPEND)
 					.setIcon(R.drawable.ic_focus_mode).build()
 			)
 		} else {

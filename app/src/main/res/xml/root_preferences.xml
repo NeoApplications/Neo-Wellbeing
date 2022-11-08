@@ -26,6 +26,18 @@
 
 	</PreferenceCategory>
 
+	<PreferenceCategory app:title="@string/app_timers">
+
+		<ListPreference
+			app:defaultValue="-1"
+			app:entries="@array/break_entries"
+			app:entryValues="@array/break_values"
+			app:key="app_timer_dialog"
+			app:title="@string/focus_mode_pref_dialog"
+			app:useSimpleSummaryProvider="true" />
+
+	</PreferenceCategory>
+
 	<PreferenceCategory app:title="@string/manually">
 
 		<SwitchPreferenceCompat

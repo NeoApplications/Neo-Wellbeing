@@ -33,5 +33,7 @@ public class ScheduleActivity extends AppCompatActivity {
 		disable.setChecked(c == 0);
 		sched.setChecked(c == 1);
 		schedc.setChecked(c == 2);
+
+
 	}
 }
