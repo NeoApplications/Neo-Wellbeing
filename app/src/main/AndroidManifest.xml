@@ -85,6 +85,7 @@
 	<uses-permission android:name="android.permission.ACCESS_AMBIENT_CONTEXT_EVENT" />
 	<uses-permission android:name="android.permission.START_CROSS_PROFILE_ACTIVITIES"
 		tools:ignore="ProtectedPermissions" />
+	<uses-permission android:name="android.permission.USE_EXACT_ALARM"/>
 
 	<application
 		android:allowBackup="false"
@@ -171,6 +172,10 @@
 			android:exported="false" />
 		<receiver
 			android:name=".broadcast.NotificationBroadcastReciever"
+			android:enabled="true"
+			android:exported="false" />
+		<receiver
+			android:name=".broadcast.AlarmFiresBroadcastReciever"
 			android:enabled="true"
 			android:exported="false" />
 

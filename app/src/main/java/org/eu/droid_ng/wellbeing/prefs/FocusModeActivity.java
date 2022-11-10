@@ -1,7 +1,5 @@
 package org.eu.droid_ng.wellbeing.prefs;
 
-import static org.eu.droid_ng.wellbeing.lib.BugUtils.BUG;
-
 import android.animation.LayoutTransition;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -36,7 +34,7 @@ public class FocusModeActivity extends AppCompatActivity {
 
 		TextView schedule = findViewById(R.id.schedule);
 		schedule.setOnClickListener(v -> {
-			startActivity(new Intent(this, ScheduleActivity.class).putExtra("type", "focus_mode"));
+			startActivity(new Intent(this, ScheduleActivity.class).putExtra("type", "focus_mode").putExtra("name", getString(R.string.focus_mode)));
 		});
 
 		WellbeingService tw = WellbeingService.get();

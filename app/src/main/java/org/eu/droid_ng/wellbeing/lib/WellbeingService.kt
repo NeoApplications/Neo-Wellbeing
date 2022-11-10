@@ -3,9 +3,12 @@ package org.eu.droid_ng.wellbeing.lib
 import android.app.Activity
 import android.app.PendingIntent
 import android.app.usage.UsageStatsManager
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.os.BatteryManager
 import android.os.Handler
 import android.util.Log
 import android.widget.Toast
@@ -25,6 +28,7 @@ import java.time.Duration
 import java.util.*
 import java.util.concurrent.TimeUnit
 import java.util.function.Consumer
+import java.util.stream.Collectors
 
 
 class WellbeingService(private val context: Context) {
@@ -33,7 +37,7 @@ class WellbeingService(private val context: Context) {
 	fun bindToHost(newhost: WellbeingStateHost?) {
 		host = newhost
 		if (host != null) {
-			onServiceStartedCallbacks.toArray(arrayOf<Runnable>()).forEach {
+			onServiceStartedCallbacks.toTypedArray().forEach {
 				it.run()
 				onServiceStartedCallbacks.remove(it)
 			}
@@ -101,12 +105,19 @@ class WellbeingService(private val context: Context) {
 	val cdm: PackageManagerDelegate.IColorDisplayManager = PackageManagerDelegate.getColorDisplayManager(context)
 	@JvmField val usm = context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
 
+	private val oidMap = context.getSharedPreferences("AppTimersInternal", 0)
+	private val config = context.getSharedPreferences("appTimers", 0)
+	private val sched = context.getSharedPreferences("sched", 0)
+
 	@JvmField var focusModeAllApps = true
 	@JvmField var focusModeBreakTimeDialog = -1
 	@JvmField var focusModeBreakTimeNotification = -1
 	@JvmField var manualSuspendDialog = true
 	@JvmField var manualSuspendAllApps = true
 	@JvmField var appTimerDialogBreakTime = -1
+
+	private var triggers: Set<Trigger> = HashSet()
+	private var conditions: Set<Condition> = HashSet()
 
 	private fun loadSettings() {
 		val prefs = context.getSharedPreferences("service", 0)
@@ -116,20 +127,78 @@ class WellbeingService(private val context: Context) {
 		manualSuspendAllApps = prefs.getBoolean("manual_all", manualSuspendAllApps)
 		focusModeAllApps = prefs.getBoolean("focus_all", focusModeAllApps)
 		appTimerDialogBreakTime = Integer.parseInt(prefs.getString("app_timer_dialog", appTimerDialogBreakTime.toString()) ?: appTimerDialogBreakTime.toString())
+
+		loadSchedcfg()
+	}
+
+	private fun loadSchedcfg() {
+		sched.getStringSet("triggers", HashSet())?.stream()?.map { raw ->
+			val values = raw.split(";;")
+			if (values.size < 2) throw IllegalStateException("invalid value $raw")
+			return@map when (values[0]) {
+				"charger" -> ChargerTriggerCondition(values[1])
+				"time" -> {
+					TimeTriggerCondition(values[1], values[2].toInt(), values[3].toInt(), values[4].toInt(), values[5].toInt())
+				}
+				else -> {
+					throw IllegalStateException("invalid trigger type ${values[0]}")
+				}
+			}
+		}?.collect(Collectors.toSet())?.let { triggers = it }
+
+		sched.getStringSet("conditions", HashSet())?.stream()?.map { raw ->
+			val values = raw.split(";;")
+			if (values.size < 2) throw IllegalStateException("invalid value $raw")
+			return@map when (values[0]) {
+				"charger" -> ChargerTriggerCondition(values[1])
+				"time" -> {
+					TimeTriggerCondition(values[1], values[2].toInt(), values[3].toInt(), values[4].toInt(), values[5].toInt())
+				}
+				else -> {
+					throw IllegalStateException("invalid condition type ${values[0]}")
+				}
+			}
+		}?.collect(Collectors.toSet())?.let { conditions = it }
+
+		ensureSchedSetup()
+	}
+
+	private fun writeSchedcfg() {
+		val s = sched.edit().clear()
+
+		s.putStringSet("triggers", triggers.stream().map {
+			when (it) {
+				is ChargerTriggerCondition -> "charger;;${it.id}"
+				is TimeTriggerCondition -> "time;;${it.id};;${it.startHour};;${it.startMinute};;${it.endHour};;${it.endMinute}"
+				else -> throw IllegalStateException("unknown trigger ${it::class.qualifiedName}")
+			}
+		}.collect(Collectors.toSet()))
+		s.putStringSet("conditions", conditions.stream().map {
+			when (it) {
+				is ChargerTriggerCondition -> "charger;;${it.id}"
+				is TimeTriggerCondition -> "time;;${it.id};;${it.startHour};;${it.startMinute};;${it.endHour};;${it.endMinute}"
+				else -> throw IllegalStateException("unknown trigger ${it::class.qualifiedName}")
+			}
+		}.collect(Collectors.toSet()))
+
+		s.apply()
 	}
 
 	init {
 		Utils.clearUsageStatsCache(usm, true)
 		loadSettings()
+
+		context.registerReceiver(object : BroadcastReceiver() {
+			override fun onReceive(p0: Context?, p1: Intent?) {
+				onUpdatePowerConnection()
+			}
+		}, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
 	}
 
 	private var bedtimeModeEnabled = false
 	private var isFocusModeEnabled = false
 	private var isFocusModeBreak /* global break */ = false
 	private val perAppState: HashMap<String /* packageName */, Int /* does NOT contain global flags like FOCUS_MODE_ENABLED or FOCUS_MODE_GLOBAL_BREAK, so always use getAppState() when reading */> = HashMap()
-
-	private val oidMap = context.getSharedPreferences("AppTimersInternal", 0)
-	private val config = context.getSharedPreferences("appTimers", 0)
 
 	// Service / Global state. Do not confuse with per-app state, that's using the same values.
 	@JvmOverloads
@@ -838,4 +907,96 @@ class WellbeingService(private val context: Context) {
 		setAppTimerInternal(uoid, toObserve, timeLimitInternal, timeUsed)
 	}
 	// end time limit core
+
+	fun onUpdatePowerConnection() {
+		val batteryStatus: Intent? = IntentFilter(Intent.ACTION_BATTERY_CHANGED).let { context.registerReceiver(null, it) }
+
+		val chargePlug: Int = batteryStatus?.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1) ?: -1
+		val charging = chargePlug == BatteryManager.BATTERY_PLUGGED_USB ||
+				chargePlug == BatteryManager.BATTERY_PLUGGED_AC
+
+		doTrigger(!charging) { it is ChargerTriggerCondition }
+	}
+
+	private fun ensureSchedSetup() {
+		triggers.forEach { it.setup(context, this) }
+	}
+
+	private fun triggerFired(expire: Boolean, trigger: Trigger) {
+		when (trigger.id) {
+			"bedtime_mode" -> {
+				if (expire && bedtimeModeEnabled) {
+					setBedtimeMode(false)
+				} else if (!expire) {
+					setBedtimeMode(true)
+				}
+			}
+			"focus_mode" -> {
+				if (expire && isFocusModeEnabled) {
+					disableFocusMode()
+				} else if (!expire) {
+					enableFocusMode()
+				}
+			}
+			else -> {
+				BUG("invalid trigger id ${trigger.id} expire=$expire")
+			}
+		}
+	}
+
+	private fun doTrigger(expire: Boolean, condition: (Trigger) -> Boolean) {
+		triggers.forEach { fired ->
+			if (condition(fired)) {
+				var isOk = true
+				if (!expire) {
+					conditions.forEach {
+						if (it.id == fired.id) {
+							isOk = isOk && it.isFulfilled(context, this)
+						}
+					}
+				}
+				if (isOk) {
+					triggerFired(expire, fired)
+				}
+			}
+		}
+	}
+
+	fun onAlarmFired(id: String) {
+		var t = false
+		val nid = if (id.startsWith("expire::")) {
+			t = true
+			id.substring(8)
+		} else id
+		doTrigger(t) { it is TimeTriggerCondition && it.id == nid }
+	}
+
+	fun setTriggersForId(id: String, triggersIn: Array<out Trigger>) {
+		triggers.filter { id == it.id }.forEach { it.dispose(context, this) }
+		triggers = triggers.filterNot { id == it.id }.toSet().plus(triggersIn)
+		ensureSchedSetup()
+	}
+
+	fun setConditionsForId(id: String, conditionsIn: Array<out Condition>) {
+		conditions = conditions.filterNot { id == it.id }.toSet().plus(conditionsIn)
+	}
+
+	fun getTriggersForId(id: String): List<Trigger> {
+		return triggers.filter { id == it.id }
+	}
+
+	fun getConditionsForId(id: String): List<Condition> {
+		return conditions.filter { id == it.id }
+	}
+
+	fun setTriggerConditionForId(id: String, triggerConditions: Array<TriggerCondition>) {
+		setTriggersForId(id, triggerConditions)
+		setConditionsForId(id, triggerConditions)
+		writeSchedcfg()
+	}
+
+	fun getTriggerConditionForId(id: String): List<TriggerCondition> {
+		return conditions.filter { id == it.id && it is TriggerCondition }.map { it as TriggerCondition }
+			.plus(triggers.filter { id == it.id && it is TriggerCondition }.map { it as TriggerCondition }).distinct()
+	}
 }

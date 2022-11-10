@@ -55,7 +55,7 @@ public class BedtimeMode extends AppCompatActivity {
 		});
 		TextView schedule = findViewById(R.id.schedule1);
 		schedule.setOnClickListener(v -> {
-			startActivity(new Intent(this, ScheduleActivity.class).putExtra("type", "bedtime_mode"));
+			startActivity(new Intent(this, ScheduleActivity.class).putExtra("type", "bedtime_mode").putExtra("name", getString(R.string.bedtime_mode)));
 		});
 
 		//TODO: do not disturb
