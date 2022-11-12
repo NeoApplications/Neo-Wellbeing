@@ -6,12 +6,15 @@
 
 	<LinearLayout android:layout_width="match_parent"
 		android:layout_height="wrap_content"
+		android:layout_margin="5dp"
+		android:gravity="center_horizontal"
 		android:orientation="vertical">
 
 		<LinearLayout
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:gravity="end|center_vertical"
+			android:layout_margin="5dp"
 			android:orientation="horizontal">
 
 			<ImageButton
@@ -23,8 +26,26 @@
 				android:contentDescription="@string/delete" />
 		</LinearLayout>
 
+		<org.eu.droid_ng.wellbeing.prefs.TimeSettingView
+			android:id="@+id/startTime"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:textSize="16sp" />
+
+		<org.eu.droid_ng.wellbeing.prefs.TimeSettingView
+			android:id="@+id/endTime"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:textSize="16sp" />
+
+		<org.eu.droid_ng.wellbeing.prefs.DayPicker
+			android:id="@+id/dayPicker"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content" />
+
 		<LinearLayout
 			android:id="@+id/chargerLayout"
+			android:layout_marginVertical="10dp"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:clickable="true"
@@ -49,22 +70,5 @@
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"/>
 		</LinearLayout>
-
-		<org.eu.droid_ng.wellbeing.prefs.TimeSettingView
-			android:id="@+id/startTime"
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:textSize="16sp" />
-
-		<org.eu.droid_ng.wellbeing.prefs.TimeSettingView
-			android:id="@+id/endTime"
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:textSize="16sp" />
-
-		<org.eu.droid_ng.wellbeing.prefs.DayPicker
-			android:id="@+id/dayPicker"
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content" />
 	</LinearLayout>
 </androidx.cardview.widget.CardView>

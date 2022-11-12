@@ -7,111 +7,24 @@
 	tools:context=".prefs.ScheduleActivity">
 
 	<LinearLayout
-		android:id="@+id/layoutDisable"
-		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:clickable="true"
-		android:gravity="center_vertical"
-		android:orientation="horizontal"
-		app:layout_constraintEnd_toEndOf="parent"
-		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toTopOf="parent">
-
-		<RadioButton
-			android:id="@+id/radioButtonDisable"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:background="?android:attr/listChoiceIndicatorSingle"
-			android:button="@null"
-			android:clickable="false" />
-
-		<TextView
-			android:layout_width="0dp"
-			android:layout_height="wrap_content"
-			android:layout_weight="1"
-			android:text="@string/disable"
-			android:textColor="?android:attr/textColorPrimary" />
-	</LinearLayout>
-
-	<LinearLayout
-		android:id="@+id/layoutSchedule"
-		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:clickable="true"
-		android:gravity="center_vertical"
-		android:orientation="horizontal"
-		app:layout_constraintEnd_toEndOf="parent"
-		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toBottomOf="@+id/layoutDisable">
-
-		<RadioButton
-			android:id="@+id/radioSchedule"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:background="?android:attr/listChoiceIndicatorSingle"
-			android:button="@null"
-			android:clickable="false" />
-
-		<TextView
-			android:layout_width="0dp"
-			android:layout_height="wrap_content"
-			android:layout_weight="1"
-			android:text="@string/schedule2"
-			android:textColor="?android:attr/textColorPrimary" />
-	</LinearLayout>
-
-	<LinearLayout
-		android:id="@+id/layoutCharging"
-		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:clickable="true"
-		android:gravity="center_vertical"
-		android:orientation="horizontal"
-		app:layout_constraintEnd_toEndOf="parent"
-		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toBottomOf="@+id/layoutSchedule">
-
-		<RadioButton
-			android:id="@+id/radioCharging"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:background="?android:attr/listChoiceIndicatorSingle"
-			android:button="@null"
-			android:clickable="false" />
-
-		<TextView
-			android:layout_width="0dp"
-			android:layout_height="wrap_content"
-			android:layout_weight="1"
-			android:text="@string/sched_charging"
-			android:textColor="?android:attr/textColorPrimary" />
-	</LinearLayout>
-
-	<org.eu.droid_ng.wellbeing.prefs.TimeSettingView
-		android:id="@+id/startTime"
+		android:id="@+id/cardHost"
 		android:layout_width="0dp"
-		android:layout_height="wrap_content"
-		android:textSize="16sp"
+		android:layout_height="0dp"
+		android:orientation="vertical"
+		android:visibility="gone"
+		app:layout_constraintBottom_toBottomOf="parent"
 		app:layout_constraintEnd_toEndOf="parent"
 		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toBottomOf="@+id/layoutCharging" />
+		app:layout_constraintTop_toTopOf="parent" />
 
-	<org.eu.droid_ng.wellbeing.prefs.TimeSettingView
-		android:id="@+id/endTime"
-		android:layout_width="0dp"
+	<TextView
+		android:id="@+id/noCardNotification"
+		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:textSize="16sp"
-		app:layout_constraintEnd_toEndOf="parent"
-		app:layout_constraintHorizontal_bias="1.0"
-		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toBottomOf="@+id/startTime" />
-
-	<org.eu.droid_ng.wellbeing.prefs.DayPicker
-		android:id="@+id/dayPicker"
-		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
+		android:text="@string/add_schedule_info"
+		app:layout_constraintBottom_toBottomOf="parent"
 		app:layout_constraintEnd_toEndOf="parent"
 		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toBottomOf="@+id/endTime" />
+		app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

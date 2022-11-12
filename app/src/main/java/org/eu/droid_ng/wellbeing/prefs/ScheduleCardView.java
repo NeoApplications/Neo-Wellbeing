@@ -36,7 +36,7 @@ public class ScheduleCardView extends FrameLayout {
 	DayPicker daypicker;
 	CheckBox checkBox;
 	boolean charger;
-	Consumer<TriggerCondition> onValuesChangedCallback;
+	Runnable onValuesChangedCallback;
 	Runnable onDeleteCardCallback;
 	String id;
 
@@ -54,24 +54,24 @@ public class ScheduleCardView extends FrameLayout {
 		startTime.setExtraText(getContext().getString(R.string.startTime));
 		startTime.setOnTimeChangedListener(t -> {
 			if (onValuesChangedCallback != null) {
-				onValuesChangedCallback.accept(getData());
+				onValuesChangedCallback.run();
 			}
 		});
 		endTime.setExtraText(getContext().getString(R.string.endTime));
 		endTime.setOnTimeChangedListener(t -> {
 			if (onValuesChangedCallback != null) {
-				onValuesChangedCallback.accept(getData());
+				onValuesChangedCallback.run();
 			}
 		});
 		daypicker.setOnValuesChangeListener(values -> {
 			if (onValuesChangedCallback != null) {
-				onValuesChangedCallback.accept(getData());
+				onValuesChangedCallback.run();
 			}
 		});
 		findViewById(R.id.chargerLayout).setOnClickListener(v -> {
-			checkBox.setChecked(charger = !charger);
+			setCharger(!charger);
 			if (onValuesChangedCallback != null) {
-				onValuesChangedCallback.accept(getData());
+				onValuesChangedCallback.run();
 			}
 		});
 		findViewById(R.id.delete).setOnClickListener(v -> {
@@ -85,7 +85,7 @@ public class ScheduleCardView extends FrameLayout {
 		this.id = id;
 	}
 
-	public void setOnValuesChangedCallback(Consumer<TriggerCondition> onValuesChangedCallback) {
+	public void setOnValuesChangedCallback(Runnable onValuesChangedCallback) {
 		this.onValuesChangedCallback = onValuesChangedCallback;
 	}
 
@@ -93,29 +93,25 @@ public class ScheduleCardView extends FrameLayout {
 		this.onDeleteCardCallback = onDeleteCardCallback;
 	}
 
-	public TriggerCondition getData() {
+	public TimeTriggerCondition getTimeData() {
 		LocalTime s = startTime.getData();
 		LocalTime e = endTime.getData();
 		boolean[] w = daypicker.getValues();
-		TimeTriggerCondition t = new TimeTriggerCondition(id, s.getHour(), s.getMinute(), e.getHour(), e.getMinute(), w);
-		if (charger) {
-			//return new TimeChargerTriggerCondition(id, t, new ChargerTriggerCondition(id));
-		}
-		return t;
+		return new TimeTriggerCondition(id, s.getHour(), s.getMinute(), e.getHour(), e.getMinute(), w);
 	}
 
-	public void setData(TriggerCondition tt) {
-		TimeTriggerCondition t;
-		/*if (tt instanceof TimeChargerTriggerCondition) {
-			charger = true;
-			t = ((TimeChargerTriggerCondition)tt).getTimeTriggerCondition();
-		} else {*/
-			t = (TimeTriggerCondition)tt;
-		//}
+	public boolean isCharger() {
+		return charger;
+	}
+
+	public void setCharger(boolean charger) {
+		this.charger = charger;
+		checkBox.setChecked(charger);
+	}
+
+	public void setTimeData(TimeTriggerCondition t) {
 		startTime.setData(LocalTime.of(t.getStartHour(), t.getStartMinute()));
 		endTime.setData(LocalTime.of(t.getEndHour(), t.getEndMinute()));
 		daypicker.setValues(t.getWeekdays());
-
-		checkBox.setChecked(charger);
 	}
 }
