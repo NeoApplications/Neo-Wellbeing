@@ -78,7 +78,7 @@ public class SettingsActivity extends AppCompatActivity {
 											Intent shareIntent = Intent.createChooser(sendIntent, null);
 											startActivity(shareIntent);
 										})
-										.setNeutralButton(R.string.copy, (d, which) -> {
+										.setNeutralButton(R.string.copy_to_clipboard, (d, which) -> {
 											ClipboardManager clipboard = (ClipboardManager) requireActivity().getSystemService(Context.CLIPBOARD_SERVICE);
 											ClipData clip = ClipData.newPlainText("Bug report", value);
 											clipboard.setPrimaryClip(clip);

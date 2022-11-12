@@ -66,13 +66,12 @@
 	<string name="bug_title">Open bug viewer</string>
 	<string name="bug_desc">That you found this hidden entry means that you found an bug in the program. Please click here for more details. Thank you for using Neo Wellbeing :)</string>
 	<string name="share">Share</string>
-	<string name="copy">Copy</string>
+	<string name="copy_to_clipboard">Copy</string>
 	<string name="copied">Copied to clipboard</string>
 	<string name="bug_viewer">Bug viewer</string>
 	<string name="bed_icon_content_desc">Bedtime mode</string>
 	<string name="greyscale">Greyscale</string>
-	<string name="sched_charging">Based on schedule, only while charging</string>
-	<string name="schedule2">Based on schedule</string>
+	<string name="sched_charging">Only while charging</string>
 	<string name="startTime">Start time:</string>
 	<string name="endTime">End time:</string>
 	<string name="dpicker_monday">M</string>
@@ -82,4 +81,7 @@
 	<string name="dpicker_friday">F</string>
 	<string name="dpicker_saturday">S</string>
 	<string name="dpicker_sunday">S</string>
+	<string name="add_schedule">Add schedule</string>
+	<string name="delete">Delete</string>
+	<string name="add_schedule_info">Nothing here yet, try to add an schedule</string>
 </resources>
