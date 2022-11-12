@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="horizontal"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent">
+
+	<ToggleButton
+		android:id="@+id/dayPickerDay1"
+		android:layout_width="35dp"
+		android:layout_height="35dp"
+		android:layout_marginLeft="3dp"
+		android:layout_marginRight="3dp"
+		android:textColor="@drawable/dpicker_text_color"
+		android:background="@drawable/dpicker_background" />
+
+	<ToggleButton
+		android:id="@+id/dayPickerDay2"
+		android:layout_width="35dp"
+		android:layout_height="35dp"
+		android:layout_marginLeft="3dp"
+		android:layout_marginRight="3dp"
+		android:textColor="@drawable/dpicker_text_color"
+		android:background="@drawable/dpicker_background" />
+
+	<ToggleButton
+		android:id="@+id/dayPickerDay3"
+		android:layout_marginLeft="3dp"
+		android:layout_marginRight="3dp"
+		android:layout_width="35dp"
+		android:layout_height="35dp"
+		android:textColor="@drawable/dpicker_text_color"
+		android:background="@drawable/dpicker_background" />
+
+	<ToggleButton
+		android:id="@+id/dayPickerDay4"
+		android:layout_marginLeft="3dp"
+		android:layout_marginRight="3dp"
+		android:layout_width="35dp"
+		android:layout_height="35dp"
+		android:textColor="@drawable/dpicker_text_color"
+		android:background="@drawable/dpicker_background" />
+
+	<ToggleButton
+		android:id="@+id/dayPickerDay5"
+		android:layout_marginLeft="3dp"
+		android:layout_marginRight="3dp"
+		android:layout_width="35dp"
+		android:layout_height="35dp"
+		android:textColor="@drawable/dpicker_text_color"
+		android:background="@drawable/dpicker_background" />
+
+	<ToggleButton
+		android:id="@+id/dayPickerDay6"
+		android:layout_marginLeft="3dp"
+		android:layout_marginRight="3dp"
+		android:layout_width="35dp"
+		android:layout_height="35dp"
+		android:textColor="@drawable/dpicker_text_color"
+		android:background="@drawable/dpicker_background" />
+
+	<ToggleButton
+		android:id="@+id/dayPickerDay7"
+		android:layout_marginLeft="3dp"
+		android:layout_marginRight="3dp"
+		android:layout_width="35dp"
+		android:layout_height="35dp"
+		android:textColor="@drawable/dpicker_text_color"
+		android:background="@drawable/dpicker_background" />
+
+
+</LinearLayout>

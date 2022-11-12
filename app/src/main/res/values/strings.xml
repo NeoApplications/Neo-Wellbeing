@@ -75,4 +75,11 @@
 	<string name="schedule2">Based on schedule</string>
 	<string name="startTime">Start time:</string>
 	<string name="endTime">End time:</string>
+	<string name="dpicker_monday">M</string>
+	<string name="dpicker_tuesday">T</string>
+	<string name="dpicker_wednesday">W</string>
+	<string name="dpicker_thursday">T</string>
+	<string name="dpicker_friday">F</string>
+	<string name="dpicker_saturday">S</string>
+	<string name="dpicker_sunday">S</string>
 </resources>

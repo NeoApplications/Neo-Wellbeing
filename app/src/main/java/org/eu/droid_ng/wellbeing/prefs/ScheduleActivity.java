@@ -28,6 +28,7 @@ public class ScheduleActivity extends AppCompatActivity {
 
 	RadioButton disable, sched, schedc;
 	TextView startTime, endTime;
+	DayPicker daypicker;
 	String type;
 	boolean use24h;
 	int checked;
@@ -63,6 +64,7 @@ public class ScheduleActivity extends AppCompatActivity {
 		if (intent.hasExtra("defaultStartHour")) {
 			em = intent.getIntExtra("defaultEndMinute", em);
 		}
+		daypicker.setValues(new boolean[] { true, true, true, true, true, true, true });
 		if (intent.hasExtra("name")) {
 			setTitle(intent.getStringExtra("name"));
 		}
@@ -72,6 +74,7 @@ public class ScheduleActivity extends AppCompatActivity {
 		schedc = findViewById(R.id.radioCharging);
 		startTime = findViewById(R.id.textView3);
 		endTime = findViewById(R.id.textView4);
+		daypicker = findViewById(R.id.dayPicker);
 		findViewById(R.id.layoutDisable).setOnClickListener(v -> setChecked(0));
 		findViewById(R.id.layoutSchedule).setOnClickListener(v -> setChecked(1));
 		findViewById(R.id.layoutCharging).setOnClickListener(v -> setChecked(2));
@@ -85,6 +88,7 @@ public class ScheduleActivity extends AppCompatActivity {
 			sm = ttc.getStartMinute();
 			eh = ttc.getEndHour();
 			em = ttc.getEndMinute();
+			daypicker.setValues(ttc.getWeekdays());
 			if (ta.stream().anyMatch(item -> item instanceof ChargerTriggerCondition)) {
 				c = 2;
 			} else {
@@ -100,8 +104,12 @@ public class ScheduleActivity extends AppCompatActivity {
 		setClockTextViewTime(getString(R.string.endTime), endTime, LocalTime.of(eh, em));
 		startTime.setOnClickListener(v -> onClickClockTextViewDialog(false));
 		endTime.setOnClickListener(v -> onClickClockTextViewDialog(true));
+		daypicker.setOnValuesChangeListener(values -> {
+			setChecked(checked); // make service take care of it :)
+		});
 		startTime.setVisibility(c != 0 ? View.VISIBLE : View.GONE);
 		endTime.setVisibility(c != 0 ? View.VISIBLE : View.GONE);
+		daypicker.setVisibility(c != 0 ? View.VISIBLE : View.GONE);
 	}
 
 	private void setChecked(int c) {
@@ -111,15 +119,16 @@ public class ScheduleActivity extends AppCompatActivity {
 		schedc.setChecked(c == 2);
 		startTime.setVisibility(c != 0 ? View.VISIBLE : View.GONE);
 		endTime.setVisibility(c != 0 ? View.VISIBLE : View.GONE);
+		daypicker.setVisibility(c != 0 ? View.VISIBLE : View.GONE);
 
 		WellbeingService tw = WellbeingService.get();
 
 		switch (c) {
 			case 1:
-				tw.setTriggerConditionForId(type, new TriggerCondition[] { new TimeTriggerCondition(type, sh, sm, eh, em) });
+				tw.setTriggerConditionForId(type, new TriggerCondition[] { new TimeTriggerCondition(type, sh, sm, eh, em, daypicker.getValues()) });
 				break;
 			case 2:
-				tw.setTriggerConditionForId(type, new TriggerCondition[] { new ChargerTriggerCondition(type), new TimeTriggerCondition(type, sh, sm, eh, em) });
+				tw.setTriggerConditionForId(type, new TriggerCondition[] { new ChargerTriggerCondition(type), new TimeTriggerCondition(type, sh, sm, eh, em, daypicker.getValues()) });
 				break;
 			case 0:
 			default:

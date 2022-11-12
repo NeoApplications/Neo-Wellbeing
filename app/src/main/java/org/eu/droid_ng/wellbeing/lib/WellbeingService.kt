@@ -138,7 +138,8 @@ class WellbeingService(private val context: Context) {
 			return@map when (values[0]) {
 				"charger" -> ChargerTriggerCondition(values[1])
 				"time" -> {
-					TimeTriggerCondition(values[1], values[2].toInt(), values[3].toInt(), values[4].toInt(), values[5].toInt())
+					val bools = BooleanArray(7); for (i in bools.indices) if (values[6].toInt() and (1 shl i) != 0) bools[i] = true // bitmask -> boolean[]
+					TimeTriggerCondition(values[1], values[2].toInt(), values[3].toInt(), values[4].toInt(), values[5].toInt(), bools)
 				}
 				else -> {
 					throw IllegalStateException("invalid trigger type ${values[0]}")
@@ -152,7 +153,8 @@ class WellbeingService(private val context: Context) {
 			return@map when (values[0]) {
 				"charger" -> ChargerTriggerCondition(values[1])
 				"time" -> {
-					TimeTriggerCondition(values[1], values[2].toInt(), values[3].toInt(), values[4].toInt(), values[5].toInt())
+					val bools = BooleanArray(7); for (i in bools.indices) if (values[6].toInt() and (1 shl i) != 0) bools[i] = true // bitmask -> boolean[]
+					TimeTriggerCondition(values[1], values[2].toInt(), values[3].toInt(), values[4].toInt(), values[5].toInt(), bools)
 				}
 				else -> {
 					throw IllegalStateException("invalid condition type ${values[0]}")
@@ -169,14 +171,20 @@ class WellbeingService(private val context: Context) {
 		s.putStringSet("triggers", triggers.stream().map {
 			when (it) {
 				is ChargerTriggerCondition -> "charger;;${it.id}"
-				is TimeTriggerCondition -> "time;;${it.id};;${it.startHour};;${it.startMinute};;${it.endHour};;${it.endMinute}"
+				is TimeTriggerCondition -> {
+					var bits = 0; for (i in 0 until it.weekdays.size) if (it.weekdays[i]) bits = bits or (1 shl i) // boolean[] -> bitmask
+					"time;;${it.id};;${it.startHour};;${it.startMinute};;${it.endHour};;${it.endMinute};;${bits}"
+				}
 				else -> throw IllegalStateException("unknown trigger ${it::class.qualifiedName}")
 			}
 		}.collect(Collectors.toSet()))
 		s.putStringSet("conditions", conditions.stream().map {
 			when (it) {
 				is ChargerTriggerCondition -> "charger;;${it.id}"
-				is TimeTriggerCondition -> "time;;${it.id};;${it.startHour};;${it.startMinute};;${it.endHour};;${it.endMinute}"
+				is TimeTriggerCondition -> {
+					var bits = 0; for (i in 0 until it.weekdays.size) if (it.weekdays[i]) bits = bits or (1 shl i) // boolean[] -> bitmask
+					"time;;${it.id};;${it.startHour};;${it.startMinute};;${it.endHour};;${it.endMinute};;${bits}"
+				}
 				else -> throw IllegalStateException("unknown trigger ${it::class.qualifiedName}")
 			}
 		}.collect(Collectors.toSet()))
