@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.BatteryManager
-import android.util.Log
 import org.eu.droid_ng.wellbeing.broadcast.AlarmFiresBroadcastReciever
 import java.time.DayOfWeek
 import java.time.LocalDateTime
@@ -35,6 +34,56 @@ class ScheduleUtils {
 			am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,
 				time.withSecond(0).atZone(ZoneId.systemDefault()).toEpochSecond() * 1000L, pi)
 		}
+
+		private fun triggerConditionFromString(raw: String, delim: String = ";;"): TriggerCondition? {
+			val values = raw.split(delim)
+			if (values.size < 2) throw IllegalStateException("invalid value $raw")
+			return when (values[0]) {
+				"charger" -> ChargerTriggerCondition(values[1])
+				"time" -> {
+					val bools = BooleanArray(7); for (i in bools.indices) if (values[6].toInt() and (1 shl i) != 0) bools[i] = true // bitmask -> boolean[]
+					TimeTriggerCondition(values[1], values[2].toInt(), values[3].toInt(), values[4].toInt(), values[5].toInt(), bools)
+				}
+				"tcdual" ->
+					TimeChargerTriggerCondition(values[1],
+						triggerConditionFromString(values[2], ";") as TimeTriggerCondition,
+						triggerConditionFromString(values[3], ";") as ChargerTriggerCondition
+					)
+				else -> {
+					null
+				}
+			}
+		}
+
+		fun triggerFromString(raw: String): Trigger {
+			val values = raw.split(";;")
+			if (values.size < 2) throw IllegalStateException("invalid value $raw")
+			val t = when (values[0]) {
+				"charger", "time", "tcdual" -> {
+					triggerConditionFromString(raw)
+				}
+				else -> {
+					null
+				}
+			}
+			if (t != null) return t
+			throw IllegalStateException("invalid trigger type ${values[0]}")
+		}
+
+		fun conditionFromString(raw: String): Condition {
+			val values = raw.split(";;")
+			if (values.size < 2) throw IllegalStateException("invalid value $raw")
+			val t = when (values[0]) {
+				"charger", "time", "tcdual" -> {
+					triggerConditionFromString(raw)
+				}
+				else -> {
+					null
+				}
+			}
+			if (t != null) return t
+			throw IllegalStateException("invalid condition type ${values[0]}")
+		}
 	}
 }
 
@@ -42,16 +91,47 @@ interface Trigger {
 	val id: String
 	fun setup(applicationContext: Context, service: WellbeingService)
 	fun dispose(applicationContext: Context, service: WellbeingService)
+	fun toString(seperator: String): String
 }
 
 interface Condition {
 	val id: String
 	fun isFulfilled(applicationContext: Context, service: WellbeingService): Boolean
+	fun toString(seperator: String): String
 }
 
 interface TriggerCondition : Trigger, Condition
 
-class TimeTriggerCondition(
+abstract class Container(override val id: String, val name: String, val sep: String) : TriggerCondition {
+	abstract val a: Array<TriggerCondition>
+
+	fun onTrigger(condition: (Trigger) -> Boolean): Trigger? {
+		a.forEach { if (condition(it)) return it }
+		return null
+	}
+
+	override fun setup(applicationContext: Context, service: WellbeingService) {
+		a.forEach { it.setup(applicationContext, service) }
+	}
+
+	override fun dispose(applicationContext: Context, service: WellbeingService) {
+		a.forEach { it.dispose(applicationContext, service) }
+	}
+
+	override fun isFulfilled(applicationContext: Context, service: WellbeingService): Boolean {
+		a.forEach {
+			if (it.isFulfilled(applicationContext, service)) return true }
+		return false
+	}
+
+	override fun toString(seperator: String): String {
+		var s = name + seperator + id
+		a.forEach { s += seperator + it.toString(sep) }
+		return s
+	}
+}
+
+open class TimeTriggerCondition(
 	override val id: String,
 	val startHour: Int,
 	val startMinute: Int,
@@ -123,6 +203,11 @@ class TimeTriggerCondition(
 		ScheduleUtils.dropAlarm(applicationContext, "expire::$id")
 	}
 
+	override fun toString(seperator: String): String {
+		var bits = 0; for (i in weekdays.indices) if (weekdays[i]) bits = bits or (1 shl i) // boolean[] -> bitmask
+		return "time$seperator$id$seperator$startHour$seperator$startMinute$seperator$endHour$seperator$endMinute$seperator$bits"
+	}
+
 	override fun isFulfilled(applicationContext: Context, service: WellbeingService): Boolean {
 		val now = LocalDateTime.now().withNano(0)
 		return (weekdays[now.dayOfWeek.ordinal] && run {
@@ -148,6 +233,10 @@ class ChargerTriggerCondition(override val id: String): TriggerCondition {
 		/* No disposal needed as we don't setup anything */
 	}
 
+	override fun toString(seperator: String): String {
+		return "charger$seperator$id"
+	}
+
 	override fun isFulfilled(applicationContext: Context, service: WellbeingService): Boolean {
 		val batteryStatus: Intent? = IntentFilter(Intent.ACTION_BATTERY_CHANGED).let { applicationContext.registerReceiver(null, it) }
 
@@ -155,4 +244,12 @@ class ChargerTriggerCondition(override val id: String): TriggerCondition {
 		return chargePlug == BatteryManager.BATTERY_PLUGGED_USB ||
 				chargePlug == BatteryManager.BATTERY_PLUGGED_AC
 	}
+}
+
+class TimeChargerTriggerCondition(
+	override val id: String,
+	val timeTriggerCondition: TimeTriggerCondition,
+	chargerCondition: ChargerTriggerCondition
+) : Container(id, "tcdual", ";") {
+	override val a: Array<TriggerCondition> = arrayOf(timeTriggerCondition, chargerCondition)
 }

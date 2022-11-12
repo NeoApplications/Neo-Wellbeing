@@ -132,62 +132,16 @@ class WellbeingService(private val context: Context) {
 	}
 
 	private fun loadSchedcfg() {
-		sched.getStringSet("triggers", HashSet())?.stream()?.map { raw ->
-			val values = raw.split(";;")
-			if (values.size < 2) throw IllegalStateException("invalid value $raw")
-			return@map when (values[0]) {
-				"charger" -> ChargerTriggerCondition(values[1])
-				"time" -> {
-					val bools = BooleanArray(7); for (i in bools.indices) if (values[6].toInt() and (1 shl i) != 0) bools[i] = true // bitmask -> boolean[]
-					TimeTriggerCondition(values[1], values[2].toInt(), values[3].toInt(), values[4].toInt(), values[5].toInt(), bools)
-				}
-				else -> {
-					throw IllegalStateException("invalid trigger type ${values[0]}")
-				}
-			}
-		}?.collect(Collectors.toSet())?.let { triggers = it }
-
-		sched.getStringSet("conditions", HashSet())?.stream()?.map { raw ->
-			val values = raw.split(";;")
-			if (values.size < 2) throw IllegalStateException("invalid value $raw")
-			return@map when (values[0]) {
-				"charger" -> ChargerTriggerCondition(values[1])
-				"time" -> {
-					val bools = BooleanArray(7); for (i in bools.indices) if (values[6].toInt() and (1 shl i) != 0) bools[i] = true // bitmask -> boolean[]
-					TimeTriggerCondition(values[1], values[2].toInt(), values[3].toInt(), values[4].toInt(), values[5].toInt(), bools)
-				}
-				else -> {
-					throw IllegalStateException("invalid condition type ${values[0]}")
-				}
-			}
-		}?.collect(Collectors.toSet())?.let { conditions = it }
-
+		sched.getStringSet("triggers", HashSet())?.stream()?.map { ScheduleUtils.triggerFromString(it) }?.collect(Collectors.toSet())?.let { triggers = it }
+		sched.getStringSet("conditions", HashSet())?.stream()?.map { ScheduleUtils.conditionFromString(it) }?.collect(Collectors.toSet())?.let { conditions = it }
 		ensureSchedSetup()
 	}
 
 	private fun writeSchedcfg() {
 		val s = sched.edit().clear()
 
-		s.putStringSet("triggers", triggers.stream().map {
-			when (it) {
-				is ChargerTriggerCondition -> "charger;;${it.id}"
-				is TimeTriggerCondition -> {
-					var bits = 0; for (i in 0 until it.weekdays.size) if (it.weekdays[i]) bits = bits or (1 shl i) // boolean[] -> bitmask
-					"time;;${it.id};;${it.startHour};;${it.startMinute};;${it.endHour};;${it.endMinute};;${bits}"
-				}
-				else -> throw IllegalStateException("unknown trigger ${it::class.qualifiedName}")
-			}
-		}.collect(Collectors.toSet()))
-		s.putStringSet("conditions", conditions.stream().map {
-			when (it) {
-				is ChargerTriggerCondition -> "charger;;${it.id}"
-				is TimeTriggerCondition -> {
-					var bits = 0; for (i in 0 until it.weekdays.size) if (it.weekdays[i]) bits = bits or (1 shl i) // boolean[] -> bitmask
-					"time;;${it.id};;${it.startHour};;${it.startMinute};;${it.endHour};;${it.endMinute};;${bits}"
-				}
-				else -> throw IllegalStateException("unknown trigger ${it::class.qualifiedName}")
-			}
-		}.collect(Collectors.toSet()))
+		s.putStringSet("triggers", triggers.stream().map { it.toString(";;") }.collect(Collectors.toSet()))
+		s.putStringSet("conditions", conditions.stream().map { it.toString(";;") }.collect(Collectors.toSet()))
 
 		s.apply()
 	}
@@ -931,7 +885,7 @@ class WellbeingService(private val context: Context) {
 	}
 
 	private fun triggerFired(expire: Boolean, trigger: Trigger) {
-		when (trigger.id) {
+		when (val id = trigger.id.split("|")[0]) {
 			"bedtime_mode" -> {
 				if (expire && bedtimeModeEnabled) {
 					setBedtimeMode(false)
@@ -947,24 +901,31 @@ class WellbeingService(private val context: Context) {
 				}
 			}
 			else -> {
-				BUG("invalid trigger id ${trigger.id} expire=$expire")
+				BUG("invalid trigger id $id expire=$expire")
 			}
 		}
 	}
 
 	private fun doTrigger(expire: Boolean, condition: (Trigger) -> Boolean) {
 		triggers.forEach { fired ->
-			if (condition(fired)) {
+			val t = if (condition(fired)) {
+				fired
+			} else if (fired is Container) {
+				fired.onTrigger(condition)
+			} else {
+				null
+			}
+			t?.let { trigger ->
 				var isOk = true
 				if (!expire) {
 					conditions.forEach {
-						if (it.id == fired.id) {
+						if (trigger.id == it.id || trigger.id.startsWith("${it.id}|")) {
 							isOk = isOk && it.isFulfilled(context, this)
 						}
 					}
 				}
 				if (isOk) {
-					triggerFired(expire, fired)
+					triggerFired(expire, trigger)
 				}
 			}
 		}
@@ -976,35 +937,38 @@ class WellbeingService(private val context: Context) {
 			t = true
 			id.substring(8)
 		} else id
-		doTrigger(t) { it is TimeTriggerCondition && it.id == nid }
+		doTrigger(t) { it is TimeTriggerCondition && (nid == it.id || nid.startsWith("${it.id}|")) }
 	}
 
 	fun setTriggersForId(id: String, triggersIn: Array<out Trigger>) {
-		triggers.filter { id == it.id }.forEach { it.dispose(context, this) }
-		triggers = triggers.filterNot { id == it.id }.toSet().plus(triggersIn)
+		triggers.filter { (id == it.id || it.id.startsWith("${id}|")) }.forEach { it.dispose(context, this) }
+		triggers = triggers.filterNot { (id == it.id || it.id.startsWith("${id}|")) }.toSet().plus(triggersIn)
 		ensureSchedSetup()
 	}
 
 	fun setConditionsForId(id: String, conditionsIn: Array<out Condition>) {
-		conditions = conditions.filterNot { id == it.id }.toSet().plus(conditionsIn)
+		conditions = conditions.filterNot { (id == it.id || it.id.startsWith("${id}|")) }.toSet().plus(conditionsIn)
 	}
 
 	fun getTriggersForId(id: String): List<Trigger> {
-		return triggers.filter { id == it.id }
+		return triggers.filter { (id == it.id || it.id.startsWith("${id}|")) }
 	}
 
 	fun getConditionsForId(id: String): List<Condition> {
-		return conditions.filter { id == it.id }
+		return conditions.filter { (id == it.id || it.id.startsWith("${id}|")) }
 	}
 
 	fun setTriggerConditionForId(id: String, triggerConditions: Array<TriggerCondition>) {
+		Log.e("AAAAA", triggerConditions.contentDeepToString())
 		setTriggersForId(id, triggerConditions)
 		setConditionsForId(id, triggerConditions)
 		writeSchedcfg()
 	}
 
 	fun getTriggerConditionForId(id: String): List<TriggerCondition> {
-		return conditions.filter { id == it.id && it is TriggerCondition }.map { it as TriggerCondition }
-			.plus(triggers.filter { id == it.id && it is TriggerCondition }.map { it as TriggerCondition }).distinct()
+		return conditions.filter { (id == it.id || it.id.startsWith("${id}|")) && it is TriggerCondition }.map { it as TriggerCondition }
+			.plus(triggers.filter { (id == it.id || it.id.startsWith("${id}|")) && it is TriggerCondition }.map { it as TriggerCondition }).distinct().also {
+				Log.e("BBBBB", it.toTypedArray().contentDeepToString())
+			}
 	}
 }
