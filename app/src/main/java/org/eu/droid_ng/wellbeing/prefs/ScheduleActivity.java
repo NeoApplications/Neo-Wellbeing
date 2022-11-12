@@ -27,10 +27,9 @@ import java.util.Locale;
 public class ScheduleActivity extends AppCompatActivity {
 
 	RadioButton disable, sched, schedc;
-	TextView startTime, endTime;
+	TimeSettingView startTime, endTime;
 	DayPicker daypicker;
 	String type;
-	boolean use24h;
 	int checked;
 	int sh = 7, sm = 0, eh = 18, em = 0;
 
@@ -51,29 +50,16 @@ public class ScheduleActivity extends AppCompatActivity {
 			finish();
 			return;
 		}
-		use24h = DateFormat.is24HourFormat(this);
-		if (intent.hasExtra("defaultStartHour")) {
-			sh = intent.getIntExtra("defaultStartHour", sh);
-		}
-		if (intent.hasExtra("defaultStartMinute")) {
-			sm = intent.getIntExtra("defaultStartMinute", sm);
-		}
-		if (intent.hasExtra("defaultEndHour")) {
-			eh = intent.getIntExtra("defaultEndHour", eh);
-		}
-		if (intent.hasExtra("defaultStartHour")) {
-			em = intent.getIntExtra("defaultEndMinute", em);
-		}
-		daypicker.setValues(new boolean[] { true, true, true, true, true, true, true });
 		if (intent.hasExtra("name")) {
 			setTitle(intent.getStringExtra("name"));
 		}
+
 		setContentView(R.layout.activity_schedule);
 		disable = findViewById(R.id.radioButtonDisable);
 		sched = findViewById(R.id.radioSchedule);
 		schedc = findViewById(R.id.radioCharging);
-		startTime = findViewById(R.id.textView3);
-		endTime = findViewById(R.id.textView4);
+		startTime = findViewById(R.id.startTime);
+		endTime = findViewById(R.id.endTime);
 		daypicker = findViewById(R.id.dayPicker);
 		findViewById(R.id.layoutDisable).setOnClickListener(v -> setChecked(0));
 		findViewById(R.id.layoutSchedule).setOnClickListener(v -> setChecked(1));
@@ -95,21 +81,26 @@ public class ScheduleActivity extends AppCompatActivity {
 				c = 1;
 			}
 		}
-		checked = c;
-		disable.setChecked(c == 0);
-		sched.setChecked(c == 1);
-		schedc.setChecked(c == 2);
 
-		setClockTextViewTime(getString(R.string.startTime), startTime, LocalTime.of(sh, sm));
-		setClockTextViewTime(getString(R.string.endTime), endTime, LocalTime.of(eh, em));
-		startTime.setOnClickListener(v -> onClickClockTextViewDialog(false));
-		endTime.setOnClickListener(v -> onClickClockTextViewDialog(true));
+		daypicker.setValues(new boolean[] { true, true, true, true, true, true, true });
+		startTime.setExtraText(getString(R.string.startTime));
+		endTime.setExtraText(getString(R.string.endTime));
+		startTime.setData(LocalTime.of(sh, sm));
+		endTime.setData(LocalTime.of(eh, em));
+		startTime.setOnTimeChangedListener(t -> {
+			sh = t.getHour();
+			sm = t.getMinute();
+			setChecked(checked);
+		});
+		endTime.setOnTimeChangedListener(t -> {
+			eh = t.getHour();
+			em = t.getMinute();
+			setChecked(checked);
+		});
 		daypicker.setOnValuesChangeListener(values -> {
 			setChecked(checked); // make service take care of it :)
 		});
-		startTime.setVisibility(c != 0 ? View.VISIBLE : View.GONE);
-		endTime.setVisibility(c != 0 ? View.VISIBLE : View.GONE);
-		daypicker.setVisibility(c != 0 ? View.VISIBLE : View.GONE);
+		setChecked(c);
 	}
 
 	private void setChecked(int c) {
@@ -135,42 +126,6 @@ public class ScheduleActivity extends AppCompatActivity {
 				tw.setTriggerConditionForId(type, new TriggerCondition[] {});
 				break;
 		}
-	}
-
-	private void setClockTextViewTime(String extraText, TextView t, LocalTime data) {
-		int hour, minute;
-		String amPmSymbol;
-		int o = extraText.length() + 1;
-		if (use24h) {
-			hour = data.getHour();
-			minute = data.getMinute();
-			amPmSymbol = "";
-		} else {
-			hour = data.getHour() % 12;
-			minute = data.getMinute();
-			amPmSymbol = " " + (data.getHour() / 12 == 0 ? "AM" : "PM");
-		}
-		String s = extraText + " " + String.format(Locale.ROOT, "%02d", hour) + ":" + String.format(Locale.ROOT, "%02d", minute) + amPmSymbol;
-		SpannableString spannableString = new SpannableString(s);
-		spannableString.setSpan(new RelativeSizeSpan(1.5f), o, o + 2, 0); // hour
-		spannableString.setSpan(new RelativeSizeSpan(1.5f), o + 3, o + 5, 0); // minute
-		t.setText(spannableString);
-	}
-
-	private void onClickClockTextViewDialog(boolean isEnd) {
-		TextView v = isEnd ? endTime : startTime;
-		String str = getString(isEnd ? R.string.endTime : R.string.startTime);
-		new TimePickerDialog(this, (tp, h, m) -> {
-			if (isEnd) {
-				eh = h;
-				em = m;
-			} else {
-				sh = h;
-				sm = m;
-			}
-			setChecked(checked); // give new hour/min values to service
-			setClockTextViewTime(str, v, LocalTime.of(h, m));
-		}, isEnd ? eh : sh, isEnd ? em : sm, use24h).show();
 	}
 
 	@Override

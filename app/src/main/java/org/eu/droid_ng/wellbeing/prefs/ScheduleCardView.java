@@ -10,7 +10,6 @@ import androidx.annotation.Nullable;
 
 import org.eu.droid_ng.wellbeing.R;
 import org.eu.droid_ng.wellbeing.lib.ChargerTriggerCondition;
-import org.eu.droid_ng.wellbeing.lib.TimeChargerTriggerCondition;
 import org.eu.droid_ng.wellbeing.lib.TimeTriggerCondition;
 import org.eu.droid_ng.wellbeing.lib.TriggerCondition;
 
@@ -100,19 +99,19 @@ public class ScheduleCardView extends FrameLayout {
 		boolean[] w = daypicker.getValues();
 		TimeTriggerCondition t = new TimeTriggerCondition(id, s.getHour(), s.getMinute(), e.getHour(), e.getMinute(), w);
 		if (charger) {
-			return new TimeChargerTriggerCondition(id, t, new ChargerTriggerCondition(id));
+			//return new TimeChargerTriggerCondition(id, t, new ChargerTriggerCondition(id));
 		}
 		return t;
 	}
 
 	public void setData(TriggerCondition tt) {
 		TimeTriggerCondition t;
-		if (tt instanceof TimeChargerTriggerCondition) {
+		/*if (tt instanceof TimeChargerTriggerCondition) {
 			charger = true;
 			t = ((TimeChargerTriggerCondition)tt).getTimeTriggerCondition();
-		} else {
+		} else {*/
 			t = (TimeTriggerCondition)tt;
-		}
+		//}
 		startTime.setData(LocalTime.of(t.getStartHour(), t.getStartMinute()));
 		endTime.setData(LocalTime.of(t.getEndHour(), t.getEndMinute()));
 		daypicker.setValues(t.getWeekdays());

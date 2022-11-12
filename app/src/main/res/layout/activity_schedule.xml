@@ -87,8 +87,8 @@
 			android:textColor="?android:attr/textColorPrimary" />
 	</LinearLayout>
 
-	<TextView
-		android:id="@+id/textView3"
+	<org.eu.droid_ng.wellbeing.prefs.TimeSettingView
+		android:id="@+id/startTime"
 		android:layout_width="0dp"
 		android:layout_height="wrap_content"
 		android:textSize="16sp"
@@ -96,15 +96,15 @@
 		app:layout_constraintStart_toStartOf="parent"
 		app:layout_constraintTop_toBottomOf="@+id/layoutCharging" />
 
-	<TextView
-		android:id="@+id/textView4"
+	<org.eu.droid_ng.wellbeing.prefs.TimeSettingView
+		android:id="@+id/endTime"
 		android:layout_width="0dp"
 		android:layout_height="wrap_content"
 		android:textSize="16sp"
 		app:layout_constraintEnd_toEndOf="parent"
 		app:layout_constraintHorizontal_bias="1.0"
 		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toBottomOf="@+id/textView3" />
+		app:layout_constraintTop_toBottomOf="@+id/startTime" />
 
 	<org.eu.droid_ng.wellbeing.prefs.DayPicker
 		android:id="@+id/dayPicker"
@@ -112,6 +112,6 @@
 		android:layout_height="wrap_content"
 		app:layout_constraintEnd_toEndOf="parent"
 		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toBottomOf="@+id/textView4" />
+		app:layout_constraintTop_toBottomOf="@+id/endTime" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
