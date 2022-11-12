@@ -31,7 +31,6 @@ public class ScheduleActivity extends AppCompatActivity {
 	DayPicker daypicker;
 	String type;
 	int checked;
-	int sh = 7, sm = 0, eh = 18, em = 0;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -65,15 +64,22 @@ public class ScheduleActivity extends AppCompatActivity {
 		findViewById(R.id.layoutSchedule).setOnClickListener(v -> setChecked(1));
 		findViewById(R.id.layoutCharging).setOnClickListener(v -> setChecked(2));
 
+		startTime.setData(LocalTime.of(7, 0));
+		endTime.setData(LocalTime.of(18, 0));
+		daypicker.setValues(new boolean[] { true, true, true, true, true, true, true });
+		startTime.setExtraText(getString(R.string.startTime));
+		endTime.setExtraText(getString(R.string.endTime));
+		startTime.setOnTimeChangedListener(t -> updateServiceStatus());
+		endTime.setOnTimeChangedListener(t -> updateServiceStatus());
+		daypicker.setOnValuesChangeListener(values -> updateServiceStatus());
+
 		WellbeingService tw = WellbeingService.get();
 		List<TriggerCondition> ta = tw.getTriggerConditionForId(type);
 		int c = 0;
 		TimeTriggerCondition ttc = ta.stream().filter(item -> item instanceof TimeTriggerCondition).map(item -> (TimeTriggerCondition) item).findAny().orElse(null);
 		if (ttc != null) {
-			sh = ttc.getStartHour();
-			sm = ttc.getStartMinute();
-			eh = ttc.getEndHour();
-			em = ttc.getEndMinute();
+			startTime.setData(LocalTime.of(ttc.getStartHour(), ttc.getStartMinute()));
+			endTime.setData(LocalTime.of(ttc.getEndHour(), ttc.getEndMinute()));
 			daypicker.setValues(ttc.getWeekdays());
 			if (ta.stream().anyMatch(item -> item instanceof ChargerTriggerCondition)) {
 				c = 2;
@@ -82,24 +88,6 @@ public class ScheduleActivity extends AppCompatActivity {
 			}
 		}
 
-		daypicker.setValues(new boolean[] { true, true, true, true, true, true, true });
-		startTime.setExtraText(getString(R.string.startTime));
-		endTime.setExtraText(getString(R.string.endTime));
-		startTime.setData(LocalTime.of(sh, sm));
-		endTime.setData(LocalTime.of(eh, em));
-		startTime.setOnTimeChangedListener(t -> {
-			sh = t.getHour();
-			sm = t.getMinute();
-			setChecked(checked);
-		});
-		endTime.setOnTimeChangedListener(t -> {
-			eh = t.getHour();
-			em = t.getMinute();
-			setChecked(checked);
-		});
-		daypicker.setOnValuesChangeListener(values -> {
-			setChecked(checked); // make service take care of it :)
-		});
 		setChecked(c);
 	}
 
@@ -112,14 +100,18 @@ public class ScheduleActivity extends AppCompatActivity {
 		endTime.setVisibility(c != 0 ? View.VISIBLE : View.GONE);
 		daypicker.setVisibility(c != 0 ? View.VISIBLE : View.GONE);
 
+		updateServiceStatus();
+	}
+
+	private void updateServiceStatus() {
 		WellbeingService tw = WellbeingService.get();
 
-		switch (c) {
+		switch (checked) {
 			case 1:
-				tw.setTriggerConditionForId(type, new TriggerCondition[] { new TimeTriggerCondition(type, sh, sm, eh, em, daypicker.getValues()) });
+				tw.setTriggerConditionForId(type, new TriggerCondition[] { new TimeTriggerCondition(type, startTime.getData().getHour(), startTime.getData().getMinute(), endTime.getData().getHour(), endTime.getData().getMinute(), daypicker.getValues()) });
 				break;
 			case 2:
-				tw.setTriggerConditionForId(type, new TriggerCondition[] { new ChargerTriggerCondition(type), new TimeTriggerCondition(type, sh, sm, eh, em, daypicker.getValues()) });
+				tw.setTriggerConditionForId(type, new TriggerCondition[] { new ChargerTriggerCondition(type), new TimeTriggerCondition(type, startTime.getData().getHour(), startTime.getData().getMinute(), endTime.getData().getHour(), endTime.getData().getMinute(), daypicker.getValues()) });
 				break;
 			case 0:
 			default:
