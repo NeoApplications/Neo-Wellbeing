@@ -9,9 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import org.eu.droid_ng.wellbeing.R;
-import org.eu.droid_ng.wellbeing.lib.ChargerTriggerCondition;
-import org.eu.droid_ng.wellbeing.lib.TimeTriggerCondition;
-import org.eu.droid_ng.wellbeing.lib.TriggerCondition;
+import org.eu.droid_ng.wellbeing.lib.TimeChargerTriggerCondition;
 
 import java.time.LocalTime;
 import java.util.function.Consumer;
@@ -35,10 +33,9 @@ public class ScheduleCardView extends FrameLayout {
 	TimeSettingView startTime, endTime;
 	DayPicker daypicker;
 	CheckBox checkBox;
-	boolean charger;
-	Runnable onValuesChangedCallback;
-	Runnable onDeleteCardCallback;
-	String id;
+	Consumer<String> onValuesChangedCallback;
+	Consumer<String> onDeleteCardCallback;
+	String id, iid;
 
 	private void initView() {
 		inflate(getContext(), R.layout.schedule_card, this);
@@ -52,66 +49,55 @@ public class ScheduleCardView extends FrameLayout {
 		startTime.setData(LocalTime.of(7, 0));
 		endTime.setData(LocalTime.of(18, 0));
 		startTime.setExtraText(getContext().getString(R.string.startTime));
+		endTime.setExtraText(getContext().getString(R.string.endTime));
 		startTime.setOnTimeChangedListener(t -> {
 			if (onValuesChangedCallback != null) {
-				onValuesChangedCallback.run();
+				onValuesChangedCallback.accept(iid);
 			}
 		});
-		endTime.setExtraText(getContext().getString(R.string.endTime));
 		endTime.setOnTimeChangedListener(t -> {
 			if (onValuesChangedCallback != null) {
-				onValuesChangedCallback.run();
+				onValuesChangedCallback.accept(iid);
 			}
 		});
 		daypicker.setOnValuesChangeListener(values -> {
 			if (onValuesChangedCallback != null) {
-				onValuesChangedCallback.run();
+				onValuesChangedCallback.accept(iid);
 			}
 		});
 		findViewById(R.id.chargerLayout).setOnClickListener(v -> {
-			setCharger(!charger);
+			checkBox.setChecked(!checkBox.isChecked());
 			if (onValuesChangedCallback != null) {
-				onValuesChangedCallback.run();
+				onValuesChangedCallback.accept(iid);
 			}
 		});
 		findViewById(R.id.delete).setOnClickListener(v -> {
 			if (onDeleteCardCallback != null) {
-				onDeleteCardCallback.run();
+				onDeleteCardCallback.accept(iid);
 			}
 		});
 	}
 
-	public void setId(String id) {
-		this.id = id;
-	}
-
-	public void setOnValuesChangedCallback(Runnable onValuesChangedCallback) {
+	public void setOnValuesChangedCallback(Consumer<String> onValuesChangedCallback) {
 		this.onValuesChangedCallback = onValuesChangedCallback;
 	}
 
-	public void setOnDeleteCardCallback(Runnable onDeleteCardCallback) {
+	public void setOnDeleteCardCallback(Consumer<String> onDeleteCardCallback) {
 		this.onDeleteCardCallback = onDeleteCardCallback;
 	}
 
-	public TimeTriggerCondition getTimeData() {
+	public TimeChargerTriggerCondition getTimeData() {
 		LocalTime s = startTime.getData();
 		LocalTime e = endTime.getData();
-		boolean[] w = daypicker.getValues();
-		return new TimeTriggerCondition(id, s.getHour(), s.getMinute(), e.getHour(), e.getMinute(), w);
+		return new TimeChargerTriggerCondition(id, iid, s.getHour(), s.getMinute(), e.getHour(), e.getMinute(), daypicker.getValues(), checkBox.isChecked());
 	}
 
-	public boolean isCharger() {
-		return charger;
-	}
-
-	public void setCharger(boolean charger) {
-		this.charger = charger;
-		checkBox.setChecked(charger);
-	}
-
-	public void setTimeData(TimeTriggerCondition t) {
+	public void setTimeData(TimeChargerTriggerCondition t) {
+		id = t.getId();
+		iid = t.getIid();
 		startTime.setData(LocalTime.of(t.getStartHour(), t.getStartMinute()));
 		endTime.setData(LocalTime.of(t.getEndHour(), t.getEndMinute()));
 		daypicker.setValues(t.getWeekdays());
+		checkBox.setChecked(t.getNeedCharger());
 	}
 }

@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.BatteryManager
-import android.util.Log
 import org.eu.droid_ng.wellbeing.broadcast.AlarmFiresBroadcastReciever
 import java.time.DayOfWeek
 import java.time.LocalDateTime
@@ -15,7 +14,7 @@ import java.time.temporal.TemporalAdjusters
 
 class ScheduleUtils {
 	companion object {
-		fun getPintentForId(context: Context, id: String): PendingIntent {
+		private fun getPintentForId(context: Context, id: String): PendingIntent {
 			return PendingIntent.getBroadcast(
 				context, 0,
 				Intent(context, AlarmFiresBroadcastReciever::class.java).addFlags(Intent.FLAG_RECEIVER_FOREGROUND).setIdentifier(id),
@@ -40,6 +39,7 @@ class ScheduleUtils {
 
 interface Trigger {
 	val id: String
+	val iid: String
 	fun setup(applicationContext: Context, service: WellbeingService)
 	fun dispose(applicationContext: Context, service: WellbeingService)
 }
@@ -49,16 +49,16 @@ interface Condition {
 	fun isFulfilled(applicationContext: Context, service: WellbeingService): Boolean
 }
 
-interface TriggerCondition : Trigger, Condition
-
-class TimeTriggerCondition(
+class TimeChargerTriggerCondition(
 	override val id: String,
+	override val iid: String,
 	val startHour: Int,
 	val startMinute: Int,
 	val endHour: Int,
 	val endMinute: Int,
-	val weekdays: BooleanArray // length = 7, 0 = monday, 6 = sunday
-) : TriggerCondition {
+	val weekdays: BooleanArray, // length = 7, 0 = monday, 6 = sunday
+	val needCharger: Boolean
+) : Trigger, Condition {
 	override fun setup(applicationContext: Context, service: WellbeingService) {
 		if (!weekdays.any { it }) return // bail if no weekday is enabled
 		val now = LocalDateTime.now().withNano(0)
@@ -114,13 +114,13 @@ class TimeTriggerCondition(
 				it
 			}
 		}
-		ScheduleUtils.setAlarm(applicationContext, id, start)
-		ScheduleUtils.setAlarm(applicationContext, "expire::$id", end)
+		ScheduleUtils.setAlarm(applicationContext, iid, start)
+		ScheduleUtils.setAlarm(applicationContext, "expire::$iid", end)
 	}
 
 	override fun dispose(applicationContext: Context, service: WellbeingService) {
-		ScheduleUtils.dropAlarm(applicationContext, id)
-		ScheduleUtils.dropAlarm(applicationContext, "expire::$id")
+		ScheduleUtils.dropAlarm(applicationContext, iid)
+		ScheduleUtils.dropAlarm(applicationContext, "expire::$iid")
 	}
 
 	override fun isFulfilled(applicationContext: Context, service: WellbeingService): Boolean {
@@ -135,24 +135,12 @@ class TimeTriggerCondition(
 				}
 			}
 			(now.isAfter(start) || now.isEqual(start)) && now.isBefore(end)
+		}) && (!needCharger || run {
+			val batteryStatus: Intent? = IntentFilter(Intent.ACTION_BATTERY_CHANGED).let { applicationContext.registerReceiver(null, it) }
+
+			val chargePlug: Int = batteryStatus?.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1) ?: -1
+			chargePlug == BatteryManager.BATTERY_PLUGGED_USB ||
+					chargePlug == BatteryManager.BATTERY_PLUGGED_AC
 		})
-	}
-}
-
-class ChargerTriggerCondition(override val id: String): TriggerCondition {
-	override fun setup(applicationContext: Context, service: WellbeingService) {
-		/* No setup needed, onPowerConnectionReceived() is all we need */
-	}
-
-	override fun dispose(applicationContext: Context, service: WellbeingService) {
-		/* No disposal needed as we don't setup anything */
-	}
-
-	override fun isFulfilled(applicationContext: Context, service: WellbeingService): Boolean {
-		val batteryStatus: Intent? = IntentFilter(Intent.ACTION_BATTERY_CHANGED).let { applicationContext.registerReceiver(null, it) }
-
-		val chargePlug: Int = batteryStatus?.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1) ?: -1
-		return chargePlug == BatteryManager.BATTERY_PLUGGED_USB ||
-				chargePlug == BatteryManager.BATTERY_PLUGGED_AC
 	}
 }

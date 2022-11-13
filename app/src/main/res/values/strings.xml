@@ -20,7 +20,6 @@
 	<string name="manually">Manual suspension</string>
 	<string name="notification_desc">Wellbeing is suspending some applications.</string>
 	<string name="notification_title">Apps suspended</string>
-	<string name="notification_action">Unsuspend</string>
 	<string name="focus_mode_off">Disable focus mode</string>
 	<string name="notification_focus_mode_break">You are taking a break right now!</string>
 	<string name="focus_mode_break_end">End break</string>
@@ -84,5 +83,4 @@
 	<string name="add_schedule">Add schedule</string>
 	<string name="delete">Delete</string>
 	<string name="add_schedule_info">Nothing here yet, try to add an schedule</string>
-	<string name="limit_reached">Limit reached</string>
 </resources>

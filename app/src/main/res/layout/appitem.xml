@@ -20,7 +20,6 @@
 		app:srcCompat="@android:drawable/sym_def_app_icon" />
 
 	<LinearLayout
-		android:id="@+id/linearLayout"
 		android:layout_width="0dp"
 		android:layout_height="wrap_content"
 		android:layout_marginStart="10dp"

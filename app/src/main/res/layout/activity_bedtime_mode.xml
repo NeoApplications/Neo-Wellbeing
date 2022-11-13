@@ -62,7 +62,6 @@
 			app:layout_constraintTop_toBottomOf="@+id/bedModeHeader"/>
 
 		<androidx.constraintlayout.widget.ConstraintLayout
-			android:id="@+id/constraintLayout2"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:layout_marginTop="54dp"
@@ -88,7 +87,6 @@
 	</androidx.constraintlayout.widget.ConstraintLayout>
 
 	<androidx.constraintlayout.widget.ConstraintLayout
-		android:id="@+id/constraintLayout4"
 		android:layout_width="match_parent"
 		android:layout_height="0dp"
 		android:orientation="horizontal"
@@ -107,14 +105,13 @@
 			app:layout_constraintTop_toTopOf="parent">
 
 			<ImageView
-				android:id="@+id/imageView"
+				android:importantForAccessibility="no"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:layout_weight="0"
 				app:srcCompat="@drawable/baseline_gradient_24" />
 
 			<TextView
-				android:id="@+id/textView2"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:layout_weight="1"

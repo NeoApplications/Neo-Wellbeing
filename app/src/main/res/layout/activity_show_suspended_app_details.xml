@@ -75,13 +75,13 @@
 				android:id="@+id/textView"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
-				android:drawableStart="@drawable/ic_focus_mode"
 				android:text="@string/focus_mode"
 				android:textAppearance="@android:style/TextAppearance.Material.Large"
 				android:textSize="24sp"
 				app:layout_constraintEnd_toEndOf="parent"
 				app:layout_constraintStart_toStartOf="parent"
-				app:layout_constraintTop_toTopOf="parent" />
+				app:layout_constraintTop_toTopOf="parent"
+				app:drawableStartCompat="@drawable/ic_focus_mode" />
 
 			<TextView
 				android:id="@+id/focusModeDesc"
@@ -137,13 +137,13 @@
 				android:id="@+id/unknownHeader"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
-				android:drawableStart="@drawable/ic_baseline_bug_report_24"
 				android:text="@string/unknown"
 				android:textAppearance="@android:style/TextAppearance.Material.Large"
 				android:textSize="24sp"
 				app:layout_constraintEnd_toEndOf="parent"
 				app:layout_constraintStart_toStartOf="parent"
-				app:layout_constraintTop_toTopOf="parent" />
+				app:layout_constraintTop_toTopOf="parent"
+				app:drawableStartCompat="@drawable/ic_baseline_bug_report_24" />
 
 			<TextView
 				android:id="@+id/unknownDesc"
@@ -190,13 +190,13 @@
 				android:id="@+id/manuallyHeader"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
-				android:drawableStart="@drawable/ic_baseline_person_24"
 				android:text="@string/manually"
 				android:textAppearance="@android:style/TextAppearance.Material.Large"
 				android:textSize="24sp"
 				app:layout_constraintEnd_toEndOf="parent"
 				app:layout_constraintStart_toStartOf="parent"
-				app:layout_constraintTop_toTopOf="parent" />
+				app:layout_constraintTop_toTopOf="parent"
+				app:drawableStartCompat="@drawable/ic_baseline_person_24" />
 
 			<TextView
 				android:id="@+id/manuallyDesc"
@@ -252,13 +252,13 @@
 				android:id="@+id/apptimerHeader"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
-				android:drawableStart="@drawable/ic_baseline_person_24"
 				android:text="@string/app_timers"
 				android:textAppearance="@android:style/TextAppearance.Material.Large"
 				android:textSize="24sp"
 				app:layout_constraintEnd_toEndOf="parent"
 				app:layout_constraintStart_toStartOf="parent"
-				app:layout_constraintTop_toTopOf="parent" />
+				app:layout_constraintTop_toTopOf="parent"
+				app:drawableStartCompat="@drawable/ic_baseline_person_24" />
 
 			<TextView
 				android:id="@+id/apptimerDesc"

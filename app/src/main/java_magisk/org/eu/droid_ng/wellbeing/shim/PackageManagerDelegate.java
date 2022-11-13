@@ -30,6 +30,7 @@ import java.util.concurrent.TimeUnit;
 * Note: The class must not fail or crash if a reference is missing.
 * */
 @SuppressLint("PrivateApi")
+@SuppressWarnings("unused")
 public class PackageManagerDelegate {
 	private static boolean success;
 	private static Method realSuspendDialogInfoBuilderBuild;
@@ -153,7 +154,7 @@ public class PackageManagerDelegate {
 		/**
 		 * Returns whether the device has a wide color gamut display.
 		 */
-		public boolean isDeviceColorManaged();
+		boolean isDeviceColorManaged();
 
 		/**
 		 * Set the level of color saturation to apply to the display.
@@ -161,7 +162,7 @@ public class PackageManagerDelegate {
 		 * @param saturationLevel 0-100 (inclusive), where 100 is full saturation
 		 * @return whether the saturation level change was applied successfully
 		 */
-		public boolean setSaturationLevel(@IntRange(from = 0, to = 100) int saturationLevel);
+		boolean setSaturationLevel(@IntRange(from = 0, to = 100) int saturationLevel);
 
 		/**
 		 * Set the level of color saturation to apply to a specific app.
@@ -170,18 +171,18 @@ public class PackageManagerDelegate {
 		 * @param saturationLevel 0-100 (inclusive), where 100 is full saturation
 		 * @return whether the saturation level change was applied successfully
 		 */
-		public boolean setAppSaturationLevel(@NonNull String packageName,
+		boolean setAppSaturationLevel(@NonNull String packageName,
 		                                     @IntRange(from = 0, to = 100) int saturationLevel);
 
 		/**
 		 * Returns {@code true} if Night Display is supported by the device.
 		 */
-		public boolean isNightDisplayAvailable(Context context);
+		boolean isNightDisplayAvailable(Context context);
 
 		/**
 		 * Returns {@code true} if display white balance is supported by the device.
 		 */
-		public boolean isDisplayWhiteBalanceAvailable(Context context);
+		boolean isDisplayWhiteBalanceAvailable(Context context);
 	}
 
 	public static IColorDisplayManager getColorDisplayManager(Context ctx) {

@@ -117,7 +117,6 @@ class WellbeingService(private val context: Context) {
 	@JvmField var appTimerDialogBreakTime = -1
 
 	private var triggers: Set<Trigger> = HashSet()
-	private var conditions: Set<Condition> = HashSet()
 
 	private fun loadSettings() {
 		val prefs = context.getSharedPreferences("service", 0)
@@ -136,31 +135,15 @@ class WellbeingService(private val context: Context) {
 			val values = raw.split(";;")
 			if (values.size < 2) throw IllegalStateException("invalid value $raw")
 			return@map when (values[0]) {
-				"charger" -> ChargerTriggerCondition(values[1])
 				"time" -> {
-					val bools = BooleanArray(7); for (i in bools.indices) if (values[6].toInt() and (1 shl i) != 0) bools[i] = true // bitmask -> boolean[]
-					TimeTriggerCondition(values[1], values[2].toInt(), values[3].toInt(), values[4].toInt(), values[5].toInt(), bools)
+					val bools = BooleanArray(7); for (i in bools.indices) if (values[7].toInt() and (1 shl i) != 0) bools[i] = true // bitmask -> boolean[]
+					TimeChargerTriggerCondition(values[1], values[2], values[3].toInt(), values[4].toInt(), values[5].toInt(), values[6].toInt(), bools, values[8].toBooleanStrict())
 				}
 				else -> {
 					throw IllegalStateException("invalid trigger type ${values[0]}")
 				}
 			}
 		}?.collect(Collectors.toSet())?.let { triggers = it }
-
-		sched.getStringSet("conditions", HashSet())?.stream()?.map { raw ->
-			val values = raw.split(";;")
-			if (values.size < 2) throw IllegalStateException("invalid value $raw")
-			return@map when (values[0]) {
-				"charger" -> ChargerTriggerCondition(values[1])
-				"time" -> {
-					val bools = BooleanArray(7); for (i in bools.indices) if (values[6].toInt() and (1 shl i) != 0) bools[i] = true // bitmask -> boolean[]
-					TimeTriggerCondition(values[1], values[2].toInt(), values[3].toInt(), values[4].toInt(), values[5].toInt(), bools)
-				}
-				else -> {
-					throw IllegalStateException("invalid condition type ${values[0]}")
-				}
-			}
-		}?.collect(Collectors.toSet())?.let { conditions = it }
 
 		ensureSchedSetup()
 	}
@@ -170,20 +153,9 @@ class WellbeingService(private val context: Context) {
 
 		s.putStringSet("triggers", triggers.stream().map {
 			when (it) {
-				is ChargerTriggerCondition -> "charger;;${it.id}"
-				is TimeTriggerCondition -> {
+				is TimeChargerTriggerCondition -> {
 					var bits = 0; for (i in 0 until it.weekdays.size) if (it.weekdays[i]) bits = bits or (1 shl i) // boolean[] -> bitmask
-					"time;;${it.id};;${it.startHour};;${it.startMinute};;${it.endHour};;${it.endMinute};;${bits}"
-				}
-				else -> throw IllegalStateException("unknown trigger ${it::class.qualifiedName}")
-			}
-		}.collect(Collectors.toSet()))
-		s.putStringSet("conditions", conditions.stream().map {
-			when (it) {
-				is ChargerTriggerCondition -> "charger;;${it.id}"
-				is TimeTriggerCondition -> {
-					var bits = 0; for (i in 0 until it.weekdays.size) if (it.weekdays[i]) bits = bits or (1 shl i) // boolean[] -> bitmask
-					"time;;${it.id};;${it.startHour};;${it.startMinute};;${it.endHour};;${it.endMinute};;${bits}"
+					"time;;${it.id};;${it.iid};;${it.startHour};;${it.startMinute};;${it.endHour};;${it.endMinute};;${bits};;${it.needCharger}"
 				}
 				else -> throw IllegalStateException("unknown trigger ${it::class.qualifiedName}")
 			}
@@ -923,7 +895,7 @@ class WellbeingService(private val context: Context) {
 		val charging = chargePlug == BatteryManager.BATTERY_PLUGGED_USB ||
 				chargePlug == BatteryManager.BATTERY_PLUGGED_AC
 
-		doTrigger(!charging) { it is ChargerTriggerCondition }
+		doTrigger(!charging) { it is TimeChargerTriggerCondition && it.needCharger }
 	}
 
 	private fun ensureSchedSetup() {
@@ -954,18 +926,11 @@ class WellbeingService(private val context: Context) {
 
 	private fun doTrigger(expire: Boolean, condition: (Trigger) -> Boolean) {
 		triggers.forEach { fired ->
-			if (condition(fired)) {
-				var isOk = true
-				if (!expire) {
-					conditions.forEach {
-						if (it.id == fired.id) {
-							isOk = isOk && it.isFulfilled(context, this)
-						}
-					}
-				}
-				if (isOk) {
-					triggerFired(expire, fired)
-				}
+			if (condition(fired) && // is this the trigger we're searching for?
+				(expire || // is this an deactiviation request?
+						(fired !is Condition) || // if this trigger is an condition, it needs to be fulfilled
+						fired.isFulfilled(context, this))) {
+				triggerFired(expire, fired)
 			}
 		}
 	}
@@ -976,35 +941,17 @@ class WellbeingService(private val context: Context) {
 			t = true
 			id.substring(8)
 		} else id
-		doTrigger(t) { it is TimeTriggerCondition && it.id == nid }
+		doTrigger(t) { it is TimeChargerTriggerCondition && it.iid == nid }
 	}
 
 	fun setTriggersForId(id: String, triggersIn: Array<out Trigger>) {
 		triggers.filter { id == it.id }.forEach { it.dispose(context, this) }
 		triggers = triggers.filterNot { id == it.id }.toSet().plus(triggersIn)
+		writeSchedcfg()
 		ensureSchedSetup()
-	}
-
-	fun setConditionsForId(id: String, conditionsIn: Array<out Condition>) {
-		conditions = conditions.filterNot { id == it.id }.toSet().plus(conditionsIn)
 	}
 
 	fun getTriggersForId(id: String): List<Trigger> {
 		return triggers.filter { id == it.id }
-	}
-
-	fun getConditionsForId(id: String): List<Condition> {
-		return conditions.filter { id == it.id }
-	}
-
-	fun setTriggerConditionForId(id: String, triggerConditions: Array<TriggerCondition>) {
-		setTriggersForId(id, triggerConditions)
-		setConditionsForId(id, triggerConditions)
-		writeSchedcfg()
-	}
-
-	fun getTriggerConditionForId(id: String): List<TriggerCondition> {
-		return conditions.filter { id == it.id && it is TriggerCondition }.map { it as TriggerCondition }
-			.plus(triggers.filter { id == it.id && it is TriggerCondition }.map { it as TriggerCondition }).distinct()
 	}
 }

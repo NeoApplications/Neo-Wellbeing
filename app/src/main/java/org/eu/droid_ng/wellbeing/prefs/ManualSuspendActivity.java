@@ -24,7 +24,6 @@ public class ManualSuspendActivity extends AppCompatActivity {
 			actionBar.setDisplayHomeAsUpEnabled(true);
 		}
 		setContentView(R.layout.activity_manual_suspend);
-		WellbeingStateClient client = new WellbeingStateClient(this);
 		Button suspendbtn = findViewById(R.id.suspendbtn);
 		Button unsuspendbtn = findViewById(R.id.desuspendbtn);
 		RecyclerView pkgList = findViewById(R.id.pkgList);

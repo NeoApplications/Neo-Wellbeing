@@ -27,7 +27,7 @@
 				android:id="@+id/focusModeIco"
 				android:layout_width="48dp"
 				android:layout_height="48dp"
-				android:contentDescription="@string/focus_icon_content_desc"
+				android:importantForAccessibility="no"
 				android:src="@drawable/ic_stat_name"
 				app:layout_constraintBottom_toBottomOf="parent"
 				app:layout_constraintStart_toStartOf="parent"
@@ -80,7 +80,6 @@
 		</androidx.constraintlayout.widget.ConstraintLayout>
 
 		<androidx.constraintlayout.widget.ConstraintLayout
-			android:id="@+id/constraintLayout2"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:layout_marginTop="54dp"
