@@ -9,11 +9,9 @@ import android.os.Bundle;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.eu.droid_ng.wellbeing.R;
 import org.eu.droid_ng.wellbeing.lib.WellbeingService;
-import org.eu.droid_ng.wellbeing.shim.PackageManagerDelegate;
 
 import java.util.function.Consumer;
 
@@ -54,9 +52,9 @@ public class BedtimeMode extends AppCompatActivity {
 			}
 		});
 		TextView schedule = findViewById(R.id.schedule1);
-		schedule.setOnClickListener(v -> {
-			startActivity(new Intent(this, ScheduleActivity.class).putExtra("type", "bedtime_mode").putExtra("name", getString(R.string.bedtime_mode)));
-		});
+		schedule.setOnClickListener(v ->
+				startActivity(new Intent(this, ScheduleActivity.class).putExtra("type", "bedtime_mode")
+						.putExtra("name", getString(R.string.bedtime_mode))));
 
 		//TODO: do not disturb
 		//TODO: disable AOD(A11)

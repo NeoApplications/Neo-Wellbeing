@@ -2,7 +2,6 @@ package org.eu.droid_ng.wellbeing.prefs;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.widget.FrameLayout;
 import android.widget.ToggleButton;
 
@@ -10,7 +9,6 @@ import androidx.annotation.Nullable;
 
 import org.eu.droid_ng.wellbeing.R;
 
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.function.Consumer;
 

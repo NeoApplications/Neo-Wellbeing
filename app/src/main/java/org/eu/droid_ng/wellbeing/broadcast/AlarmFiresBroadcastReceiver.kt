@@ -5,7 +5,7 @@ import android.content.Context
 import android.content.Intent
 import org.eu.droid_ng.wellbeing.lib.WellbeingService
 
-class AlarmFiresBroadcastReciever : BroadcastReceiver() {
+class AlarmFiresBroadcastReceiver : BroadcastReceiver() {
 	override fun onReceive(context: Context?, intent: Intent?) {
 		intent?.identifier?.let { WellbeingService.get().onAlarmFired(it) }
 	}

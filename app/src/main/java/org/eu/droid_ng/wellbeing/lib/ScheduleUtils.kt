@@ -6,7 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.BatteryManager
-import org.eu.droid_ng.wellbeing.broadcast.AlarmFiresBroadcastReciever
+import org.eu.droid_ng.wellbeing.broadcast.AlarmFiresBroadcastReceiver
 import java.time.DayOfWeek
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -17,7 +17,7 @@ class ScheduleUtils {
 		private fun getPintentForId(context: Context, id: String): PendingIntent {
 			return PendingIntent.getBroadcast(
 				context, 0,
-				Intent(context, AlarmFiresBroadcastReciever::class.java).addFlags(Intent.FLAG_RECEIVER_FOREGROUND).setIdentifier(id),
+				Intent(context, AlarmFiresBroadcastReceiver::class.java).addFlags(Intent.FLAG_RECEIVER_FOREGROUND).setIdentifier(id),
 				PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_CANCEL_CURRENT
 			)
 		}

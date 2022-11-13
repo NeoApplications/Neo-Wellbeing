@@ -22,29 +22,11 @@ class State(private val value: Int) {
 		const val STATE_BED_MODE = 256
 	}
 
-	private var valid: Boolean = true
-
-	private fun assertValid() {
-		if (!valid)
-			throw IllegalStateException("tried to read from invalidated state")
-	}
-
 	private fun isPresent(bitmask: Int): Boolean {
-		assertValid()
 		return (value and bitmask) > 0
 	}
 
-	fun isValid(): Boolean {
-		return valid
-	}
-
-	fun invalidate() {
-		assertValid()
-		valid = false
-	}
-
 	fun toInt(): Int {
-		assertValid()
 		return value
 	}
 

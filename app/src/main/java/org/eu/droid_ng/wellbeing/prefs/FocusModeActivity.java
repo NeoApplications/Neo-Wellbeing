@@ -33,9 +33,7 @@ public class FocusModeActivity extends AppCompatActivity {
 		layoutTransition.enableTransitionType(LayoutTransition.CHANGING);
 
 		TextView schedule = findViewById(R.id.schedule);
-		schedule.setOnClickListener(v -> {
-			startActivity(new Intent(this, ScheduleActivity.class).putExtra("type", "focus_mode").putExtra("name", getString(R.string.focus_mode)));
-		});
+		schedule.setOnClickListener(v -> startActivity(new Intent(this, ScheduleActivity.class).putExtra("type", "focus_mode").putExtra("name", getString(R.string.focus_mode))));
 
 		WellbeingService tw = WellbeingService.get();
 		tw.addStateCallback(sc);

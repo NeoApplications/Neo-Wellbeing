@@ -22,9 +22,6 @@ import org.eu.droid_ng.wellbeing.lib.State;
 import org.eu.droid_ng.wellbeing.lib.WellbeingService;
 import org.eu.droid_ng.wellbeing.shim.PackageManagerDelegate;
 
-import java.util.Arrays;
-import java.util.List;
-
 public class ShowSuspendedAppDetails extends AppCompatActivity {
 	private WellbeingService tw;
 	private PackageManagerDelegate pmd;

@@ -8,7 +8,6 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 
 import org.eu.droid_ng.wellbeing.R;
-import org.eu.droid_ng.wellbeing.lib.BugUtils;
 
 public class MainActivity extends AppCompatActivity {
 

@@ -6,7 +6,7 @@ import android.content.Intent
 import android.widget.Toast
 import org.eu.droid_ng.wellbeing.lib.WellbeingService
 
-class ManuallyUnsuspendBroadcastReciever : BroadcastReceiver() {
+class ManuallyUnsuspendBroadcastReceiver : BroadcastReceiver() {
 	override fun onReceive(context: Context, intent: Intent) {
 		if ("android.intent.action.PACKAGE_UNSUSPENDED_MANUALLY" != intent.action) {
 			/* Make sure no one is trying to fool us */

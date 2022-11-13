@@ -149,7 +149,6 @@ public class AppTimers extends AppCompatActivity {
 			private final ImageView appIcon;
 			private final TextView appName;
 			private final TextView appTimerInfo;
-			private final ImageButton actionButton;
 
 			public AppTimerViewHolder(@NonNull View itemView) {
 				super(itemView);
@@ -157,7 +156,7 @@ public class AppTimers extends AppCompatActivity {
 				this.appIcon = itemView.findViewById(R.id.appIcon);
 				this.appName = itemView.findViewById(R.id.appName2);
 				this.appTimerInfo = itemView.findViewById(R.id.pkgName);
-				this.actionButton = new ImageButton(itemView.getContext());
+				ImageButton actionButton = new ImageButton(itemView.getContext());
 				actionButton.setImageDrawable(AppCompatResources.getDrawable(itemView.getContext(), R.drawable.ic_focus_mode));
 				actionButton.setBackground(null);
 				CheckBox checkBox = itemView.findViewById(R.id.isChecked);

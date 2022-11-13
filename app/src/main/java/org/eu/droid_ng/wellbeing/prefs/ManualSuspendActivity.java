@@ -10,7 +10,6 @@ import android.widget.Button;
 
 import org.eu.droid_ng.wellbeing.R;
 import org.eu.droid_ng.wellbeing.lib.WellbeingService;
-import org.eu.droid_ng.wellbeing.lib.WellbeingStateClient;
 
 import java.util.HashSet;
 

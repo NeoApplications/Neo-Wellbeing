@@ -30,7 +30,7 @@ import java.util.concurrent.TimeUnit;
 * Note: The class must not fail or crash if a reference is missing.
 * */
 @SuppressLint("PrivateApi")
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "JavaReflectionMemberAccess", "ConstantConditions"})
 public class PackageManagerDelegate {
 	private static boolean success;
 	private static Method realSuspendDialogInfoBuilderBuild;
@@ -300,7 +300,6 @@ public class PackageManagerDelegate {
 		 * Button actions to specify what happens when the user taps on the neutral button.
 		 * To be used with {@link Builder#setNeutralButtonAction(int)}.
 		 *
-		 * @hide
 		 * @see Builder#setNeutralButtonAction(int)
 		 */
 		@IntDef(flag = true, value = {
@@ -313,7 +312,6 @@ public class PackageManagerDelegate {
 
 		/**
 		 * @return the resource id of the icon to be used with the dialog
-		 * @hide
 		 */
 		@DrawableRes
 		public int getIconResId() {
@@ -327,7 +325,6 @@ public class PackageManagerDelegate {
 
 		/**
 		 * @return the resource id of the title to be used with the dialog
-		 * @hide
 		 */
 		@StringRes
 		public int getTitleResId() {
@@ -341,7 +338,6 @@ public class PackageManagerDelegate {
 
 		/**
 		 * @return the resource id of the text to be shown in the dialog's body
-		 * @hide
 		 */
 		@StringRes
 		public int getDialogMessageResId() {
@@ -356,7 +352,6 @@ public class PackageManagerDelegate {
 		/**
 		 * @return the text to be shown in the dialog's body. Returns {@code null} if {@link
 		 * #getDialogMessageResId()} returns a valid resource id
-		 * @hide
 		 */
 		@Nullable
 		public String getDialogMessage() {
@@ -370,7 +365,6 @@ public class PackageManagerDelegate {
 
 		/**
 		 * @return the text to be shown
-		 * @hide
 		 */
 		@StringRes
 		public int getNeutralButtonTextResId() {

@@ -5,9 +5,14 @@ import android.content.Context
 import android.content.Intent
 import org.eu.droid_ng.wellbeing.lib.WellbeingService
 
-class NotificationBroadcastReciever : BroadcastReceiver() {
+class AppTimersBroadcastReceiver : BroadcastReceiver() {
 	override fun onReceive(context: Context, intent: Intent) {
 		// Looks weird, but we don't want to crash if someone feeds us junk
-		intent.action?.let { WellbeingService.get().onNotificationActionClick(it) }
+		intent.getStringExtra("uniqueObserverId")?.let {
+			WellbeingService.get().onAppTimerExpired(
+				intent.getIntExtra("observerId", -1),
+				it
+			)
+		}
 	}
 }

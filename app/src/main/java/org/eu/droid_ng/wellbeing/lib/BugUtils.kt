@@ -9,7 +9,7 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
-class BugUtils(val bugFolder: File) {
+class BugUtils(private val bugFolder: File) {
 	companion object {
 		private var utils: BugUtils? = null
 
@@ -22,6 +22,7 @@ class BugUtils(val bugFolder: File) {
 			}
 		}
 
+		@Suppress("FunctionName")
 		@JvmStatic
 		fun BUG(message: String) {
 			if (utils != null) {

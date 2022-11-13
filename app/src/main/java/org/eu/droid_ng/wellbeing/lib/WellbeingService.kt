@@ -15,8 +15,8 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import org.eu.droid_ng.wellbeing.R
 import org.eu.droid_ng.wellbeing.Wellbeing
-import org.eu.droid_ng.wellbeing.broadcast.AppTimersBroadcastReciever
-import org.eu.droid_ng.wellbeing.broadcast.NotificationBroadcastReciever
+import org.eu.droid_ng.wellbeing.broadcast.AppTimersBroadcastReceiver
+import org.eu.droid_ng.wellbeing.broadcast.NotificationBroadcastReceiver
 import org.eu.droid_ng.wellbeing.join
 import org.eu.droid_ng.wellbeing.lib.BugUtils.Companion.BUG
 import org.eu.droid_ng.wellbeing.lib.Utils.getTimeUsed
@@ -355,13 +355,13 @@ class WellbeingService(private val context: Context) {
 							host?.buildAction(
 								R.string.focus_mode_break_end, R.drawable.ic_take_break, Intent(
 									context,
-									NotificationBroadcastReciever::class.java
+									NotificationBroadcastReceiver::class.java
 								).setAction(INTENT_ACTION_QUIT_BREAK), true
 							),
 							host?.buildAction(
 								R.string.focus_mode_off, R.drawable.ic_stat_name, Intent(
 									context,
-									NotificationBroadcastReciever::class.java
+									NotificationBroadcastReceiver::class.java
 								).setAction(INTENT_ACTION_QUIT_FOCUS), true
 							)
 						),
@@ -381,13 +381,13 @@ class WellbeingService(private val context: Context) {
 							) else host?.buildAction(
 								R.string.focus_mode_break, R.drawable.ic_take_break, Intent(
 									context,
-									NotificationBroadcastReciever::class.java
+									NotificationBroadcastReceiver::class.java
 								).setAction(INTENT_ACTION_TAKE_BREAK), true
 							),
 							host?.buildAction(
 								R.string.focus_mode_off, R.drawable.ic_stat_name, Intent(
 									context,
-									NotificationBroadcastReciever::class.java
+									NotificationBroadcastReceiver::class.java
 								).setAction(INTENT_ACTION_QUIT_FOCUS), true
 							)
 						),
@@ -403,7 +403,7 @@ class WellbeingService(private val context: Context) {
 						host?.buildAction(
 							R.string.unsuspend_all, R.drawable.ic_stat_name, Intent(
 								context,
-								NotificationBroadcastReciever::class.java
+								NotificationBroadcastReceiver::class.java
 							).setAction(INTENT_ACTION_UNSUSPEND_ALL), true
 						)
 					),
@@ -418,7 +418,7 @@ class WellbeingService(private val context: Context) {
 						host?.buildAction(
 							R.string.disable, R.drawable.baseline_cancel_24, Intent(
 								context,
-								NotificationBroadcastReciever::class.java
+								NotificationBroadcastReceiver::class.java
 							).setAction(INTENT_ACTION_QUIT_BED), true
 						)
 					),
@@ -804,7 +804,7 @@ class WellbeingService(private val context: Context) {
 		toObserve: Array<String?>,
 		timeLimit: Duration
 	) {
-		val i = Intent(context, AppTimersBroadcastReciever::class.java)
+		val i = Intent(context, AppTimersBroadcastReceiver::class.java)
 		i.putExtra("observerId", oid)
 		i.putExtra("uniqueObserverId", uoid)
 		val pintent: PendingIntent =
@@ -826,7 +826,7 @@ class WellbeingService(private val context: Context) {
 		timeLimit: Duration,
 		timeUsed: Duration
 	) {
-		val i = Intent(context, AppTimersBroadcastReciever::class.java)
+		val i = Intent(context, AppTimersBroadcastReceiver::class.java)
 		i.putExtra("observerId", oid)
 		i.putExtra("uniqueObserverId", uoid)
 		val pintent: PendingIntent =
@@ -927,7 +927,7 @@ class WellbeingService(private val context: Context) {
 	private fun doTrigger(expire: Boolean, condition: (Trigger) -> Boolean) {
 		triggers.forEach { fired ->
 			if (condition(fired) && // is this the trigger we're searching for?
-				(expire || // is this an deactiviation request?
+				(expire || // is this an deactivation request?
 						(fired !is Condition) || // if this trigger is an condition, it needs to be fulfilled
 						fired.isFulfilled(context, this))) {
 				triggerFired(expire, fired)

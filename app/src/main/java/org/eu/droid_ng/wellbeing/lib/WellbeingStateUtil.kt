@@ -111,18 +111,6 @@ class WellbeingStateClient(context: Context) {
         }
     }
 
-    fun doBindService(callback: Consumer<WellbeingService?>) {
-        doBindService(callback, false)
-    }
-
-    fun doUnbindService() {
-        if (mShouldUnbind) {
-            // Release information about the service's state.
-            context.unbindService(mConnection)
-            mShouldUnbind = false
-        }
-    }
-
     @JvmOverloads
     fun startService(lateNotify: Boolean = false) {
         val i = Intent(context, WellbeingStateHost::class.java)
@@ -147,8 +135,8 @@ class WellbeingStateHost : Service() {
     private var mStopped = false
 
     // Unique Identification Number for the Notification.
-    private val NOTIFICATION = 325563
-    private val CHANNEL_ID = "service_notif"
+    private val notificationId = 325563
+    private val channelId = "service_notif"
 
     /**
      * Class for clients to access.  Because we know this service always
@@ -168,11 +156,11 @@ class WellbeingStateHost : Service() {
         val notificationManager = getSystemService(
             NotificationManager::class.java
         )
-        if (notificationManager.getNotificationChannel(CHANNEL_ID) == null) {
+        if (notificationManager.getNotificationChannel(channelId) == null) {
             val name: CharSequence = getString(R.string.channel_name)
             val description = getString(R.string.channel_description)
             val importance = NotificationManager.IMPORTANCE_LOW
-            val channel = NotificationChannel(CHANNEL_ID, name, importance)
+            val channel = NotificationChannel(channelId, name, importance)
             channel.description = description
             notificationManager.createNotificationChannel(channel)
         }
@@ -183,7 +171,7 @@ class WellbeingStateHost : Service() {
         val n = buildDefaultNotification()
 
         // Notification ID cannot be 0.
-        startForeground(NOTIFICATION, n)
+        startForeground(notificationId, n)
 
         state?.bindToHost(this)
 
@@ -222,14 +210,14 @@ class WellbeingStateHost : Service() {
     ): Notification {
         val pendingIntent =
             PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE)
-        val b = Notification.Builder(this, CHANNEL_ID)
+        val b = Notification.Builder(this, channelId)
             .setSmallIcon(icon) // the status icon
             .setTicker(text) // the status text
             .setWhen(System.currentTimeMillis()) // the time stamp
             .setContentTitle(getText(title)) // the label of the entry
             .setContentText(text) // the contents of the entry
             .setContentIntent(pendingIntent) // The intent to send when the entry is clicked
-            .setOnlyAlertOnce(true) // dont headsup/bling twice
+            .setOnlyAlertOnce(true) // don't headsup/bling twice
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !lateNotify) {
             b.setForegroundServiceBehavior(Notification.FOREGROUND_SERVICE_IMMEDIATE) // do not wait with showing the notification
         }
@@ -251,10 +239,10 @@ class WellbeingStateHost : Service() {
 
     private fun updateNotification(n: Notification) {
         if (mStopped) return
-        getSystemService(NotificationManager::class.java).notify(NOTIFICATION, n)
+        getSystemService(NotificationManager::class.java).notify(notificationId, n)
     }
 
-    fun updateNotification(
+    private fun updateNotification(
         title: Int,
         text: String,
         icon: Int,

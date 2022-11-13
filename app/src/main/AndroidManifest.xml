@@ -149,7 +149,7 @@
 			android:taskAffinity="" />
 
 		<receiver
-			android:name=".broadcast.ManuallyUnsuspendBroadcastReciever"
+			android:name=".broadcast.ManuallyUnsuspendBroadcastReceiver"
 			android:enabled="true"
 			android:exported="true">
 			<intent-filter>
@@ -159,7 +159,7 @@
 			</intent-filter>
 		</receiver>
 		<receiver
-			android:name=".broadcast.BootReciever"
+			android:name=".broadcast.BootReceiver"
 			android:enabled="true"
 			android:exported="true">
 			<intent-filter>
@@ -167,15 +167,15 @@
 			</intent-filter>
 		</receiver>
 		<receiver
-			android:name=".broadcast.AppTimersBroadcastReciever"
+			android:name=".broadcast.AppTimersBroadcastReceiver"
 			android:enabled="true"
 			android:exported="false" />
 		<receiver
-			android:name=".broadcast.NotificationBroadcastReciever"
+			android:name=".broadcast.NotificationBroadcastReceiver"
 			android:enabled="true"
 			android:exported="false" />
 		<receiver
-			android:name=".broadcast.AlarmFiresBroadcastReciever"
+			android:name=".broadcast.AlarmFiresBroadcastReceiver"
 			android:enabled="true"
 			android:exported="false" />
 
