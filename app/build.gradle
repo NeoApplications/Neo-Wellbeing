@@ -45,12 +45,13 @@ dependencies {
 	implementation 'androidx.cardview:cardview:1.0.0'
 	implementation 'androidx.preference:preference:1.2.0'
 	implementation 'androidx.appcompat:appcompat:1.5.1'
+	implementation 'com.google.android.material:material:1.7.0'
 	// For gradle builds only
 	implementation 'org.lsposed.hiddenapibypass:hiddenapibypass:4.3'
 }
 
 def magiskModuleProp = [
-		id           : "open_wellbeing",
+		id           : "neo_wellbeing",
 		name         : "Neo Wellbeing systemless",
 		version      : android.defaultConfig.versionName,
 		versionCode  : android.defaultConfig.versionCode,
@@ -63,7 +64,7 @@ def magiskModuleProp = [
 
 def outDir = rootProject.buildDir
 def magiskDir = file("$outDir/magisk_module")
-def zipName = "OpenWellbeing-${android.defaultConfig.versionName}.zip"
+def zipName = "NeoWellbeing-${android.defaultConfig.versionName}.zip"
 
 task assembleMagiskModule(type: Task) {
 	dependsOn(":app:assembleDebug")
@@ -73,19 +74,21 @@ task assembleMagiskModule(type: Task) {
 		def modulePropText = ""
 		magiskModuleProp.each { k, v -> modulePropText += "$k=$v\n" }
 		file("$magiskDir/module.prop").text = modulePropText
-		file("$magiskDir.path/system/priv-app/OpenWellbeing").mkdirs()
+		file("$magiskDir.path/system/priv-app/NeoWellbeing").mkdirs()
 		Files.copy(file("$rootDir/app/build/outputs/apk/debug/app-debug.apk").toPath(),
-				file("${magiskDir.path}/system/priv-app/OpenWellbeing/OpenWellbeing.apk").toPath())
-		file("$magiskDir.path/system/product/overlay/OpenWellbeingOverlay").mkdirs()
-		Files.copy(file("$rootDir/OpenWellbeingOverlay/overlay.apk").toPath(),
-				file("${magiskDir.path}/system/product/overlay/OpenWellbeingOverlay/OpenWellbeingOverlay.apk").toPath())
+				file("${magiskDir.path}/system/priv-app/NeoWellbeing/NeoWellbeing.apk").toPath())
+		file("$magiskDir.path/system/product/overlay/NeoWellbeingOverlay").mkdirs()
+		Files.copy(file("$rootDir/NeoWellbeingOverlay/overlay.apk").toPath(),
+				file("${magiskDir.path}/system/product/overlay/NeoWellbeingOverlay/NeoWellbeingOverlay.apk").toPath())
 		file("$magiskDir.path/system/etc/permissions").mkdirs()
 		Files.copy(file("$rootDir/app/src/main/privapp-permissions-wellbeing.xml").toPath(),
 				file("${magiskDir.path}/system/etc/permissions/privapp-permissions-wellbeing.xml").toPath())
 		file("$magiskDir.path/META-INF/com/google/android").mkdirs()
 		file("$magiskDir.path/META-INF/com/google/android/updater-script").text = "#MAGISK"
-		Files.copy(file("$rootDir/update-binary").toPath(),
+		Files.copy(file("$rootDir/app/update-binary").toPath(),
 				file("$magiskDir.path/META-INF/com/google/android/update-binary").toPath())
+		Files.copy(file("$rootDir/app/customize.sh").toPath(),
+				file("$magiskDir.path/customize.sh").toPath())
 	}
 }
 
