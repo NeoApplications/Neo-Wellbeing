@@ -1,7 +1,20 @@
 android_app {
-    name: "Wellbeing",
+    name: "NeoWellbeing",
     defaults: ["platform_app_defaults"],
-    static_libs: ["androidx.recyclerview_recyclerview", "androidx-constraintlayout_constraintlayout", "androidx.cardview_cardview", "androidx.preference_preference", "androidx.appcompat_appcompat"],
+    static_libs: [
+        "androidx.annotation_annotation",
+        "androidx.core_core",
+        "androidx.recyclerview_recyclerview",
+        "androidx-constraintlayout_constraintlayout",
+        "androidx.lifecycle_lifecycle-runtime",
+        "androidx.fragment_fragment",
+        "androidx.preference_preference",
+        "androidx.cardview_cardview",
+        "androidx.recyclerview_recyclerview",
+        "androidx.preference_preference",
+        "androidx.appcompat_appcompat",
+        "com.google.android.material_material",
+    ]
     resource_dirs: ["res"],
 
     srcs: ["java/**/*.java", "java/**/*.kt", "java_real/**/*.java"],
