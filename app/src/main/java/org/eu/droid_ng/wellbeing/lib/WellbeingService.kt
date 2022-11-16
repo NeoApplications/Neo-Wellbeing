@@ -104,6 +104,7 @@ class WellbeingService(private val context: Context) {
 	private val pmd = PackageManagerDelegate(pm)
 	val cdm: PackageManagerDelegate.IColorDisplayManager = PackageManagerDelegate.getColorDisplayManager(context)
 	@JvmField val usm = context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
+	private val alc = AlarmCoordinator(context)
 
 	private val oidMap = context.getSharedPreferences("AppTimersInternal", 0)
 	private val config = context.getSharedPreferences("appTimers", 0)
@@ -128,6 +129,7 @@ class WellbeingService(private val context: Context) {
 		appTimerDialogBreakTime = Integer.parseInt(prefs.getString("app_timer_dialog", appTimerDialogBreakTime.toString()) ?: appTimerDialogBreakTime.toString())
 
 		loadSchedcfg()
+		alc.updateState()
 	}
 
 	private fun loadSchedcfg() {
@@ -137,7 +139,7 @@ class WellbeingService(private val context: Context) {
 			return@map when (values[0]) {
 				"time" -> {
 					val bools = BooleanArray(7); for (i in bools.indices) if (values[7].toInt() and (1 shl i) != 0) bools[i] = true // bitmask -> boolean[]
-					TimeChargerTriggerCondition(values[1], values[2], values[3].toInt(), values[4].toInt(), values[5].toInt(), values[6].toInt(), bools, values[8].toBooleanStrict())
+					TimeChargerTriggerCondition(values[1], values[2], values[3].toInt(), values[4].toInt(), values[5].toInt(), values[6].toInt(), bools, values[8].toBooleanStrict(), values[9].toBooleanStrict())
 				}
 				else -> {
 					throw IllegalStateException("invalid trigger type ${values[0]}")
@@ -155,7 +157,7 @@ class WellbeingService(private val context: Context) {
 			when (it) {
 				is TimeChargerTriggerCondition -> {
 					var bits = 0; for (i in 0 until it.weekdays.size) if (it.weekdays[i]) bits = bits or (1 shl i) // boolean[] -> bitmask
-					"time;;${it.id};;${it.iid};;${it.startHour};;${it.startMinute};;${it.endHour};;${it.endMinute};;${bits};;${it.needCharger}"
+					"time;;${it.id};;${it.iid};;${it.startHour};;${it.startMinute};;${it.endHour};;${it.endMinute};;${bits};;${it.needCharger};;${it.endOnAlarm}"
 				}
 				else -> throw IllegalStateException("unknown trigger ${it::class.qualifiedName}")
 			}
@@ -924,7 +926,7 @@ class WellbeingService(private val context: Context) {
 		}
 	}
 
-	private fun doTrigger(expire: Boolean, condition: (Trigger) -> Boolean) {
+	fun doTrigger(expire: Boolean, condition: (Trigger) -> Boolean) {
 		triggers.forEach { fired ->
 			if (condition(fired) && // is this the trigger we're searching for?
 				(expire || // is this an deactivation request?
@@ -936,6 +938,10 @@ class WellbeingService(private val context: Context) {
 	}
 
 	fun onAlarmFired(id: String) {
+		if ("alc" == id) {
+			alc.fired()
+			return
+		}
 		var t = false
 		val nid = if (id.startsWith("expire::")) {
 			t = true

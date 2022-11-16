@@ -57,7 +57,8 @@ class TimeChargerTriggerCondition(
 	val endHour: Int,
 	val endMinute: Int,
 	val weekdays: BooleanArray, // length = 7, 0 = monday, 6 = sunday
-	val needCharger: Boolean
+	val needCharger: Boolean,
+	val endOnAlarm: Boolean
 ) : Trigger, Condition {
 	override fun setup(applicationContext: Context, service: WellbeingService) {
 		if (!weekdays.any { it }) return // bail if no weekday is enabled

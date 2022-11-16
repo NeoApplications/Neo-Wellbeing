@@ -66,7 +66,7 @@ public class ScheduleActivity extends AppCompatActivity {
 	@Override
 	public boolean onOptionsItemSelected(@NonNull MenuItem item) {
 		if (item.getItemId() == R.id.addSchedule) {
-			data.add(new TimeChargerTriggerCondition(type, String.valueOf(System.currentTimeMillis()), 7, 0, 18, 0, new boolean[]{true, true, true, true, true, true, true}, false));
+			data.add(new TimeChargerTriggerCondition(type, String.valueOf(System.currentTimeMillis()), 7, 0, 18, 0, new boolean[]{true, true, true, true, true, true, true}, false, false));
 			updateUi();
 			return true;
 		}

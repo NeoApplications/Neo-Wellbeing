@@ -83,4 +83,5 @@
 	<string name="add_schedule">Add schedule</string>
 	<string name="delete">Delete</string>
 	<string name="add_schedule_info">Nothing here yet, try to add an schedule</string>
+	<string name="sched_alarm">End with alarm</string>
 </resources>

@@ -32,7 +32,7 @@ public class ScheduleCardView extends FrameLayout {
 
 	TimeSettingView startTime, endTime;
 	DayPicker daypicker;
-	AppCompatCheckBox checkBox;
+	AppCompatCheckBox charger, alarm;
 	Consumer<String> onValuesChangedCallback;
 	Consumer<String> onDeleteCardCallback;
 	String id, iid;
@@ -43,7 +43,8 @@ public class ScheduleCardView extends FrameLayout {
 		startTime = findViewById(R.id.startTime);
 		endTime = findViewById(R.id.endTime);
 		daypicker = findViewById(R.id.dayPicker);
-		checkBox = findViewById(R.id.chargerCheckBox);
+		charger = findViewById(R.id.chargerCheckBox);
+		alarm = findViewById(R.id.alarmCheckBox);
 
 		daypicker.setValues(new boolean[] { true, true, true, true, true, true, true });
 		startTime.setData(LocalTime.of(7, 0));
@@ -66,7 +67,13 @@ public class ScheduleCardView extends FrameLayout {
 			}
 		});
 		findViewById(R.id.chargerLayout).setOnClickListener(v -> {
-			checkBox.setChecked(!checkBox.isChecked());
+			charger.setChecked(!charger.isChecked());
+			if (onValuesChangedCallback != null) {
+				onValuesChangedCallback.accept(iid);
+			}
+		});
+		findViewById(R.id.alarmLayout).setOnClickListener(v -> {
+			alarm.setChecked(!alarm.isChecked());
 			if (onValuesChangedCallback != null) {
 				onValuesChangedCallback.accept(iid);
 			}
@@ -89,7 +96,7 @@ public class ScheduleCardView extends FrameLayout {
 	public TimeChargerTriggerCondition getTimeData() {
 		LocalTime s = startTime.getData();
 		LocalTime e = endTime.getData();
-		return new TimeChargerTriggerCondition(id, iid, s.getHour(), s.getMinute(), e.getHour(), e.getMinute(), daypicker.getValues(), checkBox.isChecked());
+		return new TimeChargerTriggerCondition(id, iid, s.getHour(), s.getMinute(), e.getHour(), e.getMinute(), daypicker.getValues(), charger.isChecked(), alarm.isChecked());
 	}
 
 	public void setTimeData(TimeChargerTriggerCondition t) {
@@ -98,6 +105,7 @@ public class ScheduleCardView extends FrameLayout {
 		startTime.setData(LocalTime.of(t.getStartHour(), t.getStartMinute()));
 		endTime.setData(LocalTime.of(t.getEndHour(), t.getEndMinute()));
 		daypicker.setValues(t.getWeekdays());
-		checkBox.setChecked(t.getNeedCharger());
+		charger.setChecked(t.getNeedCharger());
+		alarm.setChecked(t.getEndOnAlarm());
 	}
 }

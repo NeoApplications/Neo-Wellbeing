@@ -45,7 +45,7 @@
 
 		<LinearLayout
 			android:id="@+id/chargerLayout"
-			android:layout_marginVertical="10dp"
+			android:layout_marginTop="10dp"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:clickable="true"
@@ -66,6 +66,34 @@
 
 			<com.google.android.material.checkbox.MaterialCheckBox
 				android:id="@+id/chargerCheckBox"
+				android:clickable="false"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"/>
+		</LinearLayout>
+
+		<LinearLayout
+			android:id="@+id/alarmLayout"
+			android:layout_marginBottom="10dp"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:clickable="true"
+			android:gravity="center_vertical"
+			android:orientation="horizontal">
+
+			<androidx.appcompat.widget.AppCompatImageView
+				android:importantForAccessibility="no"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				app:srcCompat="@drawable/baseline_alarm_24" />
+
+			<androidx.appcompat.widget.AppCompatTextView
+				android:layout_width="0dp"
+				android:layout_height="wrap_content"
+				android:text="@string/sched_alarm"
+				android:layout_weight="1" />
+
+			<com.google.android.material.checkbox.MaterialCheckBox
+				android:id="@+id/alarmCheckBox"
 				android:clickable="false"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"/>
