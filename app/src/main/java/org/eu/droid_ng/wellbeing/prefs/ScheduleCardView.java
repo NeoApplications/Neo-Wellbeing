@@ -32,7 +32,7 @@ public class ScheduleCardView extends FrameLayout {
 
 	TimeSettingView startTime, endTime;
 	DayPicker daypicker;
-	AppCompatCheckBox charger, alarm;
+	AppCompatCheckBox enable, charger, alarm;
 	Consumer<String> onValuesChangedCallback;
 	Consumer<String> onDeleteCardCallback;
 	String id, iid;
@@ -43,6 +43,7 @@ public class ScheduleCardView extends FrameLayout {
 		startTime = findViewById(R.id.startTime);
 		endTime = findViewById(R.id.endTime);
 		daypicker = findViewById(R.id.dayPicker);
+		enable = findViewById(R.id.enableCheckBox);
 		charger = findViewById(R.id.chargerCheckBox);
 		alarm = findViewById(R.id.alarmCheckBox);
 
@@ -62,6 +63,11 @@ public class ScheduleCardView extends FrameLayout {
 			}
 		});
 		daypicker.setOnValuesChangeListener(values -> {
+			if (onValuesChangedCallback != null) {
+				onValuesChangedCallback.accept(iid);
+			}
+		});
+		enable.setOnCheckedChangeListener((buttonView, isChecked) -> {
 			if (onValuesChangedCallback != null) {
 				onValuesChangedCallback.accept(iid);
 			}
@@ -96,12 +102,13 @@ public class ScheduleCardView extends FrameLayout {
 	public TimeChargerTriggerCondition getTimeData() {
 		LocalTime s = startTime.getData();
 		LocalTime e = endTime.getData();
-		return new TimeChargerTriggerCondition(id, iid, s.getHour(), s.getMinute(), e.getHour(), e.getMinute(), daypicker.getValues(), charger.isChecked(), alarm.isChecked());
+		return new TimeChargerTriggerCondition(id, iid, enable.isChecked(), s.getHour(), s.getMinute(), e.getHour(), e.getMinute(), daypicker.getValues(), charger.isChecked(), alarm.isChecked());
 	}
 
 	public void setTimeData(TimeChargerTriggerCondition t) {
 		id = t.getId();
 		iid = t.getIid();
+		enable.setChecked(t.getEnabled());
 		startTime.setData(LocalTime.of(t.getStartHour(), t.getStartMinute()));
 		endTime.setData(LocalTime.of(t.getEndHour(), t.getEndMinute()));
 		daypicker.setValues(t.getWeekdays());

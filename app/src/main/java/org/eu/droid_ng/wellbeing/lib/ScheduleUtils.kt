@@ -40,6 +40,7 @@ class ScheduleUtils {
 interface Trigger {
 	val id: String
 	val iid: String
+	val enabled: Boolean
 	fun setup(applicationContext: Context, service: WellbeingService)
 	fun dispose(applicationContext: Context, service: WellbeingService)
 }
@@ -52,6 +53,7 @@ interface Condition {
 class TimeChargerTriggerCondition(
 	override val id: String,
 	override val iid: String,
+	override val enabled: Boolean,
 	val startHour: Int,
 	val startMinute: Int,
 	val endHour: Int,
@@ -62,6 +64,7 @@ class TimeChargerTriggerCondition(
 ) : Trigger, Condition {
 	override fun setup(applicationContext: Context, service: WellbeingService) {
 		if (!weekdays.any { it }) return // bail if no weekday is enabled
+		if (!enabled) return
 		val now = LocalDateTime.now().withNano(0)
 		val cwd = if (!weekdays[now.dayOfWeek.ordinal]) {
 			val offset = now.dayOfWeek.ordinal
@@ -126,7 +129,7 @@ class TimeChargerTriggerCondition(
 
 	override fun isFulfilled(applicationContext: Context, service: WellbeingService): Boolean {
 		val now = LocalDateTime.now().withNano(0)
-		return (weekdays[now.dayOfWeek.ordinal] && run {
+		return (enabled && weekdays[now.dayOfWeek.ordinal] && run {
 			val end = now.withSecond(0).withHour(endHour).withMinute(endMinute)
 			val start = now.withSecond(0).withHour(startHour).withMinute(startMinute).let {
 				if (it.isAfter(end)) {

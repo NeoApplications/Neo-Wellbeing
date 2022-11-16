@@ -138,8 +138,8 @@ class WellbeingService(private val context: Context) {
 			if (values.size < 2) throw IllegalStateException("invalid value $raw")
 			return@map when (values[0]) {
 				"time" -> {
-					val bools = BooleanArray(7); for (i in bools.indices) if (values[7].toInt() and (1 shl i) != 0) bools[i] = true // bitmask -> boolean[]
-					TimeChargerTriggerCondition(values[1], values[2], values[3].toInt(), values[4].toInt(), values[5].toInt(), values[6].toInt(), bools, values[8].toBooleanStrict(), values[9].toBooleanStrict())
+					val bools = BooleanArray(7); for (i in bools.indices) if (values[8].toInt() and (1 shl i) != 0) bools[i] = true // bitmask -> boolean[]
+					TimeChargerTriggerCondition(values[1], values[2], values[3].toBooleanStrict(), values[4].toInt(), values[5].toInt(), values[6].toInt(), values[7].toInt(), bools, values[9].toBooleanStrict(), values[10].toBooleanStrict())
 				}
 				else -> {
 					throw IllegalStateException("invalid trigger type ${values[0]}")
@@ -157,7 +157,7 @@ class WellbeingService(private val context: Context) {
 			when (it) {
 				is TimeChargerTriggerCondition -> {
 					var bits = 0; for (i in 0 until it.weekdays.size) if (it.weekdays[i]) bits = bits or (1 shl i) // boolean[] -> bitmask
-					"time;;${it.id};;${it.iid};;${it.startHour};;${it.startMinute};;${it.endHour};;${it.endMinute};;${bits};;${it.needCharger};;${it.endOnAlarm}"
+					"time;;${it.id};;${it.iid};;${it.enabled};;${it.startHour};;${it.startMinute};;${it.endHour};;${it.endMinute};;${bits};;${it.needCharger};;${it.endOnAlarm}"
 				}
 				else -> throw IllegalStateException("unknown trigger ${it::class.qualifiedName}")
 			}
