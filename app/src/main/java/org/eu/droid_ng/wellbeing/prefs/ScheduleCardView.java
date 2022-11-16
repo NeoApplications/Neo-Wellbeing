@@ -2,11 +2,11 @@ package org.eu.droid_ng.wellbeing.prefs;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.widget.CheckBox;
 import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.AppCompatCheckBox;
 
 import org.eu.droid_ng.wellbeing.R;
 import org.eu.droid_ng.wellbeing.lib.TimeChargerTriggerCondition;
@@ -32,7 +32,7 @@ public class ScheduleCardView extends FrameLayout {
 
 	TimeSettingView startTime, endTime;
 	DayPicker daypicker;
-	CheckBox checkBox;
+	AppCompatCheckBox checkBox;
 	Consumer<String> onValuesChangedCallback;
 	Consumer<String> onDeleteCardCallback;
 	String id, iid;

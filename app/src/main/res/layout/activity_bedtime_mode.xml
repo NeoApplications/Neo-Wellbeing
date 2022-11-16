@@ -25,7 +25,7 @@
 			app:layout_constraintStart_toStartOf="parent"
 			app:layout_constraintTop_toTopOf="parent">
 
-			<ImageView
+			<androidx.appcompat.widget.AppCompatImageView
 				android:id="@+id/bedModeIco"
 				android:layout_width="48dp"
 				android:layout_height="48dp"
@@ -35,7 +35,7 @@
 				app:layout_constraintStart_toStartOf="parent"
 				app:layout_constraintTop_toTopOf="parent" />
 
-			<TextView
+			<androidx.appcompat.widget.AppCompatTextView
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:text="@string/bedtime_mode"
@@ -47,9 +47,8 @@
 				app:layout_constraintTop_toTopOf="parent" />
 		</androidx.constraintlayout.widget.ConstraintLayout>
 
-		<Button
+		<com.google.android.material.button.MaterialButton
 			android:id="@+id/bedModeToggle"
-			style="@style/Widget.AppCompat.Button.Colored"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:text="@string/enable"
@@ -70,7 +69,7 @@
 			app:layout_constraintStart_toEndOf="@+id/bedModeToggle"
 			app:layout_constraintTop_toBottomOf="@+id/bedModeHeader">
 
-			<TextView
+			<androidx.appcompat.widget.AppCompatTextView
 				android:id="@+id/schedule1"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
@@ -104,21 +103,21 @@
 			app:layout_constraintStart_toStartOf="parent"
 			app:layout_constraintTop_toTopOf="parent">
 
-			<ImageView
+			<androidx.appcompat.widget.AppCompatImageView
 				android:importantForAccessibility="no"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:layout_weight="0"
 				app:srcCompat="@drawable/baseline_gradient_24" />
 
-			<TextView
+			<androidx.appcompat.widget.AppCompatTextView
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:layout_weight="1"
 				android:textSize="20sp"
 				android:text="@string/greyscale" />
 
-			<CheckBox
+			<com.google.android.material.checkbox.MaterialCheckBox
 				android:id="@+id/checkBox2"
 				android:clickable="false"
 				android:layout_width="32dp"

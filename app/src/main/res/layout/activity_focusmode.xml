@@ -23,7 +23,7 @@
 			app:layout_constraintStart_toStartOf="parent"
 			app:layout_constraintTop_toTopOf="parent">
 
-			<ImageView
+			<androidx.appcompat.widget.AppCompatImageView
 				android:id="@+id/focusModeIco"
 				android:layout_width="48dp"
 				android:layout_height="48dp"
@@ -33,7 +33,7 @@
 				app:layout_constraintStart_toStartOf="parent"
 				app:layout_constraintTop_toTopOf="parent" />
 
-			<TextView
+			<androidx.appcompat.widget.AppCompatTextView
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:text="@string/focus_mode"
@@ -57,9 +57,8 @@
 			app:layout_constraintStart_toStartOf="parent"
 			app:layout_constraintTop_toBottomOf="@+id/focusModeHeader">
 
-			<Button
+			<com.google.android.material.button.MaterialButton
 				android:id="@+id/focusModeToggle"
-				style="@style/Widget.AppCompat.Button.Colored"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:text="@string/enable"
@@ -67,7 +66,7 @@
 				app:layout_constraintStart_toStartOf="parent"
 				app:layout_constraintTop_toTopOf="parent" />
 
-			<TextView
+			<androidx.appcompat.widget.AppCompatTextView
 				android:id="@+id/focusModeBreak"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
@@ -88,7 +87,7 @@
 			app:layout_constraintStart_toEndOf="@+id/constraintLayout"
 			app:layout_constraintTop_toBottomOf="@+id/focusModeHeader">
 
-			<TextView
+			<androidx.appcompat.widget.AppCompatTextView
 				android:id="@+id/schedule"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"

@@ -3,9 +3,9 @@ package org.eu.droid_ng.wellbeing.prefs;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.FrameLayout;
-import android.widget.ToggleButton;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.AppCompatToggleButton;
 
 import org.eu.droid_ng.wellbeing.R;
 
@@ -13,7 +13,7 @@ import java.util.Calendar;
 import java.util.function.Consumer;
 
 public class DayPicker extends FrameLayout {
-	private ToggleButton[] views;
+	private AppCompatToggleButton[] views;
 	private boolean[] values = new boolean[7]; // Monday -> Sunday like Java DayOfWeek
 	private int firstDayOfWeek;
 	private Consumer<boolean[]> onValuesChangeListener;
@@ -35,18 +35,18 @@ public class DayPicker extends FrameLayout {
 
 	private void initView() {
 		inflate(getContext(), R.layout.dpicker, this);
-		ToggleButton day1 = findViewById(R.id.dayPickerDay1);
-		ToggleButton day2 = findViewById(R.id.dayPickerDay2);
-		ToggleButton day3 = findViewById(R.id.dayPickerDay3);
-		ToggleButton day4 = findViewById(R.id.dayPickerDay4);
-		ToggleButton day5 = findViewById(R.id.dayPickerDay5);
-		ToggleButton day6 = findViewById(R.id.dayPickerDay6);
-		ToggleButton day7 = findViewById(R.id.dayPickerDay7);
-		views = new ToggleButton[] {day1, day2, day3, day4, day5, day6, day7};
+		AppCompatToggleButton day1 = findViewById(R.id.dayPickerDay1);
+		AppCompatToggleButton day2 = findViewById(R.id.dayPickerDay2);
+		AppCompatToggleButton day3 = findViewById(R.id.dayPickerDay3);
+		AppCompatToggleButton day4 = findViewById(R.id.dayPickerDay4);
+		AppCompatToggleButton day5 = findViewById(R.id.dayPickerDay5);
+		AppCompatToggleButton day6 = findViewById(R.id.dayPickerDay6);
+		AppCompatToggleButton day7 = findViewById(R.id.dayPickerDay7);
+		views = new AppCompatToggleButton[] {day1, day2, day3, day4, day5, day6, day7};
 
 		firstDayOfWeek = (Calendar.getInstance().getFirstDayOfWeek() - 2) % 7;
 		for (int i = 0; i < 7; i++) {
-			ToggleButton v = views[i];
+			AppCompatToggleButton v = views[i];
 			int textToSet;
 			int javaDayOfWeek = Math.floorMod((i + firstDayOfWeek), 7);
 			switch (javaDayOfWeek + 2) {
@@ -90,7 +90,7 @@ public class DayPicker extends FrameLayout {
 	public void setValues(boolean[] values) {
 		this.values = values;
 		for (int i = 0; i < 7; i++) {
-			ToggleButton v = views[i];
+			AppCompatToggleButton v = views[i];
 			int javaDayOfWeek = Math.floorMod((i + firstDayOfWeek), 7);
 			v.setChecked(values[javaDayOfWeek]);
 		}

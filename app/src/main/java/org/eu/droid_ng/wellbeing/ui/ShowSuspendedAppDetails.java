@@ -9,13 +9,14 @@ import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.cardview.widget.CardView;
+import androidx.appcompat.widget.AppCompatImageView;
+import androidx.appcompat.widget.AppCompatTextView;
+
+import com.google.android.material.card.MaterialCardView;
 
 import org.eu.droid_ng.wellbeing.R;
 import org.eu.droid_ng.wellbeing.lib.State;
@@ -46,8 +47,8 @@ public class ShowSuspendedAppDetails extends AppCompatActivity {
 			actionBar.setDisplayHomeAsUpEnabled(true);
 		}
 
-		final ImageView iconView = findViewById(R.id.appIcon);
-		final TextView nameView = findViewById(R.id.appName);
+		final AppCompatImageView iconView = findViewById(R.id.appIcon);
+		final AppCompatTextView nameView = findViewById(R.id.appName);
 		ApplicationInfo appInfo = null;
 		Drawable icon = null;
 		CharSequence name = null;
@@ -61,7 +62,7 @@ public class ShowSuspendedAppDetails extends AppCompatActivity {
 			nameView.setText(name);
 		}
 		final State reason = tw.getAppState(packageName);
-		CardView container;
+		MaterialCardView container;
 		int hasReason = 0;
 		if (reason.isAppTimerExpired() && !reason.isAppTimerBreak()) {
 			hasReason++;

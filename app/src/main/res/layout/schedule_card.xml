@@ -17,7 +17,7 @@
 			android:layout_margin="5dp"
 			android:orientation="horizontal">
 
-			<ImageButton
+			<androidx.appcompat.widget.AppCompatImageButton
 				android:id="@+id/delete"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
@@ -52,19 +52,19 @@
 			android:gravity="center_vertical"
 			android:orientation="horizontal">
 
-			<ImageView
+			<androidx.appcompat.widget.AppCompatImageView
 				android:importantForAccessibility="no"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				app:srcCompat="@drawable/baseline_charging_station_24" />
 
-			<TextView
+			<androidx.appcompat.widget.AppCompatTextView
 				android:layout_width="0dp"
 				android:layout_height="wrap_content"
 				android:text="@string/sched_charging"
 				android:layout_weight="1" />
 
-			<CheckBox
+			<com.google.android.material.checkbox.MaterialCheckBox
 				android:id="@+id/chargerCheckBox"
 				android:clickable="false"
 				android:layout_width="wrap_content"

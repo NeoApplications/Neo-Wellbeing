@@ -1,12 +1,5 @@
 package org.eu.droid_ng.wellbeing.prefs;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.content.res.AppCompatResources;
-import androidx.recyclerview.widget.RecyclerView;
-
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -18,11 +11,19 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CheckBox;
-import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.NumberPicker;
-import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.content.res.AppCompatResources;
+import androidx.appcompat.widget.AppCompatImageButton;
+import androidx.appcompat.widget.AppCompatImageView;
+import androidx.appcompat.widget.AppCompatTextView;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.material.checkbox.MaterialCheckBox;
 
 import org.eu.droid_ng.wellbeing.R;
 import org.eu.droid_ng.wellbeing.lib.Utils;
@@ -146,9 +147,9 @@ public class AppTimers extends AppCompatActivity {
 
 		public class AppTimerViewHolder extends RecyclerView.ViewHolder {
 			private final ViewGroup container;
-			private final ImageView appIcon;
-			private final TextView appName;
-			private final TextView appTimerInfo;
+			private final AppCompatImageView appIcon;
+			private final AppCompatTextView appName;
+			private final AppCompatTextView appTimerInfo;
 
 			public AppTimerViewHolder(@NonNull View itemView) {
 				super(itemView);
@@ -156,10 +157,10 @@ public class AppTimers extends AppCompatActivity {
 				this.appIcon = itemView.findViewById(R.id.appIcon);
 				this.appName = itemView.findViewById(R.id.appName2);
 				this.appTimerInfo = itemView.findViewById(R.id.pkgName);
-				ImageButton actionButton = new ImageButton(itemView.getContext());
+				AppCompatImageButton actionButton = new AppCompatImageButton(itemView.getContext());
 				actionButton.setImageDrawable(AppCompatResources.getDrawable(itemView.getContext(), R.drawable.ic_focus_mode));
 				actionButton.setBackground(null);
-				CheckBox checkBox = itemView.findViewById(R.id.isChecked);
+				MaterialCheckBox checkBox = itemView.findViewById(R.id.isChecked);
 				ViewGroup parent = (ViewGroup) checkBox.getParent();
 				int idx = parent.indexOfChild(checkBox);
 				parent.removeView(checkBox);

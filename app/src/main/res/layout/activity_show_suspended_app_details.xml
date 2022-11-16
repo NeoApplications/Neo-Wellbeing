@@ -16,7 +16,7 @@
 		app:layout_constraintStart_toStartOf="parent"
 		app:layout_constraintTop_toTopOf="parent">
 
-		<ImageView
+		<androidx.appcompat.widget.AppCompatImageView
 			android:id="@+id/appIcon"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
@@ -28,7 +28,7 @@
 			app:layout_constraintStart_toStartOf="parent"
 			app:layout_constraintTop_toTopOf="parent" />
 
-		<TextView
+		<androidx.appcompat.widget.AppCompatTextView
 			android:id="@+id/appName"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
@@ -41,7 +41,7 @@
 
 	</androidx.constraintlayout.widget.ConstraintLayout>
 
-	<TextView
+	<androidx.appcompat.widget.AppCompatTextView
 		android:id="@+id/suspendedDueTo"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
@@ -52,7 +52,7 @@
 		app:layout_constraintStart_toStartOf="parent"
 		app:layout_constraintTop_toBottomOf="@+id/appLayout" />
 
-	<androidx.cardview.widget.CardView
+	<com.google.android.material.card.MaterialCardView
 		android:id="@+id/focusMode"
 		android:layout_width="0dp"
 		android:layout_height="wrap_content"
@@ -71,7 +71,7 @@
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content">
 
-			<TextView
+			<androidx.appcompat.widget.AppCompatTextView
 				android:id="@+id/textView"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
@@ -83,7 +83,7 @@
 				app:layout_constraintTop_toTopOf="parent"
 				app:drawableStartCompat="@drawable/ic_focus_mode" />
 
-			<TextView
+			<androidx.appcompat.widget.AppCompatTextView
 				android:id="@+id/focusModeDesc"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
@@ -92,29 +92,29 @@
 				app:layout_constraintStart_toStartOf="parent"
 				app:layout_constraintTop_toBottomOf="@+id/textView" />
 
-			<Button
+			<com.google.android.material.button.MaterialButton
 				android:id="@+id/takeabreakbtn"
-				style="@android:style/Widget.Material.Button.Borderless.Colored"
+				style="@style/Widget.Material3.Button.TonalButton"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:text="@string/focus_mode_break"
 				app:layout_constraintEnd_toEndOf="parent"
 				app:layout_constraintTop_toBottomOf="@+id/focusModeDesc" />
 
-			<Button
+			<com.google.android.material.button.MaterialButton
 				android:id="@+id/disablefocusmode"
-				style="@android:style/Widget.Material.Button.Borderless.Colored"
+				style="@style/Widget.Material3.Button.TonalButton"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:text="@string/focus_mode_off"
-				android:textColor="@android:color/holo_red_dark"
+				android:backgroundTint="@android:color/holo_red_dark"
 				app:layout_constraintBottom_toBottomOf="parent"
 				app:layout_constraintStart_toStartOf="parent" />
 
 		</androidx.constraintlayout.widget.ConstraintLayout>
-	</androidx.cardview.widget.CardView>
+	</com.google.android.material.card.MaterialCardView>
 
-	<androidx.cardview.widget.CardView
+	<com.google.android.material.card.MaterialCardView
 		android:id="@+id/unknown"
 		android:layout_width="0dp"
 		android:layout_height="wrap_content"
@@ -133,7 +133,7 @@
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content">
 
-			<TextView
+			<androidx.appcompat.widget.AppCompatTextView
 				android:id="@+id/unknownHeader"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
@@ -145,7 +145,7 @@
 				app:layout_constraintTop_toTopOf="parent"
 				app:drawableStartCompat="@drawable/ic_baseline_bug_report_24" />
 
-			<TextView
+			<androidx.appcompat.widget.AppCompatTextView
 				android:id="@+id/unknownDesc"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
@@ -154,9 +154,9 @@
 				app:layout_constraintStart_toStartOf="parent"
 				app:layout_constraintTop_toBottomOf="@+id/unknownHeader" />
 
-			<Button
+			<com.google.android.material.button.MaterialButton
 				android:id="@+id/unsuspendbtn"
-				style="@android:style/Widget.Material.Button.Borderless.Colored"
+				style="@style/Widget.Material3.Button.TonalButton"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:text="@string/unsuspend"
@@ -165,9 +165,9 @@
 				tools:ignore="DuplicateSpeakableTextCheck" />
 
 		</androidx.constraintlayout.widget.ConstraintLayout>
-	</androidx.cardview.widget.CardView>
+	</com.google.android.material.card.MaterialCardView>
 
-	<androidx.cardview.widget.CardView
+	<com.google.android.material.card.MaterialCardView
 		android:id="@+id/manually"
 		android:layout_width="0dp"
 		android:layout_height="wrap_content"
@@ -186,7 +186,7 @@
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content">
 
-			<TextView
+			<androidx.appcompat.widget.AppCompatTextView
 				android:id="@+id/manuallyHeader"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
@@ -198,7 +198,7 @@
 				app:layout_constraintTop_toTopOf="parent"
 				app:drawableStartCompat="@drawable/ic_baseline_person_24" />
 
-			<TextView
+			<androidx.appcompat.widget.AppCompatTextView
 				android:id="@+id/manuallyDesc"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
@@ -207,29 +207,29 @@
 				app:layout_constraintStart_toStartOf="parent"
 				app:layout_constraintTop_toBottomOf="@+id/manuallyHeader" />
 
-			<Button
+			<com.google.android.material.button.MaterialButton
 				android:id="@+id/unsuspendbtn2"
-				style="@android:style/Widget.Material.Button.Borderless.Colored"
+				style="@style/Widget.Material3.Button.TonalButton"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:text="@string/unsuspend"
 				app:layout_constraintEnd_toEndOf="parent"
 				app:layout_constraintTop_toBottomOf="@+id/manuallyDesc" />
 
-			<Button
+			<com.google.android.material.button.MaterialButton
 				android:id="@+id/unsuspendallbtn"
-				style="@android:style/Widget.Material.Button.Borderless.Colored"
+				style="@style/Widget.Material3.Button.TonalButton"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:text="@string/unsuspend_all"
-				android:textColor="@android:color/holo_red_dark"
+				android:backgroundTint="@android:color/holo_red_dark"
 				app:layout_constraintBottom_toBottomOf="parent"
 				app:layout_constraintStart_toStartOf="parent" />
 
 		</androidx.constraintlayout.widget.ConstraintLayout>
-	</androidx.cardview.widget.CardView>
+	</com.google.android.material.card.MaterialCardView>
 
-	<androidx.cardview.widget.CardView
+	<com.google.android.material.card.MaterialCardView
 		android:id="@+id/apptimer"
 		android:layout_width="0dp"
 		android:layout_height="wrap_content"
@@ -248,7 +248,7 @@
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content">
 
-			<TextView
+			<androidx.appcompat.widget.AppCompatTextView
 				android:id="@+id/apptimerHeader"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
@@ -260,7 +260,7 @@
 				app:layout_constraintTop_toTopOf="parent"
 				app:drawableStartCompat="@drawable/ic_baseline_person_24" />
 
-			<TextView
+			<androidx.appcompat.widget.AppCompatTextView
 				android:id="@+id/apptimerDesc"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
@@ -269,9 +269,9 @@
 				app:layout_constraintStart_toStartOf="parent"
 				app:layout_constraintTop_toBottomOf="@+id/apptimerHeader" />
 
-			<Button
+			<com.google.android.material.button.MaterialButton
 				android:id="@+id/takeabreakbtn2"
-				style="@android:style/Widget.Material.Button.Borderless.Colored"
+				style="@style/Widget.Material3.Button.TonalButton"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:text="@string/focus_mode_break"
@@ -279,6 +279,6 @@
 				app:layout_constraintTop_toBottomOf="@+id/apptimerDesc" />
 
 		</androidx.constraintlayout.widget.ConstraintLayout>
-	</androidx.cardview.widget.CardView>
+	</com.google.android.material.card.MaterialCardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

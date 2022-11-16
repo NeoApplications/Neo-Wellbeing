@@ -12,17 +12,17 @@
 		android:layout_height="wrap_content"
 		android:orientation="horizontal">
 
-		<Button
+		<com.google.android.material.button.MaterialButton
 			android:id="@+id/suspendbtn"
-			style="@style/Widget.AppCompat.Button.Borderless.Colored"
+			style="@style/AppTheme.TonalButton"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:layout_weight="1"
 			android:text="@string/suspend" />
 
-		<Button
+		<com.google.android.material.button.MaterialButton
 			android:id="@+id/desuspendbtn"
-			style="@style/Widget.AppCompat.Button.Borderless.Colored"
+			style="@style/AppTheme.TonalButton"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:layout_weight="1"

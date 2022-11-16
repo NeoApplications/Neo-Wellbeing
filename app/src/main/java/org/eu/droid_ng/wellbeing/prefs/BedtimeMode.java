@@ -2,13 +2,14 @@ package org.eu.droid_ng.wellbeing.prefs;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatTextView;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.TextView;
+
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.checkbox.MaterialCheckBox;
 
 import org.eu.droid_ng.wellbeing.R;
 import org.eu.droid_ng.wellbeing.lib.WellbeingService;
@@ -18,7 +19,7 @@ import java.util.function.Consumer;
 public class BedtimeMode extends AppCompatActivity {
 
 	private final Consumer<WellbeingService> sc = tw -> {
-		Button bt = findViewById(R.id.bedModeToggle);
+		MaterialButton bt = findViewById(R.id.bedModeToggle);
 		bt.setText(tw.getState(false).isBedtimeModeEnabled() ? R.string.disable : R.string.enable);
 	};
 
@@ -33,9 +34,9 @@ public class BedtimeMode extends AppCompatActivity {
 		WellbeingService tw = WellbeingService.get();
 		SharedPreferences prefs = getSharedPreferences("bedtime_mode", 0);
 
-		CheckBox c = findViewById(R.id.checkBox2);
+		MaterialCheckBox c = findViewById(R.id.checkBox2);
 		c.setChecked(prefs.getBoolean("greyscale", false));
-		Button bt = findViewById(R.id.bedModeToggle);
+		MaterialButton bt = findViewById(R.id.bedModeToggle);
 		bt.setOnClickListener(v -> {
 			boolean b = !tw.getState(false).isBedtimeModeEnabled();
 			tw.setBedtimeMode(b);
@@ -51,7 +52,7 @@ public class BedtimeMode extends AppCompatActivity {
 				tw.getCdm().setSaturationLevel(b ? 0 : 100);
 			}
 		});
-		TextView schedule = findViewById(R.id.schedule1);
+		AppCompatTextView schedule = findViewById(R.id.schedule1);
 		schedule.setOnClickListener(v ->
 				startActivity(new Intent(this, ScheduleActivity.class).putExtra("type", "bedtime_mode")
 						.putExtra("name", getString(R.string.bedtime_mode))));

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+	<style name="AppTheme" parent="AppThemeM2" />
+	<style name="AppTheme.TonalButton" parent="AppThemeM2.TonalButton" />
+
+	<style name="AppThemeM3" parent="AppThemeM3.Base" />
+	<style name="AppThemeM3.Base" parent="Theme.Material3.DynamicColors.DayNight">
+		<item name="alertDialogTheme">@style/AppThemeM3.AlertDialog</item>
+	</style>
+	<style name="AppThemeM3.AlertDialog" parent="ThemeOverlay.Material3.MaterialAlertDialog">
+		<item name="dialogCornerRadius">28dp</item>
+		<item name="cornerFamily">rounded</item>
+		<item name="android:colorBackground">?attr/colorSurface</item>
+		<item name="android:layout" tools:ignore="PrivateResource">@layout/m3_alert_dialog</item>
+	</style>
+	<style name="AppThemeM3.TonalButton" parent="ThemeOverlay.Material3.Button.TonalButton" />
+
+	<style name="AppThemeM2" parent="Theme.MaterialComponents.DayNight">
+		<item name="alertDialogTheme">@style/Theme.MaterialComponents.Dialog.Alert</item>
+	</style>
+	<style name="AppThemeM2.TonalButton" parent="Widget.MaterialComponents.Button.TextButton" />
+
+</resources>

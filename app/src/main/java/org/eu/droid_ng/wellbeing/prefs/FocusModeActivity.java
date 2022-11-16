@@ -5,13 +5,14 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatTextView;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.material.button.MaterialButton;
 
 import org.eu.droid_ng.wellbeing.R;
 import org.eu.droid_ng.wellbeing.lib.State;
@@ -32,7 +33,7 @@ public class FocusModeActivity extends AppCompatActivity {
 		LayoutTransition layoutTransition = ((LinearLayout) findViewById(R.id.focusModeRoot)).getLayoutTransition();
 		layoutTransition.enableTransitionType(LayoutTransition.CHANGING);
 
-		TextView schedule = findViewById(R.id.schedule);
+		AppCompatTextView schedule = findViewById(R.id.schedule);
 		schedule.setOnClickListener(v -> startActivity(new Intent(this, ScheduleActivity.class).putExtra("type", "focus_mode").putExtra("name", getString(R.string.focus_mode))));
 
 		WellbeingService tw = WellbeingService.get();
@@ -57,8 +58,8 @@ public class FocusModeActivity extends AppCompatActivity {
 	private void updateUi() {
 		WellbeingService tw = WellbeingService.get();
 		State state = tw.getState();
-		Button toggle = findViewById(R.id.focusModeToggle);
-		TextView takeBreak = findViewById(R.id.focusModeBreak);
+		MaterialButton toggle = findViewById(R.id.focusModeToggle);
+		AppCompatTextView takeBreak = findViewById(R.id.focusModeBreak);
 		if (!state.isFocusModeEnabled()) {
 			toggle.setText(R.string.enable);
 			toggle.setOnClickListener(v -> tw.enableFocusMode());

@@ -6,7 +6,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.widget.Button;
+
+import com.google.android.material.button.MaterialButton;
 
 import org.eu.droid_ng.wellbeing.R;
 import org.eu.droid_ng.wellbeing.lib.WellbeingService;
@@ -23,8 +24,8 @@ public class ManualSuspendActivity extends AppCompatActivity {
 			actionBar.setDisplayHomeAsUpEnabled(true);
 		}
 		setContentView(R.layout.activity_manual_suspend);
-		Button suspendbtn = findViewById(R.id.suspendbtn);
-		Button unsuspendbtn = findViewById(R.id.desuspendbtn);
+		MaterialButton suspendbtn = findViewById(R.id.suspendbtn);
+		MaterialButton unsuspendbtn = findViewById(R.id.desuspendbtn);
 		RecyclerView pkgList = findViewById(R.id.pkgList);
 		final PackageRecyclerViewAdapter a;
 		pkgList.setAdapter(
