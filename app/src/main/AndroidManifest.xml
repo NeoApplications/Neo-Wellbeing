@@ -129,9 +129,6 @@
 				android:name="com.android.settings.icon"
 				android:resource="@drawable/ic_settings" />
 			<meta-data
-				android:name="com.android.settings.icon_tintable"
-				android:value="true" />
-			<meta-data
 				android:name="com.android.settings.order"
 				android:value="1" />
 			<meta-data
