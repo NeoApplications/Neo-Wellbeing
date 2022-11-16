@@ -53,7 +53,7 @@ public class SettingsActivity extends AppCompatActivity {
 		public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
 			getPreferenceManager().setSharedPreferencesName("service");
 			setPreferencesFromResource(R.xml.root_preferences, rootKey);
-			//applyMaterial3(getPreferenceScreen());
+			applyMaterial3(getPreferenceScreen());
 
 			if (!PackageManagerDelegate.canSetNeutralButtonAction()) {
 				((Preference) Objects.requireNonNull(findPreference("manual_dialog"))).setEnabled(false);
