@@ -112,6 +112,10 @@
 				<action android:name="com.android.settings.action.IA_SETTINGS" />
 				<category android:name="android.intent.category.DEFAULT" />
 			</intent-filter>
+			<intent-filter>
+				<action android:name="com.google.android.apps.wellbeing.action.HOME" />
+				<category android:name="android.intent.category.DEFAULT" />
+			</intent-filter>
 			<meta-data
 				android:name="com.android.settings.category"
 				android:value="com.android.settings.category.ia.homepage" />
@@ -130,27 +134,16 @@
 			<meta-data
 				android:name="com.android.settings.order"
 				android:value="1" />
-			<!-- <meta-data
+			<meta-data
 				android:name="com.android.settings.bg.argb"
-				android:value="@color/cardview_daynight_background" /> -->
-			<meta-data
-				android:name="com.android.settings.profile"
-				android:value="primary_profile_only" />
-			<meta-data
-				android:name="com.android.settings.PRIMARY_PROFILE_CONTROLLED"
-				android:value="true" />
+				android:value="-16725933" />
 			<meta-data
 				android:name="com.android.settings.keyhint"
 				android:value="neo_wellbeing" />
-			<!-- Handle Google specific intent -->
-			<intent-filter>
-				<action android:name="com.google.android.apps.wellbeing.action.HOME" />
-				<category android:name="android.intent.category.DEFAULT" />
-			</intent-filter>
 		</activity>
 		<!-- Use activity-alias for launcher activity to allow easy enable/disable -->
 		<activity-alias
-			android:name=".prefs.MainLauncherActivity"
+			android:name=".MainActivity"
 			android:targetActivity=".prefs.MainActivity"
 			android:exported="true">
 			<intent-filter>

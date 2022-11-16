@@ -1,5 +1,5 @@
 #!/bin/sh
 
-if [ $API -lt 29 ]; then
-  abort "! Neo-Wellbeing require Android 10+ to work properly"
+if [ "$API" -lt 29 ]; then
+  abort "! Neo Wellbeing requires Android 10 or later"
 fi
