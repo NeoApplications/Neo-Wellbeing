@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
 	<style name="AppTheme" parent="AppTheme.Base" />
+	<style name="AppWidgetTheme" parent="AppTheme.Base" />
 	<style name="AppTheme.Base" parent="Theme.Material3.DynamicColors.DayNight">
 		<item name="alertDialogTheme">@style/AppTheme.AlertDialog</item>
 	</style>

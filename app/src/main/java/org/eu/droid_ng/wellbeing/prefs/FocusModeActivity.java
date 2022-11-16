@@ -42,7 +42,7 @@ public class FocusModeActivity extends AppCompatActivity {
 		RecyclerView r = findViewById(R.id.focusModePkgs);
 		r.setAdapter(
 				new PackageRecyclerViewAdapter(this,
-						getPackageManager().getInstalledApplications(PackageManager.GET_META_DATA),
+						tw.getInstalledApplications(PackageManager.GET_META_DATA),
 						"focus_mode", tw::onFocusModePreferenceChanged));
 
 		updateUi();
