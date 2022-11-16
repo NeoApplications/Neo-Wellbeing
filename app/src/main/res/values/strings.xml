@@ -1,5 +1,6 @@
 <resources>
 	<string name="app_name" translatable="false">Neo Wellbeing</string>
+	<string name="loading">Loading…</string>
 	<string name="setting_desc">Focus mode, bedtime mode, app timers</string>
 	<string name="dialog_title">App is blocked</string>
 	<string name="dialog_message">Unfortunately, this app is currently not available.</string>
@@ -55,6 +56,7 @@
 	<string name="bedtime_desc">You should go to sleep now!</string>
 	<string name="no_timer">No timer set</string>
 	<string name="app_timers">App timers</string>
+	<string name="screen_time">Screen time</string>
 	<string name="ok">OK</string>
 	<string name="desc_container">%s (used %s)</string>
 	<string name="app_timer_exceed">The app timer for this app has elapsed.</string>
@@ -84,4 +86,7 @@
 	<string name="delete">Delete</string>
 	<string name="add_schedule_info">Nothing here yet, try to add an schedule</string>
 	<string name="sched_alarm">End with alarm</string>
+	<string name="sample_app_1">Application 1</string>
+	<string name="sample_app_2">Application 2</string>
+	<string name="sample_app_3">Application 3</string>
 </resources>

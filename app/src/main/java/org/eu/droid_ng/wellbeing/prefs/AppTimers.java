@@ -35,7 +35,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class AppTimers extends AppCompatActivity {
@@ -57,7 +56,7 @@ public class AppTimers extends AppCompatActivity {
 		RecyclerView r = findViewById(R.id.appTimerPkgs);
 		new Thread(() -> {
 			AppTimersRecyclerViewAdapter a = new AppTimersRecyclerViewAdapter(this,
-					getPackageManager().getInstalledApplications(PackageManager.GET_META_DATA));
+					ati.getInstalledApplications(PackageManager.GET_META_DATA));
 			h.post(() -> {
 				findViewById(R.id.appTimerLoading).setVisibility(View.GONE);
 				r.setAdapter(a);
@@ -94,6 +93,10 @@ public class AppTimers extends AppCompatActivity {
 			Collator collator = Collator.getInstance();
 			// Sort alphabetically by display name
 			Comparator<ApplicationInfo> nc = (a, b) -> {
+				Duration durationA = Utils.getTimeUsed(ati.usm, a.packageName);
+				Duration durationB = Utils.getTimeUsed(ati.usm, b.packageName);
+				int x = durationA.compareTo(durationB);
+				if (x != 0) return -x;
 				CharSequence displayA = pm.getApplicationLabel(a);
 				CharSequence displayB = pm.getApplicationLabel(b);
 				return collator.compare(displayA, displayB);
@@ -101,12 +104,13 @@ public class AppTimers extends AppCompatActivity {
 			Intent mainIntent = new Intent(Intent.ACTION_MAIN, null)
 					.addCategory(Intent.CATEGORY_LAUNCHER);
 
-			List<String> hasLauncherIcon = pm.queryIntentActivities(mainIntent, 0).stream().map(a -> a.activityInfo.packageName).collect(Collectors.toList());
-			final List<String> blacklist = List.of("com.android.settings", "com.android.dialer", "org.eu.droid_ng.wellbeing");
+			// We already force include user apps, so let's only iterate over system apps
+			List<String> hasLauncherIcon = pm.queryIntentActivities(mainIntent, PackageManager.MATCH_SYSTEM_ONLY)
+					.stream().map(a -> a.activityInfo.packageName).collect(Collectors.toList());
 			this.mData = mData.stream().filter(i -> {
-				// Filter out system apps without launcher icon and Settings, Dialer and Wellbeing
+				// Filter out system apps without launcher icon and Default Launcher
 				boolean isUser = (i.flags & (ApplicationInfo.FLAG_UPDATED_SYSTEM_APP | ApplicationInfo.FLAG_SYSTEM)) < 1;
-				return !blacklist.contains(i.packageName) && (isUser || hasLauncherIcon.contains(i.packageName));
+				return !Utils.blackListedPackages.contains(i.packageName) && (isUser || hasLauncherIcon.contains(i.packageName));
 			}).sorted((a, b) -> {
 				// Enabled goes first
 				boolean hasA = enabledMap.getOrDefault(a.packageName, 0) != 0;
@@ -150,6 +154,7 @@ public class AppTimers extends AppCompatActivity {
 			private final AppCompatImageView appIcon;
 			private final AppCompatTextView appName;
 			private final AppCompatTextView appTimerInfo;
+			private final AppCompatImageButton actionButton;
 
 			public AppTimerViewHolder(@NonNull View itemView) {
 				super(itemView);
@@ -157,8 +162,9 @@ public class AppTimers extends AppCompatActivity {
 				this.appIcon = itemView.findViewById(R.id.appIcon);
 				this.appName = itemView.findViewById(R.id.appName2);
 				this.appTimerInfo = itemView.findViewById(R.id.pkgName);
-				AppCompatImageButton actionButton = new AppCompatImageButton(itemView.getContext());
-				actionButton.setImageDrawable(AppCompatResources.getDrawable(itemView.getContext(), R.drawable.ic_focus_mode));
+				actionButton = new AppCompatImageButton(itemView.getContext());
+				actionButton.setImageDrawable(AppCompatResources.getDrawable(
+						itemView.getContext(), R.drawable.ic_focus_mode));
 				actionButton.setBackground(null);
 				MaterialCheckBox checkBox = itemView.findViewById(R.id.isChecked);
 				ViewGroup parent = (ViewGroup) checkBox.getParent();
@@ -168,10 +174,13 @@ public class AppTimers extends AppCompatActivity {
 			}
 
 			public void apply(ApplicationInfo info, int mins) {
+				final boolean restricted = Utils.restrictedPackages.contains(info.packageName);
 				appIcon.setImageDrawable(pm.getApplicationIcon(info));
 				appName.setText(pm.getApplicationLabel(info));
-				applyText(mins, Math.toIntExact(Objects.requireNonNull(Utils.getTimeUsed(ati.usm, new String[]{info.packageName})).toMinutes()));
+				applyText(mins, Math.toIntExact(Utils.getTimeUsed(ati.usm, info.packageName).toMinutes()));
+				actionButton.setEnabled(!restricted);
 				container.setOnClickListener(view -> {
+					if (restricted) return;
 					int realmins = enabledMap.getOrDefault(info.packageName, 0);
 					NumberPicker numberPicker = new NumberPicker(AppTimers.this);
 					numberPicker.setMinValue(0);
@@ -192,11 +201,11 @@ public class AppTimers extends AppCompatActivity {
 			private void updateMins(String pkgName, int oldmins, int mins) {
 				enabledMap.put(pkgName, mins);
 				prefs.edit().putInt(pkgName, mins).apply();
-				applyText(mins, Math.toIntExact(Objects.requireNonNull(Utils.getTimeUsed(ati.usm, new String[]{pkgName})).toMinutes()));
+				applyText(mins, Math.toIntExact(Utils.getTimeUsed(ati.usm, pkgName).toMinutes()));
 				new Thread(() -> {
-					Utils.clearUsageStatsCache(ati.usm, true);
+					Utils.clearUsageStatsCache(ati.usm, pm, true);
 					h.post(() -> {
-						applyText(mins, Math.toIntExact(Objects.requireNonNull(Utils.getTimeUsed(ati.usm, new String[]{pkgName})).toMinutes()));
+						applyText(mins, Math.toIntExact(Utils.getTimeUsed(ati.usm, pkgName).toMinutes()));
 						ati.onUpdateAppTimerPreference(pkgName, Duration.ofMinutes(oldmins));
 					});
 				}).start();

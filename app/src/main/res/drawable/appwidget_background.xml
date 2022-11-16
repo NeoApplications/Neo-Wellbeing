@@ -1,0 +1,7 @@
+<shape  xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="?android:attr/colorBackground"/>
+    <corners android:bottomRightRadius="@dimen/app_widget_background_radius"
+        android:bottomLeftRadius="@dimen/app_widget_background_radius"
+        android:topRightRadius="@dimen/app_widget_background_radius"
+        android:topLeftRadius="@dimen/app_widget_background_radius"/>
+</shape>

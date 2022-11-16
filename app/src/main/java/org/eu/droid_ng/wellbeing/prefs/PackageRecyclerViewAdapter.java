@@ -18,6 +18,7 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.eu.droid_ng.wellbeing.R;
+import org.eu.droid_ng.wellbeing.lib.Utils;
 
 import java.text.Collator;
 import java.util.ArrayList;
@@ -55,12 +56,13 @@ class PackageRecyclerViewAdapter extends RecyclerView.Adapter<PackageRecyclerVie
 		Intent mainIntent = new Intent(Intent.ACTION_MAIN, null)
 				.addCategory(Intent.CATEGORY_LAUNCHER);
 
-		List<String> hasLauncherIcon = pm.queryIntentActivities(mainIntent, 0).stream().map(a -> a.activityInfo.packageName).collect(Collectors.toList());
-		final List<String> blacklist = List.of("com.android.settings", "com.android.dialer", "org.eu.droid_ng.wellbeing");
+		// We already force include user apps, so let's only iterate over system apps
+		List<String> hasLauncherIcon = pm.queryIntentActivities(mainIntent, PackageManager.MATCH_SYSTEM_ONLY)
+				.stream().map(a -> a.activityInfo.packageName).collect(Collectors.toList());
 		this.mData = mData.stream().filter(i -> {
 			// Filter out system apps without launcher icon and Settings, Dialer and Wellbeing
 			boolean isUser = (i.flags & (ApplicationInfo.FLAG_UPDATED_SYSTEM_APP | ApplicationInfo.FLAG_SYSTEM)) < 1;
-			return !blacklist.contains(i.packageName) && (isUser || hasLauncherIcon.contains(i.packageName));
+			return !Utils.restrictedPackages.contains(i.packageName) && (isUser || hasLauncherIcon.contains(i.packageName));
 		}).sorted((a, b) -> {
 			// Enabled goes first
 			boolean hasA = enabledArr.contains(a.packageName);

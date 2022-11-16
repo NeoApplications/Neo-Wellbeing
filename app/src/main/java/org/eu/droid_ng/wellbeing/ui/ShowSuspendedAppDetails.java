@@ -53,7 +53,7 @@ public class ShowSuspendedAppDetails extends AppCompatActivity {
 		Drawable icon = null;
 		CharSequence name = null;
 		try {
-			appInfo = pm.getApplicationInfo(packageName, 0);
+			appInfo = tw.getApplicationInfo(packageName, false);
 			icon = pm.getApplicationIcon(appInfo);
 			name = pm.getApplicationLabel(appInfo);
 		} catch (PackageManager.NameNotFoundException ignored) {}

@@ -7,6 +7,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.os.BatteryManager
 import android.os.Handler
@@ -33,6 +34,9 @@ import java.util.stream.Collectors
 
 class WellbeingService(private val context: Context) {
 	private var host: WellbeingStateHost? = null
+	// systemApp should always be true, only used for development purposes.
+	private val systemApp: Boolean = (context.applicationInfo.flags and
+			(ApplicationInfo.FLAG_UPDATED_SYSTEM_APP or ApplicationInfo.FLAG_SYSTEM)) > 1
 
 	fun bindToHost(newhost: WellbeingStateHost?) {
 		host = newhost
@@ -81,6 +85,32 @@ class WellbeingService(private val context: Context) {
 
 	private fun stopService() {
 		host?.stop()
+	}
+
+	@JvmOverloads
+	fun getInstalledApplications(flags: Int = 0): List<ApplicationInfo> {
+		return pm.getInstalledApplications(when(systemApp) {
+			true -> Utils.PACKAGE_MANAGER_MATCH_INSTANT
+			false -> 0
+		} or flags)
+	}
+
+	@JvmOverloads
+	@Throws(PackageManager.NameNotFoundException::class)
+	fun getApplicationInfo(packageName: String, matchUninstalled: Boolean = true, flags: Int = 0): ApplicationInfo {
+		return pm.getApplicationInfo(packageName, when(matchUninstalled) {
+			true -> PackageManager.MATCH_UNINSTALLED_PACKAGES
+			false -> 0
+		} or when(systemApp) {
+			true -> Utils.PACKAGE_MANAGER_MATCH_INSTANT
+			false -> 0
+		} or PackageManager.MATCH_ALL or flags)
+	}
+
+	@JvmOverloads
+	@Throws(PackageManager.NameNotFoundException::class)
+	fun getApplicationLabel(packageName: String, matchUninstalled: Boolean = true): CharSequence {
+		return pm.getApplicationLabel(getApplicationInfo(packageName, matchUninstalled))
 	}
 
 	companion object {
@@ -167,7 +197,7 @@ class WellbeingService(private val context: Context) {
 	}
 
 	init {
-		Utils.clearUsageStatsCache(usm, true)
+		Utils.clearUsageStatsCache(usm, pm, true)
 		loadSettings()
 
 		context.registerReceiver(object : BroadcastReceiver() {
@@ -211,7 +241,7 @@ class WellbeingService(private val context: Context) {
 		if (config.getInt(packageName, -1) > 0) {
 			value = value or State.STATE_APP_TIMER_SET
 		}
-		if ((value and State.STATE_APP_TIMER_SET) > 0 && Duration.ofMinutes(config.getInt(packageName, 0).toLong()).minus(getTimeUsed(usm, arrayOf(packageName))).toMinutes() <= 0) {
+		if ((value and State.STATE_APP_TIMER_SET) > 0 && Duration.ofMinutes(config.getInt(packageName, 0).toLong()).minus(getTimeUsed(usm, packageName)).toMinutes() <= 0) {
 			value = value or State.STATE_APP_TIMER_EXPIRED
 		}
 		if ((value and State.STATE_APP_TIMER_SET) > 0 && oidMap.contains(ParsedUoid("AppBreak", 0, arrayOf(packageName)).toString())) {
@@ -506,7 +536,7 @@ class WellbeingService(private val context: Context) {
 		val state = getAppState(packageName)
 		val f: Array<String> = if (state.isFocusModeEnabled() && !(state.isOnFocusModeBreakGlobal() || state.isOnFocusModeBreakPartial())) {
 			val label: CharSequence = try {
-				pm.getApplicationLabel(pm.getApplicationInfo(packageName, 0))
+				getApplicationLabel(packageName, false)
 			} catch (e: PackageManager.NameNotFoundException) {
 				BUG("tried to suspend nonexistant app: $packageName")
 				return
@@ -532,7 +562,7 @@ class WellbeingService(private val context: Context) {
 			pmd.setPackagesSuspended(
 				arrayOf(packageName), true, null, null, SuspendDialogInfo.Builder()
 					.setTitle(R.string.app_timers)
-					.setMessage(context.getString(R.string.app_timer_exceed_f, pm.getApplicationLabel(pm.getApplicationInfo(packageName, 0))))
+					.setMessage(context.getString(R.string.app_timer_exceed_f, getApplicationLabel(packageName)))
 					.setNeutralButtonText(if (appTimerDialogBreakTime == -1) R.string.dialog_btn_settings else getUseAppForString(appTimerDialogBreakTime))
 					.setNeutralButtonAction(if (appTimerDialogBreakTime == -1) SuspendDialogInfo.BUTTON_ACTION_MORE_DETAILS else SuspendDialogInfo.BUTTON_ACTION_UNSUSPEND)
 					.setIcon(R.drawable.ic_focus_mode).build()

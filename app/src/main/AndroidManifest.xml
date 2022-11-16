@@ -87,6 +87,17 @@
 		tools:ignore="ProtectedPermissions" />
 	<uses-permission android:name="android.permission.USE_EXACT_ALARM"/>
 
+	<queries>
+		<intent>
+			<action android:name="android.intent.action.MAIN" />
+			<category android:name="android.intent.category.HOME" />
+		</intent>
+		<intent>
+			<action android:name="android.intent.action.DIAL" />
+			<category android:name="android.intent.category.DEFAULT" />
+		</intent>
+	</queries>
+
 	<application
 		android:allowBackup="false"
 		android:name=".Wellbeing"
@@ -167,6 +178,17 @@
 		<activity
 			android:name=".prefs.ScheduleActivity"
 			android:exported="false" />
+		<receiver
+			android:name=".widget.ScreenTimeAppWidget"
+			android:exported="false">
+			<intent-filter>
+				<action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+			</intent-filter>
+
+			<meta-data
+				android:name="android.appwidget.provider"
+				android:resource="@xml/appwidget_screen_time" />
+		</receiver>
 		<!-- to-do: On A13, implement com.google.android.apps.wellbeing.action.ACTION_WIND_DOWN_STATE_CHANGED -->
 		<activity
 			android:name=".ui.ShowSuspendedAppDetails"

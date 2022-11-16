@@ -1,0 +1,47 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/appwidget_background"
+    android:theme="@style/AppWidgetTheme"
+    android:id="@+id/appwidget_root"
+    android:paddingTop="1dp"
+    android:paddingStart="8dp"
+    android:paddingEnd="4dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/screen_time"
+        android:id="@+id/appwidget_title" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/loading"
+        android:textSize="22sp"
+        android:id="@+id/appwidget_screen_time"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/sample_app_1"
+        android:textSize="11sp"
+        android:id="@+id/appwidget_app1" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/sample_app_2"
+        android:textSize="11sp"
+        android:id="@+id/appwidget_app2" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/sample_app_3"
+        android:textSize="11sp"
+        android:id="@+id/appwidget_app3" />
+</LinearLayout>
