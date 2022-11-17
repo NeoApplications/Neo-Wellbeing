@@ -7,7 +7,12 @@ import android.appwidget.AppWidgetProvider;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
+import android.graphics.Rect;
+import android.graphics.RectF;
+import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.RemoteViews;
 
 import org.eu.droid_ng.wellbeing.R;
@@ -18,7 +23,13 @@ import java.time.Duration;
 
 public class ScreenTimeAppWidget extends AppWidgetProvider {
     private static final int[] appViewIds = new int[]{
-            R.id.appwidget_app1, R.id.appwidget_app2, R.id.appwidget_app3
+            R.id.appwidget_app1_n, R.id.appwidget_app2_n, R.id.appwidget_app3_n
+    };
+    private static final int[] appView2Ids = new int[]{
+            R.id.appwidget_app1_t, R.id.appwidget_app2_t, R.id.appwidget_app3_t
+    };
+    private static final int[] appView3Ids = new int[]{
+            R.id.appwidget_app1_l, R.id.appwidget_app2_l, R.id.appwidget_app3_l
     };
     private PendingIntent pendingIntent;
 
@@ -40,6 +51,7 @@ public class ScreenTimeAppWidget extends AppWidgetProvider {
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         checkInitialize(context);
         Utils.clearUsageStatsCache(WellbeingService.get().usm, context.getPackageManager(), true);
+
 
         for (int appWidgetId : appWidgetIds) {
             appWidgetManager.updateAppWidget(appWidgetId,
@@ -67,9 +79,11 @@ public class ScreenTimeAppWidget extends AppWidgetProvider {
         String[] mostUsedPackages = Utils.getMostUsedPackages(usm);
         for (int i = 0; i < appViewIds.length; i++) {
             if (i >= mostUsedPackages.length) {
-                remoteViews.setTextViewText(appViewIds[i], "");
+                remoteViews.setViewVisibility(appView3Ids[i], View.GONE);
+                remoteViews.setViewVisibility(appViewIds[i], View.GONE);
             } else {
-                StringBuilder stringBuilder = new StringBuilder();
+                remoteViews.setViewVisibility(appViewIds[i], View.VISIBLE);
+                remoteViews.setViewVisibility(appView3Ids[i], View.VISIBLE);
                 String packageName = mostUsedPackages[i];
                 String packageLabel = packageName;
                 try {
@@ -78,10 +92,9 @@ public class ScreenTimeAppWidget extends AppWidgetProvider {
                 } catch (PackageManager.NameNotFoundException e) {
                     Log.e("ScreenTimeAppWidget", "Failed to get app label!");
                 }
-                stringBuilder.append(packageLabel).append(" ").append(
-                        formatDuration(Utils.getTimeUsed(usm, packageName)));
 
-                remoteViews.setTextViewText(appViewIds[i], stringBuilder.toString());
+                remoteViews.setTextViewText(appViewIds[i], packageLabel);
+                remoteViews.setTextViewText(appView2Ids[i], formatDuration(Utils.getTimeUsed(usm, packageName)));
             }
         }
         return remoteViews;

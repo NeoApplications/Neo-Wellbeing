@@ -1,284 +1,319 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto"
 	xmlns:tools="http://schemas.android.com/tools"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
 	android:orientation="vertical"
-	android:padding="5dp"
-	tools:context=".ui.ShowSuspendedAppDetails">
+	tools:context=".prefs.AppTimers">
 
-	<androidx.constraintlayout.widget.ConstraintLayout
-		android:id="@+id/appLayout"
+	<com.google.android.material.appbar.AppBarLayout
+		android:fitsSystemWindows="true"
 		android:layout_width="match_parent"
-		android:layout_height="0dp"
-		app:layout_constraintEnd_toEndOf="parent"
-		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toTopOf="parent">
+		android:layout_height="wrap_content">
 
-		<androidx.appcompat.widget.AppCompatImageView
-			android:id="@+id/appIcon"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:contentDescription="@string/app_icon_content_desc"
-			android:src="@android:drawable/sym_def_app_icon"
-			app:layout_constraintBottom_toBottomOf="parent"
-			app:layout_constraintEnd_toEndOf="parent"
-			app:layout_constraintHorizontal_bias="0.06"
-			app:layout_constraintStart_toStartOf="parent"
-			app:layout_constraintTop_toTopOf="parent" />
+		<com.google.android.material.appbar.CollapsingToolbarLayout
+			style="?attr/collapsingToolbarLayoutLargeSize"
+			app:expandedTitleTextAppearance="?attr/textAppearanceHeadlineLarge"
+			app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
+			android:layout_width="match_parent"
+			android:layout_height="?attr/collapsingToolbarLayoutLargeSize">
 
-		<androidx.appcompat.widget.AppCompatTextView
-			android:id="@+id/appName"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:text="@string/suspended_app_details_app"
-			android:textAppearance="@android:style/TextAppearance.Material.Large"
-			app:layout_constraintBottom_toBottomOf="parent"
-			app:layout_constraintEnd_toEndOf="parent"
-			app:layout_constraintStart_toEndOf="@+id/appIcon"
-			app:layout_constraintTop_toTopOf="parent" />
+			<com.google.android.material.appbar.MaterialToolbar
+				android:id="@+id/topbar"
+				android:elevation="0dp"
+				app:layout_collapseMode="pin"
+				android:layout_height="?attr/actionBarSize"
+				android:layout_width="match_parent"/>
 
-	</androidx.constraintlayout.widget.ConstraintLayout>
+		</com.google.android.material.appbar.CollapsingToolbarLayout>
 
-	<androidx.appcompat.widget.AppCompatTextView
-		android:id="@+id/suspendedDueTo"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:text="@string/suspended_app_details_was_suspended_due_to"
-		android:textAppearance="@android:style/TextAppearance.Material.Large"
-		android:textColor="?android:attr/colorAccent"
-		app:layout_constraintEnd_toEndOf="parent"
-		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toBottomOf="@+id/appLayout" />
+	</com.google.android.material.appbar.AppBarLayout>
 
-	<com.google.android.material.card.MaterialCardView
-		android:id="@+id/focusMode"
-		android:layout_width="0dp"
-		android:layout_height="wrap_content"
-		android:layout_margin="5dp"
-		android:visibility="gone"
-		app:contentPadding="10dp"
-		app:contentPaddingBottom="0dp"
-		app:layout_constraintBottom_toBottomOf="parent"
-		app:layout_constraintEnd_toEndOf="parent"
-		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toBottomOf="@+id/suspendedDueTo"
-		app:layout_constraintVertical_bias="0.0"
-		tools:visibility="visible">
-
+	<androidx.core.widget.NestedScrollView
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:importantForAccessibility="no"
+		app:layout_behavior="@string/appbar_scrolling_view_behavior">
 		<androidx.constraintlayout.widget.ConstraintLayout
 			android:layout_width="match_parent"
-			android:layout_height="wrap_content">
+			android:layout_height="match_parent"
+			android:padding="5dp">
+
+			<androidx.constraintlayout.widget.ConstraintLayout
+				android:id="@+id/appLayout"
+				android:layout_width="match_parent"
+				android:layout_height="0dp"
+				app:layout_constraintEnd_toEndOf="parent"
+				app:layout_constraintStart_toStartOf="parent"
+				app:layout_constraintTop_toTopOf="parent">
+
+				<androidx.appcompat.widget.AppCompatImageView
+					android:id="@+id/appIcon"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:contentDescription="@string/app_icon_content_desc"
+					android:src="@android:drawable/sym_def_app_icon"
+					app:layout_constraintBottom_toBottomOf="parent"
+					app:layout_constraintEnd_toEndOf="parent"
+					app:layout_constraintHorizontal_bias="0.06"
+					app:layout_constraintStart_toStartOf="parent"
+					app:layout_constraintTop_toTopOf="parent" />
+
+				<androidx.appcompat.widget.AppCompatTextView
+					android:id="@+id/appName"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="@string/suspended_app_details_app"
+					android:textAppearance="@android:style/TextAppearance.Material.Large"
+					app:layout_constraintBottom_toBottomOf="parent"
+					app:layout_constraintEnd_toEndOf="parent"
+					app:layout_constraintStart_toEndOf="@+id/appIcon"
+					app:layout_constraintTop_toTopOf="parent" />
+
+			</androidx.constraintlayout.widget.ConstraintLayout>
 
 			<androidx.appcompat.widget.AppCompatTextView
-				android:id="@+id/textView"
+				android:id="@+id/suspendedDueTo"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
-				android:text="@string/focus_mode"
+				android:text="@string/suspended_app_details_was_suspended_due_to"
 				android:textAppearance="@android:style/TextAppearance.Material.Large"
-				android:textSize="24sp"
+				android:textColor="?android:attr/colorAccent"
 				app:layout_constraintEnd_toEndOf="parent"
 				app:layout_constraintStart_toStartOf="parent"
-				app:layout_constraintTop_toTopOf="parent"
-				app:drawableStartCompat="@drawable/ic_focus_mode" />
+				app:layout_constraintTop_toBottomOf="@+id/appLayout" />
 
-			<androidx.appcompat.widget.AppCompatTextView
-				android:id="@+id/focusModeDesc"
-				android:layout_width="wrap_content"
+			<com.google.android.material.card.MaterialCardView
+				android:id="@+id/focusMode"
+				android:layout_width="0dp"
 				android:layout_height="wrap_content"
-				android:text="@string/suspended_app_details_focus_mode"
-				android:textColor="#546E7A"
-				app:layout_constraintStart_toStartOf="parent"
-				app:layout_constraintTop_toBottomOf="@+id/textView" />
-
-			<com.google.android.material.button.MaterialButton
-				android:id="@+id/takeabreakbtn"
-				style="@style/Widget.Material3.Button.TonalButton"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:text="@string/focus_mode_break"
-				app:layout_constraintEnd_toEndOf="parent"
-				app:layout_constraintTop_toBottomOf="@+id/focusModeDesc" />
-
-			<com.google.android.material.button.MaterialButton
-				android:id="@+id/disablefocusmode"
-				style="@style/Widget.Material3.Button.TonalButton"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:text="@string/focus_mode_off"
-				android:backgroundTint="@android:color/holo_red_dark"
+				android:layout_margin="5dp"
+				android:visibility="gone"
+				app:contentPadding="10dp"
+				app:contentPaddingBottom="0dp"
 				app:layout_constraintBottom_toBottomOf="parent"
-				app:layout_constraintStart_toStartOf="parent" />
-
-		</androidx.constraintlayout.widget.ConstraintLayout>
-	</com.google.android.material.card.MaterialCardView>
-
-	<com.google.android.material.card.MaterialCardView
-		android:id="@+id/unknown"
-		android:layout_width="0dp"
-		android:layout_height="wrap_content"
-		android:layout_margin="5dp"
-		android:visibility="gone"
-		app:contentPadding="10dp"
-		app:contentPaddingBottom="0dp"
-		app:layout_constraintBottom_toBottomOf="parent"
-		app:layout_constraintEnd_toEndOf="parent"
-		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toBottomOf="@+id/focusMode"
-		app:layout_constraintVertical_bias="0.0"
-		tools:visibility="visible">
-
-		<androidx.constraintlayout.widget.ConstraintLayout
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content">
-
-			<androidx.appcompat.widget.AppCompatTextView
-				android:id="@+id/unknownHeader"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:text="@string/unknown"
-				android:textAppearance="@android:style/TextAppearance.Material.Large"
-				android:textSize="24sp"
 				app:layout_constraintEnd_toEndOf="parent"
 				app:layout_constraintStart_toStartOf="parent"
-				app:layout_constraintTop_toTopOf="parent"
-				app:drawableStartCompat="@drawable/ic_baseline_bug_report_24" />
+				app:layout_constraintTop_toBottomOf="@+id/suspendedDueTo"
+				app:layout_constraintVertical_bias="0.0"
+				tools:visibility="visible">
 
-			<androidx.appcompat.widget.AppCompatTextView
-				android:id="@+id/unknownDesc"
-				android:layout_width="wrap_content"
+				<androidx.constraintlayout.widget.ConstraintLayout
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content">
+
+					<androidx.appcompat.widget.AppCompatTextView
+						android:id="@+id/textView"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:text="@string/focus_mode"
+						android:textAppearance="@android:style/TextAppearance.Material.Large"
+						android:textSize="24sp"
+						app:layout_constraintEnd_toEndOf="parent"
+						app:layout_constraintStart_toStartOf="parent"
+						app:layout_constraintTop_toTopOf="parent"
+						app:drawableStartCompat="@drawable/ic_focus_mode" />
+
+					<androidx.appcompat.widget.AppCompatTextView
+						android:id="@+id/focusModeDesc"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:text="@string/suspended_app_details_focus_mode"
+						android:textColor="#546E7A"
+						app:layout_constraintStart_toStartOf="parent"
+						app:layout_constraintTop_toBottomOf="@+id/textView" />
+
+					<com.google.android.material.button.MaterialButton
+						android:id="@+id/takeabreakbtn"
+						style="@style/Widget.Material3.Button.TonalButton"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:text="@string/focus_mode_break"
+						app:layout_constraintEnd_toEndOf="parent"
+						app:layout_constraintTop_toBottomOf="@+id/focusModeDesc" />
+
+					<com.google.android.material.button.MaterialButton
+						android:id="@+id/disablefocusmode"
+						style="@style/Widget.Material3.Button.TonalButton"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:text="@string/focus_mode_off"
+						android:backgroundTint="@android:color/holo_red_dark"
+						app:layout_constraintBottom_toBottomOf="parent"
+						app:layout_constraintStart_toStartOf="parent" />
+
+				</androidx.constraintlayout.widget.ConstraintLayout>
+			</com.google.android.material.card.MaterialCardView>
+
+			<com.google.android.material.card.MaterialCardView
+				android:id="@+id/unknown"
+				android:layout_width="0dp"
 				android:layout_height="wrap_content"
-				android:text="@string/suspended_app_details_unknown"
-				android:textColor="#546E7A"
-				app:layout_constraintStart_toStartOf="parent"
-				app:layout_constraintTop_toBottomOf="@+id/unknownHeader" />
-
-			<com.google.android.material.button.MaterialButton
-				android:id="@+id/unsuspendbtn"
-				style="@style/Widget.Material3.Button.TonalButton"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:text="@string/unsuspend"
-				app:layout_constraintEnd_toEndOf="parent"
-				app:layout_constraintTop_toBottomOf="@+id/unknownDesc"
-				tools:ignore="DuplicateSpeakableTextCheck" />
-
-		</androidx.constraintlayout.widget.ConstraintLayout>
-	</com.google.android.material.card.MaterialCardView>
-
-	<com.google.android.material.card.MaterialCardView
-		android:id="@+id/manually"
-		android:layout_width="0dp"
-		android:layout_height="wrap_content"
-		android:layout_margin="5dp"
-		android:visibility="gone"
-		app:contentPadding="10dp"
-		app:contentPaddingBottom="0dp"
-		app:layout_constraintBottom_toBottomOf="parent"
-		app:layout_constraintEnd_toEndOf="parent"
-		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toBottomOf="@+id/unknown"
-		app:layout_constraintVertical_bias="0.0"
-		tools:visibility="visible">
-
-		<androidx.constraintlayout.widget.ConstraintLayout
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content">
-
-			<androidx.appcompat.widget.AppCompatTextView
-				android:id="@+id/manuallyHeader"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:text="@string/manually"
-				android:textAppearance="@android:style/TextAppearance.Material.Large"
-				android:textSize="24sp"
-				app:layout_constraintEnd_toEndOf="parent"
-				app:layout_constraintStart_toStartOf="parent"
-				app:layout_constraintTop_toTopOf="parent"
-				app:drawableStartCompat="@drawable/ic_baseline_person_24" />
-
-			<androidx.appcompat.widget.AppCompatTextView
-				android:id="@+id/manuallyDesc"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:text="@string/suspended_app_details_manually"
-				android:textColor="#546E7A"
-				app:layout_constraintStart_toStartOf="parent"
-				app:layout_constraintTop_toBottomOf="@+id/manuallyHeader" />
-
-			<com.google.android.material.button.MaterialButton
-				android:id="@+id/unsuspendbtn2"
-				style="@style/Widget.Material3.Button.TonalButton"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:text="@string/unsuspend"
-				app:layout_constraintEnd_toEndOf="parent"
-				app:layout_constraintTop_toBottomOf="@+id/manuallyDesc" />
-
-			<com.google.android.material.button.MaterialButton
-				android:id="@+id/unsuspendallbtn"
-				style="@style/Widget.Material3.Button.TonalButton"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:text="@string/unsuspend_all"
-				android:backgroundTint="@android:color/holo_red_dark"
+				android:layout_margin="5dp"
+				android:visibility="gone"
+				app:contentPadding="10dp"
+				app:contentPaddingBottom="0dp"
 				app:layout_constraintBottom_toBottomOf="parent"
-				app:layout_constraintStart_toStartOf="parent" />
-
-		</androidx.constraintlayout.widget.ConstraintLayout>
-	</com.google.android.material.card.MaterialCardView>
-
-	<com.google.android.material.card.MaterialCardView
-		android:id="@+id/apptimer"
-		android:layout_width="0dp"
-		android:layout_height="wrap_content"
-		android:layout_margin="5dp"
-		android:visibility="gone"
-		app:contentPadding="10dp"
-		app:contentPaddingBottom="0dp"
-		app:layout_constraintBottom_toBottomOf="parent"
-		app:layout_constraintEnd_toEndOf="parent"
-		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toBottomOf="@+id/manually"
-		app:layout_constraintVertical_bias="0.0"
-		tools:visibility="visible">
-
-		<androidx.constraintlayout.widget.ConstraintLayout
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content">
-
-			<androidx.appcompat.widget.AppCompatTextView
-				android:id="@+id/apptimerHeader"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:text="@string/app_timers"
-				android:textAppearance="@android:style/TextAppearance.Material.Large"
-				android:textSize="24sp"
 				app:layout_constraintEnd_toEndOf="parent"
 				app:layout_constraintStart_toStartOf="parent"
-				app:layout_constraintTop_toTopOf="parent"
-				app:drawableStartCompat="@drawable/ic_baseline_person_24" />
+				app:layout_constraintTop_toBottomOf="@+id/focusMode"
+				app:layout_constraintVertical_bias="0.0"
+				tools:visibility="visible">
 
-			<androidx.appcompat.widget.AppCompatTextView
-				android:id="@+id/apptimerDesc"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:text="@string/app_timer_exceed"
-				android:textColor="#546E7A"
-				app:layout_constraintStart_toStartOf="parent"
-				app:layout_constraintTop_toBottomOf="@+id/apptimerHeader" />
+				<androidx.constraintlayout.widget.ConstraintLayout
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content">
 
-			<com.google.android.material.button.MaterialButton
-				android:id="@+id/takeabreakbtn2"
-				style="@style/Widget.Material3.Button.TonalButton"
-				android:layout_width="wrap_content"
+					<androidx.appcompat.widget.AppCompatTextView
+						android:id="@+id/unknownHeader"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:text="@string/unknown"
+						android:textAppearance="@android:style/TextAppearance.Material.Large"
+						android:textSize="24sp"
+						app:layout_constraintEnd_toEndOf="parent"
+						app:layout_constraintStart_toStartOf="parent"
+						app:layout_constraintTop_toTopOf="parent"
+						app:drawableStartCompat="@drawable/ic_baseline_bug_report_24" />
+
+					<androidx.appcompat.widget.AppCompatTextView
+						android:id="@+id/unknownDesc"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:text="@string/suspended_app_details_unknown"
+						android:textColor="#546E7A"
+						app:layout_constraintStart_toStartOf="parent"
+						app:layout_constraintTop_toBottomOf="@+id/unknownHeader" />
+
+					<com.google.android.material.button.MaterialButton
+						android:id="@+id/unsuspendbtn"
+						style="@style/Widget.Material3.Button.TonalButton"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:text="@string/unsuspend"
+						app:layout_constraintEnd_toEndOf="parent"
+						app:layout_constraintTop_toBottomOf="@+id/unknownDesc"
+						tools:ignore="DuplicateSpeakableTextCheck" />
+
+				</androidx.constraintlayout.widget.ConstraintLayout>
+			</com.google.android.material.card.MaterialCardView>
+
+			<com.google.android.material.card.MaterialCardView
+				android:id="@+id/manually"
+				android:layout_width="0dp"
 				android:layout_height="wrap_content"
-				android:text="@string/focus_mode_break"
+				android:layout_margin="5dp"
+				android:visibility="gone"
+				app:contentPadding="10dp"
+				app:contentPaddingBottom="0dp"
+				app:layout_constraintBottom_toBottomOf="parent"
 				app:layout_constraintEnd_toEndOf="parent"
-				app:layout_constraintTop_toBottomOf="@+id/apptimerDesc" />
+				app:layout_constraintStart_toStartOf="parent"
+				app:layout_constraintTop_toBottomOf="@+id/unknown"
+				app:layout_constraintVertical_bias="0.0"
+				tools:visibility="visible">
+
+				<androidx.constraintlayout.widget.ConstraintLayout
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content">
+
+					<androidx.appcompat.widget.AppCompatTextView
+						android:id="@+id/manuallyHeader"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:text="@string/manually"
+						android:textAppearance="@android:style/TextAppearance.Material.Large"
+						android:textSize="24sp"
+						app:layout_constraintEnd_toEndOf="parent"
+						app:layout_constraintStart_toStartOf="parent"
+						app:layout_constraintTop_toTopOf="parent"
+						app:drawableStartCompat="@drawable/ic_baseline_person_24" />
+
+					<androidx.appcompat.widget.AppCompatTextView
+						android:id="@+id/manuallyDesc"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:text="@string/suspended_app_details_manually"
+						android:textColor="#546E7A"
+						app:layout_constraintStart_toStartOf="parent"
+						app:layout_constraintTop_toBottomOf="@+id/manuallyHeader" />
+
+					<com.google.android.material.button.MaterialButton
+						android:id="@+id/unsuspendbtn2"
+						style="@style/Widget.Material3.Button.TonalButton"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:text="@string/unsuspend"
+						app:layout_constraintEnd_toEndOf="parent"
+						app:layout_constraintTop_toBottomOf="@+id/manuallyDesc" />
+
+					<com.google.android.material.button.MaterialButton
+						android:id="@+id/unsuspendallbtn"
+						style="@style/Widget.Material3.Button.TonalButton"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:text="@string/unsuspend_all"
+						android:backgroundTint="@android:color/holo_red_dark"
+						app:layout_constraintBottom_toBottomOf="parent"
+						app:layout_constraintStart_toStartOf="parent" />
+
+				</androidx.constraintlayout.widget.ConstraintLayout>
+			</com.google.android.material.card.MaterialCardView>
+
+			<com.google.android.material.card.MaterialCardView
+				android:id="@+id/apptimer"
+				android:layout_width="0dp"
+				android:layout_height="wrap_content"
+				android:layout_margin="5dp"
+				android:visibility="gone"
+				app:contentPadding="10dp"
+				app:contentPaddingBottom="0dp"
+				app:layout_constraintBottom_toBottomOf="parent"
+				app:layout_constraintEnd_toEndOf="parent"
+				app:layout_constraintStart_toStartOf="parent"
+				app:layout_constraintTop_toBottomOf="@+id/manually"
+				app:layout_constraintVertical_bias="0.0"
+				tools:visibility="visible">
+
+				<androidx.constraintlayout.widget.ConstraintLayout
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content">
+
+					<androidx.appcompat.widget.AppCompatTextView
+						android:id="@+id/apptimerHeader"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:text="@string/app_timers"
+						android:textAppearance="@android:style/TextAppearance.Material.Large"
+						android:textSize="24sp"
+						app:layout_constraintEnd_toEndOf="parent"
+						app:layout_constraintStart_toStartOf="parent"
+						app:layout_constraintTop_toTopOf="parent"
+						app:drawableStartCompat="@drawable/ic_baseline_person_24" />
+
+					<androidx.appcompat.widget.AppCompatTextView
+						android:id="@+id/apptimerDesc"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:text="@string/app_timer_exceed"
+						android:textColor="#546E7A"
+						app:layout_constraintStart_toStartOf="parent"
+						app:layout_constraintTop_toBottomOf="@+id/apptimerHeader" />
+
+					<com.google.android.material.button.MaterialButton
+						android:id="@+id/takeabreakbtn2"
+						style="@style/Widget.Material3.Button.TonalButton"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:text="@string/focus_mode_break"
+						app:layout_constraintEnd_toEndOf="parent"
+						app:layout_constraintTop_toBottomOf="@+id/apptimerDesc" />
+
+				</androidx.constraintlayout.widget.ConstraintLayout>
+			</com.google.android.material.card.MaterialCardView>
 
 		</androidx.constraintlayout.widget.ConstraintLayout>
-	</com.google.android.material.card.MaterialCardView>
+	</androidx.core.widget.NestedScrollView>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

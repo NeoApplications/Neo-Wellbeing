@@ -8,6 +8,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatCheckBox;
 
+import com.google.android.material.materialswitch.MaterialSwitch;
+
 import org.eu.droid_ng.wellbeing.R;
 import org.eu.droid_ng.wellbeing.lib.TimeChargerTriggerCondition;
 
@@ -32,7 +34,8 @@ public class ScheduleCardView extends FrameLayout {
 
 	TimeSettingView startTime, endTime;
 	DayPicker daypicker;
-	AppCompatCheckBox enable, charger, alarm;
+	MaterialSwitch enable;
+	AppCompatCheckBox charger, alarm;
 	Consumer<String> onValuesChangedCallback;
 	Consumer<String> onDeleteCardCallback;
 	String id, iid;
@@ -50,8 +53,6 @@ public class ScheduleCardView extends FrameLayout {
 		daypicker.setValues(new boolean[] { true, true, true, true, true, true, true });
 		startTime.setData(LocalTime.of(7, 0));
 		endTime.setData(LocalTime.of(18, 0));
-		startTime.setExtraText(getContext().getString(R.string.startTime));
-		endTime.setExtraText(getContext().getString(R.string.endTime));
 		startTime.setOnTimeChangedListener(t -> {
 			if (onValuesChangedCallback != null) {
 				onValuesChangedCallback.accept(iid);

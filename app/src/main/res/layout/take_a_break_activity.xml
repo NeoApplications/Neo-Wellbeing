@@ -30,17 +30,10 @@
 
 	</com.google.android.material.appbar.AppBarLayout>
 
-	<androidx.core.widget.NestedScrollView
+	<ListView
+		android:id="@+id/listView"
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
-		android:importantForAccessibility="no"
-		app:layout_behavior="@string/appbar_scrolling_view_behavior">
-
-		<FrameLayout
-			android:id="@+id/settings"
-			android:layout_width="match_parent"
-			android:layout_height="match_parent" />
-
-	</androidx.core.widget.NestedScrollView>
+		app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

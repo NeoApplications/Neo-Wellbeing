@@ -1,119 +1,147 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto"
 	xmlns:tools="http://schemas.android.com/tools"
-	android:id="@+id/focusModeRoot"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
 	android:orientation="vertical"
-	android:animateLayoutChanges="true"
 	tools:context=".prefs.FocusModeActivity">
 
-	<androidx.constraintlayout.widget.ConstraintLayout
+	<com.google.android.material.appbar.AppBarLayout
+		android:fitsSystemWindows="true"
 		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:animateLayoutChanges="true"
-		android:background="@color/cardview_daynight_background"
-		android:padding="10dp">
+		android:layout_height="wrap_content">
 
-		<androidx.constraintlayout.widget.ConstraintLayout
-			android:id="@+id/focusModeHeader"
+		<com.google.android.material.appbar.CollapsingToolbarLayout
+			style="?attr/collapsingToolbarLayoutLargeSize"
+			app:expandedTitleTextAppearance="?attr/textAppearanceHeadlineLarge"
+			app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
 			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			app:layout_constraintStart_toStartOf="parent"
-			app:layout_constraintTop_toTopOf="parent">
+			android:layout_height="?attr/collapsingToolbarLayoutLargeSize">
 
-			<androidx.appcompat.widget.AppCompatImageView
-				android:id="@+id/focusModeIco"
-				android:layout_width="48dp"
-				android:layout_height="48dp"
-				android:importantForAccessibility="no"
-				android:src="@drawable/ic_stat_name"
-				app:layout_constraintBottom_toBottomOf="parent"
-				app:layout_constraintStart_toStartOf="parent"
-				app:layout_constraintTop_toTopOf="parent" />
+			<com.google.android.material.appbar.MaterialToolbar
+				android:id="@+id/topbar"
+				android:elevation="0dp"
+				app:layout_collapseMode="pin"
+				android:layout_height="?attr/actionBarSize"
+				android:layout_width="match_parent"/>
 
-			<androidx.appcompat.widget.AppCompatTextView
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:text="@string/focus_mode"
-				android:textAppearance="@style/TextAppearance.AppCompat.Headline"
-				android:textColor="?android:attr/colorAccent"
-				app:layout_constraintBottom_toBottomOf="parent"
-				app:layout_constraintEnd_toEndOf="parent"
-				app:layout_constraintStart_toEndOf="@+id/focusModeIco"
-				app:layout_constraintTop_toTopOf="parent" />
-		</androidx.constraintlayout.widget.ConstraintLayout>
+		</com.google.android.material.appbar.CollapsingToolbarLayout>
 
-		<androidx.constraintlayout.widget.ConstraintLayout
-			android:id="@+id/constraintLayout"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:layout_marginTop="40dp"
-			android:animateLayoutChanges="true"
-			app:layout_constraintBottom_toBottomOf="parent"
-			app:layout_constraintEnd_toEndOf="parent"
-			app:layout_constraintHorizontal_bias="0.2"
-			app:layout_constraintStart_toStartOf="parent"
-			app:layout_constraintTop_toBottomOf="@+id/focusModeHeader">
+	</com.google.android.material.appbar.AppBarLayout>
 
-			<com.google.android.material.button.MaterialButton
-				android:id="@+id/focusModeToggle"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:text="@string/enable"
-				app:layout_constraintEnd_toEndOf="parent"
-				app:layout_constraintStart_toStartOf="parent"
-				app:layout_constraintTop_toTopOf="parent" />
-
-			<androidx.appcompat.widget.AppCompatTextView
-				android:id="@+id/focusModeBreak"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:layout_marginTop="10dp"
-				android:text="@string/focus_mode_break"
-				android:textColor="?android:attr/colorAccent"
-				app:layout_constraintEnd_toEndOf="parent"
-				app:layout_constraintStart_toStartOf="parent"
-				app:layout_constraintTop_toBottomOf="@+id/focusModeToggle" />
-		</androidx.constraintlayout.widget.ConstraintLayout>
-
-		<androidx.constraintlayout.widget.ConstraintLayout
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:layout_marginTop="54dp"
-			android:animateLayoutChanges="true"
-			app:layout_constraintEnd_toEndOf="parent"
-			app:layout_constraintStart_toEndOf="@+id/constraintLayout"
-			app:layout_constraintTop_toBottomOf="@+id/focusModeHeader">
-
-			<androidx.appcompat.widget.AppCompatTextView
-				android:id="@+id/schedule"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:text="@string/schedule"
-				android:textColor="?android:attr/colorAccent"
-				app:layout_constraintBottom_toBottomOf="parent"
-				app:layout_constraintEnd_toEndOf="parent"
-				app:layout_constraintHorizontal_bias="0.0"
-				app:layout_constraintStart_toStartOf="parent"
-				app:layout_constraintTop_toTopOf="parent"
-				app:layout_constraintVertical_bias="0.0" />
-		</androidx.constraintlayout.widget.ConstraintLayout>
-
-	</androidx.constraintlayout.widget.ConstraintLayout>
-
-	<LinearLayout
+	<androidx.appcompat.widget.LinearLayoutCompat
+		android:id="@+id/focusModeRoot"
+		android:orientation="vertical"
+		android:animateLayoutChanges="true"
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
-		android:orientation="horizontal">
+		app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-		<androidx.recyclerview.widget.RecyclerView
-			android:id="@+id/focusModePkgs"
-			android:layout_width="match_parent"
-			android:layout_height="match_parent"
-			app:layoutManager="LinearLayoutManager" />
-	</LinearLayout>
+			<androidx.constraintlayout.widget.ConstraintLayout
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:animateLayoutChanges="true"
+				android:background="@color/cardview_daynight_background"
+				android:padding="10dp">
 
+				<androidx.constraintlayout.widget.ConstraintLayout
+					android:id="@+id/focusModeHeader"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					app:layout_constraintStart_toStartOf="parent"
+					app:layout_constraintTop_toTopOf="parent">
 
-</LinearLayout>
+					<androidx.appcompat.widget.AppCompatImageView
+						android:id="@+id/focusModeIco"
+						android:layout_width="48dp"
+						android:layout_height="48dp"
+						android:importantForAccessibility="no"
+						android:src="@drawable/ic_stat_name"
+						app:layout_constraintBottom_toBottomOf="parent"
+						app:layout_constraintStart_toStartOf="parent"
+						app:layout_constraintTop_toTopOf="parent" />
+
+					<androidx.appcompat.widget.AppCompatTextView
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:text="@string/focus_mode"
+						android:textAppearance="@style/TextAppearance.AppCompat.Headline"
+						android:textColor="?android:attr/colorAccent"
+						app:layout_constraintBottom_toBottomOf="parent"
+						app:layout_constraintEnd_toEndOf="parent"
+						app:layout_constraintStart_toEndOf="@+id/focusModeIco"
+						app:layout_constraintTop_toTopOf="parent" />
+				</androidx.constraintlayout.widget.ConstraintLayout>
+
+				<androidx.constraintlayout.widget.ConstraintLayout
+					android:id="@+id/constraintLayout"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="40dp"
+					android:animateLayoutChanges="true"
+					app:layout_constraintBottom_toBottomOf="parent"
+					app:layout_constraintEnd_toEndOf="parent"
+					app:layout_constraintHorizontal_bias="0.2"
+					app:layout_constraintStart_toStartOf="parent"
+					app:layout_constraintTop_toBottomOf="@+id/focusModeHeader">
+
+					<com.google.android.material.button.MaterialButton
+						android:id="@+id/focusModeToggle"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:text="@string/enable"
+						app:layout_constraintEnd_toEndOf="parent"
+						app:layout_constraintStart_toStartOf="parent"
+						app:layout_constraintTop_toTopOf="parent" />
+
+					<androidx.appcompat.widget.AppCompatTextView
+						android:id="@+id/focusModeBreak"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="10dp"
+						android:text="@string/focus_mode_break"
+						android:textColor="?android:attr/colorAccent"
+						app:layout_constraintEnd_toEndOf="parent"
+						app:layout_constraintStart_toStartOf="parent"
+						app:layout_constraintTop_toBottomOf="@+id/focusModeToggle" />
+				</androidx.constraintlayout.widget.ConstraintLayout>
+
+				<androidx.constraintlayout.widget.ConstraintLayout
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="54dp"
+					android:animateLayoutChanges="true"
+					app:layout_constraintEnd_toEndOf="parent"
+					app:layout_constraintStart_toEndOf="@+id/constraintLayout"
+					app:layout_constraintTop_toBottomOf="@+id/focusModeHeader">
+
+					<androidx.appcompat.widget.AppCompatTextView
+						android:id="@+id/schedule"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:text="@string/schedule"
+						android:textColor="?android:attr/colorAccent"
+						app:layout_constraintBottom_toBottomOf="parent"
+						app:layout_constraintEnd_toEndOf="parent"
+						app:layout_constraintHorizontal_bias="0.0"
+						app:layout_constraintStart_toStartOf="parent"
+						app:layout_constraintTop_toTopOf="parent"
+						app:layout_constraintVertical_bias="0.0" />
+				</androidx.constraintlayout.widget.ConstraintLayout>
+
+			</androidx.constraintlayout.widget.ConstraintLayout>
+
+			<LinearLayout
+				android:layout_width="match_parent"
+				android:layout_height="match_parent"
+				android:orientation="horizontal">
+
+				<androidx.recyclerview.widget.RecyclerView
+					android:id="@+id/focusModePkgs"
+					android:layout_width="match_parent"
+					android:layout_height="match_parent"
+					app:layoutManager="LinearLayoutManager" />
+			</LinearLayout>
+	</androidx.appcompat.widget.LinearLayoutCompat>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

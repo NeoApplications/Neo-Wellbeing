@@ -47,12 +47,11 @@ public class AppTimers extends AppCompatActivity {
 		super.onCreate(savedInstanceState);
 		h = new Handler(getMainLooper());
 		ati = WellbeingService.get();
-		ActionBar actionBar = getSupportActionBar();
-		if (actionBar != null) {
-			actionBar.setDisplayHomeAsUpEnabled(true);
-		}
 		setContentView(R.layout.activity_app_timers);
-
+		setSupportActionBar(findViewById(R.id.topbar));
+		ActionBar actionBar = getSupportActionBar();
+		assert actionBar != null;
+		actionBar.setDisplayHomeAsUpEnabled(true);
 		RecyclerView r = findViewById(R.id.appTimerPkgs);
 		new Thread(() -> {
 			AppTimersRecyclerViewAdapter a = new AppTimersRecyclerViewAdapter(this,

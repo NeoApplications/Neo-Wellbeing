@@ -19,11 +19,11 @@ public class ManualSuspendActivity extends AppCompatActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		ActionBar actionBar = getSupportActionBar();
-		if (actionBar != null) {
-			actionBar.setDisplayHomeAsUpEnabled(true);
-		}
 		setContentView(R.layout.activity_manual_suspend);
+		setSupportActionBar(findViewById(R.id.topbar));
+		ActionBar actionBar = getSupportActionBar();
+		assert actionBar != null;
+		actionBar.setDisplayHomeAsUpEnabled(true);
 		MaterialButton suspendbtn = findViewById(R.id.suspendbtn);
 		MaterialButton unsuspendbtn = findViewById(R.id.desuspendbtn);
 		RecyclerView pkgList = findViewById(R.id.pkgList);

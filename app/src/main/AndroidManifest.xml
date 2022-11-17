@@ -161,9 +161,11 @@
 		</activity-alias>
 		<activity
 			android:name=".prefs.FocusModeActivity"
+			android:label="@string/focus_mode"
 			android:exported="false" />
 		<activity
 			android:name=".prefs.ManualSuspendActivity"
+			android:label="@string/manually"
 			android:exported="false" />
 		<activity
 			android:name=".prefs.SettingsActivity"
@@ -171,9 +173,11 @@
 			android:label="@string/title_activity_settings" />
 		<activity
 			android:name=".prefs.BedtimeMode"
+			android:label="@string/bedtime_mode"
 			android:exported="false" />
 		<activity
 			android:name=".prefs.AppTimers"
+			android:label="@string/app_timers"
 			android:exported="false" />
 		<activity
 			android:name=".prefs.ScheduleActivity"

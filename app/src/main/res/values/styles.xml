@@ -3,6 +3,10 @@
 	<style name="AppTheme" parent="AppTheme.Base" />
 	<style name="AppWidgetTheme" parent="AppTheme.Base" />
 	<style name="AppTheme.Base" parent="Theme.Material3.DynamicColors.DayNight">
+		<item name="colorPrimaryDark">@android:color/transparent</item> <!-- Status bar color -->
+		<item name="colorPrimaryVariant">@android:color/transparent</item>
+		<item name="windowActionBar">false</item>
+		<item name="windowNoTitle">true</item>
 		<item name="alertDialogTheme">@style/AppTheme.AlertDialog</item>
 	</style>
 	<style name="AppTheme.AlertDialog" parent="ThemeOverlay.Material3.MaterialAlertDialog">

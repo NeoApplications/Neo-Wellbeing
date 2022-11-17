@@ -1,71 +1,113 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
 	android:orientation="horizontal"
+	android:layout_gravity="center"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent">
 
-	<androidx.appcompat.widget.AppCompatToggleButton
-		android:id="@+id/dayPickerDay1"
-		android:layout_width="35dp"
-		android:layout_height="35dp"
-		android:layout_marginLeft="3dp"
-		android:layout_marginRight="3dp"
-		android:textColor="@drawable/dpicker_text_color"
-		android:background="@drawable/dpicker_background" />
+	<androidx.appcompat.widget.LinearLayoutCompat
+		android:layout_gravity="center"
+		android:layout_width="0dp"
+		android:layout_height="match_parent"
+		android:layout_weight="1">
+		<androidx.appcompat.widget.AppCompatToggleButton
+			android:id="@+id/dayPickerDay1"
+			android:layout_width="35dp"
+			android:layout_height="35dp"
+			android:layout_marginLeft="3dp"
+			android:layout_marginRight="3dp"
+			android:textColor="@drawable/dpicker_text_color"
+			android:background="@drawable/dpicker_background" />
+	</androidx.appcompat.widget.LinearLayoutCompat>
 
-	<androidx.appcompat.widget.AppCompatToggleButton
-		android:id="@+id/dayPickerDay2"
-		android:layout_width="35dp"
-		android:layout_height="35dp"
-		android:layout_marginLeft="3dp"
-		android:layout_marginRight="3dp"
-		android:textColor="@drawable/dpicker_text_color"
-		android:background="@drawable/dpicker_background" />
+	<androidx.appcompat.widget.LinearLayoutCompat
+		android:layout_gravity="center"
+		android:layout_width="0dp"
+		android:layout_height="match_parent"
+		android:layout_weight="1">
+		<androidx.appcompat.widget.AppCompatToggleButton
+			android:id="@+id/dayPickerDay2"
+			android:layout_width="35dp"
+			android:layout_height="35dp"
+			android:layout_marginLeft="3dp"
+			android:layout_marginRight="3dp"
+			android:textColor="@drawable/dpicker_text_color"
+			android:background="@drawable/dpicker_background" />
+	</androidx.appcompat.widget.LinearLayoutCompat>
 
-	<androidx.appcompat.widget.AppCompatToggleButton
-		android:id="@+id/dayPickerDay3"
-		android:layout_marginLeft="3dp"
-		android:layout_marginRight="3dp"
-		android:layout_width="35dp"
-		android:layout_height="35dp"
-		android:textColor="@drawable/dpicker_text_color"
-		android:background="@drawable/dpicker_background" />
+	<androidx.appcompat.widget.LinearLayoutCompat
+		android:layout_gravity="center"
+		android:layout_width="0dp"
+		android:layout_height="match_parent"
+		android:layout_weight="1">
+		<androidx.appcompat.widget.AppCompatToggleButton
+			android:id="@+id/dayPickerDay3"
+			android:layout_width="35dp"
+			android:layout_height="35dp"
+			android:layout_marginLeft="3dp"
+			android:layout_marginRight="3dp"
+			android:textColor="@drawable/dpicker_text_color"
+			android:background="@drawable/dpicker_background" />
+	</androidx.appcompat.widget.LinearLayoutCompat>
 
-	<androidx.appcompat.widget.AppCompatToggleButton
-		android:id="@+id/dayPickerDay4"
-		android:layout_marginLeft="3dp"
-		android:layout_marginRight="3dp"
-		android:layout_width="35dp"
-		android:layout_height="35dp"
-		android:textColor="@drawable/dpicker_text_color"
-		android:background="@drawable/dpicker_background" />
+	<androidx.appcompat.widget.LinearLayoutCompat
+		android:layout_gravity="center"
+		android:layout_width="0dp"
+		android:layout_height="match_parent"
+		android:layout_weight="1">
+		<androidx.appcompat.widget.AppCompatToggleButton
+			android:id="@+id/dayPickerDay4"
+			android:layout_width="35dp"
+			android:layout_height="35dp"
+			android:layout_marginLeft="3dp"
+			android:layout_marginRight="3dp"
+			android:textColor="@drawable/dpicker_text_color"
+			android:background="@drawable/dpicker_background" />
+	</androidx.appcompat.widget.LinearLayoutCompat>
 
-	<androidx.appcompat.widget.AppCompatToggleButton
-		android:id="@+id/dayPickerDay5"
-		android:layout_marginLeft="3dp"
-		android:layout_marginRight="3dp"
-		android:layout_width="35dp"
-		android:layout_height="35dp"
-		android:textColor="@drawable/dpicker_text_color"
-		android:background="@drawable/dpicker_background" />
+	<androidx.appcompat.widget.LinearLayoutCompat
+		android:layout_gravity="center"
+		android:layout_width="0dp"
+		android:layout_height="match_parent"
+		android:layout_weight="1">
+		<androidx.appcompat.widget.AppCompatToggleButton
+			android:id="@+id/dayPickerDay5"
+			android:layout_width="35dp"
+			android:layout_height="35dp"
+			android:layout_marginLeft="3dp"
+			android:layout_marginRight="3dp"
+			android:textColor="@drawable/dpicker_text_color"
+			android:background="@drawable/dpicker_background" />
+	</androidx.appcompat.widget.LinearLayoutCompat>
 
-	<androidx.appcompat.widget.AppCompatToggleButton
-		android:id="@+id/dayPickerDay6"
-		android:layout_marginLeft="3dp"
-		android:layout_marginRight="3dp"
-		android:layout_width="35dp"
-		android:layout_height="35dp"
-		android:textColor="@drawable/dpicker_text_color"
-		android:background="@drawable/dpicker_background" />
+	<androidx.appcompat.widget.LinearLayoutCompat
+		android:layout_gravity="center"
+		android:layout_width="0dp"
+		android:layout_height="match_parent"
+		android:layout_weight="1">
+		<androidx.appcompat.widget.AppCompatToggleButton
+			android:id="@+id/dayPickerDay6"
+			android:layout_width="35dp"
+			android:layout_height="35dp"
+			android:layout_marginLeft="3dp"
+			android:layout_marginRight="3dp"
+			android:textColor="@drawable/dpicker_text_color"
+			android:background="@drawable/dpicker_background" />
+	</androidx.appcompat.widget.LinearLayoutCompat>
 
-	<androidx.appcompat.widget.AppCompatToggleButton
-		android:id="@+id/dayPickerDay7"
-		android:layout_marginLeft="3dp"
-		android:layout_marginRight="3dp"
-		android:layout_width="35dp"
-		android:layout_height="35dp"
-		android:textColor="@drawable/dpicker_text_color"
-		android:background="@drawable/dpicker_background" />
+	<androidx.appcompat.widget.LinearLayoutCompat
+		android:layout_gravity="center"
+		android:layout_width="0dp"
+		android:layout_height="match_parent"
+		android:layout_weight="1">
+		<androidx.appcompat.widget.AppCompatToggleButton
+			android:id="@+id/dayPickerDay7"
+			android:layout_width="35dp"
+			android:layout_height="35dp"
+			android:layout_marginLeft="3dp"
+			android:layout_marginRight="3dp"
+			android:textColor="@drawable/dpicker_text_color"
+			android:background="@drawable/dpicker_background" />
+	</androidx.appcompat.widget.LinearLayoutCompat>
 
-
-</LinearLayout>
+</androidx.appcompat.widget.LinearLayoutCompat>

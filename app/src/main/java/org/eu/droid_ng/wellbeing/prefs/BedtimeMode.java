@@ -26,11 +26,11 @@ public class BedtimeMode extends AppCompatActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		ActionBar actionBar = getSupportActionBar();
-		if (actionBar != null) {
-			actionBar.setDisplayHomeAsUpEnabled(true);
-		}
 		setContentView(R.layout.activity_bedtime_mode);
+		setSupportActionBar(findViewById(R.id.topbar));
+		ActionBar actionBar = getSupportActionBar();
+		assert actionBar != null;
+		actionBar.setDisplayHomeAsUpEnabled(true);
 		WellbeingService tw = WellbeingService.get();
 		SharedPreferences prefs = getSharedPreferences("bedtime_mode", 0);
 

@@ -10,6 +10,7 @@ import android.widget.LinearLayout;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatTextView;
+import androidx.appcompat.widget.LinearLayoutCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.button.MaterialButton;
@@ -25,12 +26,12 @@ public class FocusModeActivity extends AppCompatActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		ActionBar actionBar = getSupportActionBar();
-		if (actionBar != null) {
-			actionBar.setDisplayHomeAsUpEnabled(true);
-		}
 		setContentView(R.layout.activity_focusmode);
-		LayoutTransition layoutTransition = ((LinearLayout) findViewById(R.id.focusModeRoot)).getLayoutTransition();
+		setSupportActionBar(findViewById(R.id.topbar));
+		ActionBar actionBar = getSupportActionBar();
+		assert actionBar != null;
+		actionBar.setDisplayHomeAsUpEnabled(true);
+		LayoutTransition layoutTransition = ((LinearLayoutCompat) findViewById(R.id.focusModeRoot)).getLayoutTransition();
 		layoutTransition.enableTransitionType(LayoutTransition.CHANGING);
 
 		AppCompatTextView schedule = findViewById(R.id.schedule);

@@ -86,7 +86,7 @@
 	<string name="delete">Delete</string>
 	<string name="add_schedule_info">Nothing here yet, try to add an schedule</string>
 	<string name="sched_alarm">End with alarm</string>
-	<string name="sample_app_1">Application 1</string>
-	<string name="sample_app_2">Application 2</string>
-	<string name="sample_app_3">Application 3</string>
+	<string name="sample_app">Application</string>
+	<string name="sample_app_t">23h 59m</string>
+	<string name="until" translatable="false">-</string>
 </resources>

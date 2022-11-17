@@ -42,10 +42,10 @@ public class ShowSuspendedAppDetails extends AppCompatActivity {
 		pmd = new PackageManagerDelegate(pm);
 
 		setContentView(R.layout.activity_show_suspended_app_details);
+		setSupportActionBar(findViewById(R.id.topbar));
 		ActionBar actionBar = getSupportActionBar();
-		if (actionBar != null) {
-			actionBar.setDisplayHomeAsUpEnabled(true);
-		}
+		assert actionBar != null;
+		actionBar.setDisplayHomeAsUpEnabled(true);
 
 		final AppCompatImageView iconView = findViewById(R.id.appIcon);
 		final AppCompatTextView nameView = findViewById(R.id.appName);

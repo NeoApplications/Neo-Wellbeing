@@ -1,70 +1,74 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto"
+	style="@style/Widget.Material3.CardView.Filled"
+	app:cardCornerRadius="20dp"
 	android:layout_width="match_parent"
 	android:layout_height="wrap_content">
 
 	<LinearLayout android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:layout_margin="5dp"
+		android:padding="10dp"
 		android:gravity="center_horizontal"
 		android:orientation="vertical">
 
 		<LinearLayout
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:gravity="end|center_vertical"
-			android:layout_margin="5dp"
+			android:gravity="center_vertical|start"
 			android:orientation="horizontal">
 
-			<com.google.android.material.checkbox.MaterialCheckBox
+			<org.eu.droid_ng.wellbeing.prefs.TimeSettingView
+				android:id="@+id/startTime"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:textSize="18sp" />
+
+			<androidx.appcompat.widget.AppCompatTextView
+				android:layout_marginStart="7dp"
+				android:textSize="30sp"
+				android:text="@string/until"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content" />
+
+			<org.eu.droid_ng.wellbeing.prefs.TimeSettingView
+				android:id="@+id/endTime"
+				android:layout_width="0dp"
+				android:layout_height="wrap_content"
+				android:layout_weight="1"
+				android:textSize="18sp" />
+
+			<com.google.android.material.materialswitch.MaterialSwitch
 				android:id="@+id/enableCheckBox"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"/>
 
-			<androidx.appcompat.widget.AppCompatImageButton
-				android:id="@+id/delete"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:background="@android:color/transparent"
-				app:srcCompat="@drawable/baseline_delete_24"
-				android:contentDescription="@string/delete" />
-
 		</LinearLayout>
-
-		<org.eu.droid_ng.wellbeing.prefs.TimeSettingView
-			android:id="@+id/startTime"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:textSize="16sp" />
-
-		<org.eu.droid_ng.wellbeing.prefs.TimeSettingView
-			android:id="@+id/endTime"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:textSize="16sp" />
 
 		<org.eu.droid_ng.wellbeing.prefs.DayPicker
 			android:id="@+id/dayPicker"
-			android:layout_width="wrap_content"
+			android:layout_marginVertical="10dp"
+			android:layout_width="match_parent"
 			android:layout_height="wrap_content" />
 
 		<LinearLayout
 			android:id="@+id/chargerLayout"
-			android:layout_marginTop="10dp"
 			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
+			android:layout_height="45dp"
 			android:clickable="true"
 			android:gravity="center_vertical"
 			android:orientation="horizontal">
 
 			<androidx.appcompat.widget.AppCompatImageView
 				android:importantForAccessibility="no"
+				android:width="10dp"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
-				app:srcCompat="@drawable/baseline_charging_station_24" />
+				app:srcCompat="@drawable/baseline_battery_charging_full_24" />
 
 			<androidx.appcompat.widget.AppCompatTextView
+				android:layout_marginStart="10dp"
 				android:layout_width="0dp"
 				android:layout_height="wrap_content"
 				android:text="@string/sched_charging"
@@ -74,25 +78,26 @@
 				android:id="@+id/chargerCheckBox"
 				android:clickable="false"
 				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"/>
+				android:layout_height="wrap_content" />
 		</LinearLayout>
 
 		<LinearLayout
 			android:id="@+id/alarmLayout"
-			android:layout_marginBottom="10dp"
 			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
+			android:layout_height="45dp"
 			android:clickable="true"
 			android:gravity="center_vertical"
 			android:orientation="horizontal">
 
 			<androidx.appcompat.widget.AppCompatImageView
 				android:importantForAccessibility="no"
+				android:width="10dp"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				app:srcCompat="@drawable/baseline_alarm_24" />
 
 			<androidx.appcompat.widget.AppCompatTextView
+				android:layout_marginStart="10dp"
 				android:layout_width="0dp"
 				android:layout_height="wrap_content"
 				android:text="@string/sched_alarm"
@@ -104,5 +109,30 @@
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"/>
 		</LinearLayout>
+
+		<LinearLayout
+			android:id="@+id/delete"
+			android:layout_width="match_parent"
+			android:layout_height="45dp"
+			android:clickable="true"
+			android:gravity="center_vertical"
+			android:orientation="horizontal">
+
+			<androidx.appcompat.widget.AppCompatImageButton
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:background="@android:color/transparent"
+				app:srcCompat="@drawable/baseline_delete_24"
+				android:width="10dp"
+				android:clickable="false"
+				android:contentDescription="@string/delete" />
+
+			<androidx.appcompat.widget.AppCompatTextView
+				android:layout_marginStart="10dp"
+				android:layout_width="0dp"
+				android:layout_height="wrap_content"
+				android:text="@string/delete"
+				android:layout_weight="1" />
+		</LinearLayout>
 	</LinearLayout>
-</androidx.cardview.widget.CardView>
+</com.google.android.material.card.MaterialCardView>

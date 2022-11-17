@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.FrameLayout;
 import android.widget.ListView;
 
 import org.eu.droid_ng.wellbeing.R;
@@ -21,6 +22,11 @@ public class TakeBreakDialogActivity extends AppCompatActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		setContentView(R.layout.take_a_break_activity);
+		setSupportActionBar(findViewById(R.id.topbar));
+		ActionBar actionBar = getSupportActionBar();
+		assert actionBar != null;
+		actionBar.setDisplayHomeAsUpEnabled(true);
 
 		WellbeingService tw = WellbeingService.get();
 		String[] optionsS = Arrays.stream(WellbeingService.breakTimeOptions).mapToObj(i -> getResources().getQuantityString(R.plurals.break_mins, i, i)).toArray(String[]::new);
@@ -36,13 +42,8 @@ public class TakeBreakDialogActivity extends AppCompatActivity {
 				return v;
 			}
 		};
-		ListView lv = new ListView(this);
+		ListView lv = findViewById(R.id.listView);
 		lv.setAdapter(a);
-		ActionBar actionBar = getSupportActionBar();
-		if (actionBar != null) {
-			actionBar.setDisplayHomeAsUpEnabled(true);
-		}
-		setContentView(lv);
 	}
 
 	@Override

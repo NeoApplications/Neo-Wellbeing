@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto"
 	xmlns:tools="http://schemas.android.com/tools"
 	android:layout_width="match_parent"
@@ -7,23 +7,53 @@
 	android:orientation="vertical"
 	tools:context=".prefs.AppTimers">
 
-	<LinearLayout
-		android:id="@+id/appTimerLoading"
+	<com.google.android.material.appbar.AppBarLayout
+		android:fitsSystemWindows="true"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content">
+
+		<com.google.android.material.appbar.CollapsingToolbarLayout
+			style="?attr/collapsingToolbarLayoutLargeSize"
+			app:expandedTitleTextAppearance="?attr/textAppearanceHeadlineLarge"
+			app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
+			android:layout_width="match_parent"
+			android:layout_height="?attr/collapsingToolbarLayoutLargeSize">
+
+			<com.google.android.material.appbar.MaterialToolbar
+				android:id="@+id/topbar"
+				android:elevation="0dp"
+				app:layout_collapseMode="pin"
+				android:layout_height="?attr/actionBarSize"
+				android:layout_width="match_parent"/>
+
+		</com.google.android.material.appbar.CollapsingToolbarLayout>
+
+	</com.google.android.material.appbar.AppBarLayout>
+
+	<FrameLayout
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
-		android:gravity="center">
+		android:importantForAccessibility="no"
+		app:layout_behavior="@string/appbar_scrolling_view_behavior">
+		<LinearLayout
+			android:id="@+id/appTimerLoading"
+			android:layout_width="match_parent"
+			android:layout_height="match_parent"
+			android:gravity="center">
 
-		<ProgressBar
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content" />
+			<ProgressBar
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content" />
 
-	</LinearLayout>
+		</LinearLayout>
 
-	<androidx.recyclerview.widget.RecyclerView
-		android:id="@+id/appTimerPkgs"
-		android:visibility="gone"
-		android:layout_width="match_parent"
-		android:layout_height="match_parent"
-		app:layoutManager="LinearLayoutManager" />
+		<androidx.recyclerview.widget.RecyclerView
+			android:id="@+id/appTimerPkgs"
+			android:visibility="gone"
+			android:layout_width="match_parent"
+			android:layout_height="match_parent"
+			app:layoutManager="LinearLayoutManager" />
 
-</LinearLayout>
+	</FrameLayout>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
