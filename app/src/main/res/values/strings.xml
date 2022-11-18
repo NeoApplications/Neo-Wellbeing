@@ -89,4 +89,6 @@
 	<string name="sample_app">Application</string>
 	<string name="sample_app_t">23h 59m</string>
 	<string name="until" translatable="false">-</string>
+	<string name="on">On</string>
+	<string name="off">Off</string>
 </resources>

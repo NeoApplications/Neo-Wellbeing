@@ -112,19 +112,23 @@
 		android:forceQueryable="true"
 		tools:targetApi="s">
 
-		<activity
-			android:name=".prefs.MainActivity"
+		<!-- Use activity-alias for launcher activity to allow easy enable/disable -->
+		<activity-alias
+			android:name=".MainActivity"
+			android:targetActivity=".prefs.MainActivity"
 			android:exported="true">
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN" />
-				<category android:name="android.intent.category.MONKEY" />
+				<category android:name="android.intent.category.LAUNCHER" />
 			</intent-filter>
+		</activity-alias>
+		<!-- Use activity-alias for settings activity to allow easy enable/disable -->
+		<activity-alias
+			android:name=".SettingsActivity"
+			android:targetActivity=".prefs.MainActivity"
+			android:exported="true">
 			<intent-filter>
 				<action android:name="com.android.settings.action.IA_SETTINGS" />
-				<category android:name="android.intent.category.DEFAULT" />
-			</intent-filter>
-			<intent-filter>
-				<action android:name="com.google.android.apps.wellbeing.action.HOME" />
 				<category android:name="android.intent.category.DEFAULT" />
 			</intent-filter>
 			<meta-data
@@ -148,17 +152,19 @@
 			<meta-data
 				android:name="com.android.settings.keyhint"
 				android:value="neo_wellbeing" />
-		</activity>
-		<!-- Use activity-alias for launcher activity to allow easy enable/disable -->
-		<activity-alias
-			android:name=".MainActivity"
-			android:targetActivity=".prefs.MainActivity"
+		</activity-alias>
+		<activity
+			android:name=".prefs.MainActivity"
 			android:exported="true">
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN" />
-				<category android:name="android.intent.category.LAUNCHER" />
+				<category android:name="android.intent.category.MONKEY" />
 			</intent-filter>
-		</activity-alias>
+			<intent-filter>
+				<action android:name="com.google.android.apps.wellbeing.action.HOME" />
+				<category android:name="android.intent.category.DEFAULT" />
+			</intent-filter>
+		</activity>
 		<activity
 			android:name=".prefs.FocusModeActivity"
 			android:label="@string/focus_mode"
@@ -169,8 +175,8 @@
 			android:exported="false" />
 		<activity
 			android:name=".prefs.SettingsActivity"
-			android:exported="false"
-			android:label="@string/title_activity_settings" />
+			android:label="@string/title_activity_settings"
+			android:exported="false" />
 		<activity
 			android:name=".prefs.BedtimeMode"
 			android:label="@string/bedtime_mode"
@@ -181,18 +187,8 @@
 			android:exported="false" />
 		<activity
 			android:name=".prefs.ScheduleActivity"
+			android:label="@string/schedule"
 			android:exported="false" />
-		<receiver
-			android:name=".widget.ScreenTimeAppWidget"
-			android:exported="false">
-			<intent-filter>
-				<action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-			</intent-filter>
-
-			<meta-data
-				android:name="android.appwidget.provider"
-				android:resource="@xml/appwidget_screen_time" />
-		</receiver>
 		<!-- to-do: On A13, implement com.google.android.apps.wellbeing.action.ACTION_WIND_DOWN_STATE_CHANGED -->
 		<activity
 			android:name=".ui.ShowSuspendedAppDetails"
@@ -203,7 +199,6 @@
 			android:taskAffinity="">
 			<intent-filter>
 				<action android:name="android.intent.action.SHOW_SUSPENDED_APP_DETAILS" />
-
 				<category android:name="android.intent.category.DEFAULT" />
 			</intent-filter>
 		</activity>
@@ -213,7 +208,6 @@
 			android:exported="false"
 			android:label="@string/focus_mode_break"
 			android:taskAffinity="" />
-
 		<receiver
 			android:name=".broadcast.ManuallyUnsuspendBroadcastReceiver"
 			android:enabled="true"
@@ -223,6 +217,17 @@
 
 				<category android:name="android.intent.category.DEFAULT" />
 			</intent-filter>
+		</receiver>
+		<receiver
+			android:name=".widget.ScreenTimeAppWidget"
+			android:exported="false">
+			<intent-filter>
+				<action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+			</intent-filter>
+
+			<meta-data
+				android:name="android.appwidget.provider"
+				android:resource="@xml/appwidget_screen_time" />
 		</receiver>
 		<receiver
 			android:name=".broadcast.BootReceiver"
@@ -253,7 +258,34 @@
 			android:name=".broadcast.AlarmFiresBroadcastReceiver"
 			android:enabled="true"
 			android:exported="false" />
-
+		<service
+			android:name=".lib.FocusModeQSTile"
+			android:label="@string/focus_mode"
+			android:icon="@drawable/outline_badge_24"
+			android:exported="true"
+			android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+			<intent-filter>
+				<action android:name="android.service.quicksettings.action.QS_TILE" />
+			</intent-filter>
+			<meta-data android:name="android.service.quicksettings.ACTIVE_TILE"
+				android:value="true" />
+			<meta-data android:name="android.service.quicksettings.TOGGLEABLE_TILE"
+				android:value="true" />
+		</service>
+		<service
+			android:name=".lib.BedtimeModeQSTile"
+			android:label="@string/bedtime_mode"
+			android:icon="@drawable/baseline_bedtime_24"
+			android:exported="true"
+			android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+			<intent-filter>
+				<action android:name="android.service.quicksettings.action.QS_TILE" />
+			</intent-filter>
+			<meta-data android:name="android.service.quicksettings.ACTIVE_TILE"
+				android:value="true" />
+			<meta-data android:name="android.service.quicksettings.TOGGLEABLE_TILE"
+				android:value="true" />
+		</service>
 		<service
 			android:name=".lib.WellbeingStateHost"
 			android:enabled="true"

@@ -3,14 +3,12 @@ package org.eu.droid_ng.wellbeing.lib
 import android.app.Activity
 import android.app.PendingIntent
 import android.app.usage.UsageStatsManager
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
+import android.content.*
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.os.BatteryManager
 import android.os.Handler
+import android.service.quicksettings.TileService
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -266,6 +264,8 @@ class WellbeingService(private val context: Context) {
 		}
 
 		onStateChanged()
+
+		doUpdateTile(BedtimeModeQSTile::class.java)
 	}
 
 	fun onAppTimerExpired(observerId: Int, uniqueObserverId: String) {
@@ -370,6 +370,11 @@ class WellbeingService(private val context: Context) {
 
 	fun onBootCompleted() {
 		loadAppTimers()
+		doUpdateTile(FocusModeQSTile::class.java)
+	}
+
+	private fun doUpdateTile(tile: Class<out TileService>) {
+		TileService.requestListeningState(context, ComponentName(context, tile))
 	}
 
 	private fun updateServiceStatus() {
@@ -606,6 +611,8 @@ class WellbeingService(private val context: Context) {
 			setFocusModeStateForPkgInternal(s, suspend = true, forBreak = false, forAppBreak = false)
 
 		onStateChanged()
+
+		doUpdateTile(FocusModeQSTile::class.java)
 	}
 
 	fun disableFocusMode() {
@@ -629,6 +636,8 @@ class WellbeingService(private val context: Context) {
 			setFocusModeStateForPkgInternal(s, suspend = false, forBreak = false, forAppBreak = false)
 
 		onStateChanged()
+
+		doUpdateTile(FocusModeQSTile::class.java)
 	}
 
 	fun onFocusModePreferenceChanged(packageName: String) {
