@@ -6,5 +6,5 @@
    See https://developer.android.com/about/versions/12/backup-restore
 -->
 <full-backup-content>
-   <exclude domain="root" path="."/>
+   <include domain="sharedpref" path="." />
 </full-backup-content>
