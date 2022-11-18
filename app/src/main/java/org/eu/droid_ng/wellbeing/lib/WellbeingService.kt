@@ -382,7 +382,7 @@ class WellbeingService(private val context: Context) {
 					host?.updateNotification(
 						R.string.focus_mode,
 						R.string.notification_focus_mode_break,
-						R.drawable.ic_stat_name,
+						R.drawable.outline_badge_24,
 						arrayOf(
 							host?.buildAction(
 								R.string.focus_mode_break_end, R.drawable.ic_take_break, Intent(
@@ -391,7 +391,7 @@ class WellbeingService(private val context: Context) {
 								).setAction(INTENT_ACTION_QUIT_BREAK), true
 							),
 							host?.buildAction(
-								R.string.focus_mode_off, R.drawable.ic_stat_name, Intent(
+								R.string.focus_mode_off, R.drawable.baseline_cancel_24, Intent(
 									context,
 									NotificationBroadcastReceiver::class.java
 								).setAction(INTENT_ACTION_QUIT_FOCUS), true
@@ -403,7 +403,7 @@ class WellbeingService(private val context: Context) {
 					host?.updateNotification(
 						R.string.focus_mode,
 						R.string.notification_focus_mode,
-						R.drawable.ic_stat_name,
+						R.drawable.outline_badge_24,
 						arrayOf(
 							if (focusModeBreakTimeNotification == -1) host?.buildAction(
 								R.string.focus_mode_break, R.drawable.ic_take_break, Intent(
@@ -417,7 +417,7 @@ class WellbeingService(private val context: Context) {
 								).setAction(INTENT_ACTION_TAKE_BREAK), true
 							),
 							host?.buildAction(
-								R.string.focus_mode_off, R.drawable.ic_stat_name, Intent(
+								R.string.focus_mode_off, R.drawable.baseline_cancel_24, Intent(
 									context,
 									NotificationBroadcastReceiver::class.java
 								).setAction(INTENT_ACTION_QUIT_FOCUS), true
@@ -430,10 +430,10 @@ class WellbeingService(private val context: Context) {
 				host?.updateNotification(
 					R.string.notification_title,
 					R.string.notification_manual,
-					R.drawable.ic_stat_name,
+					R.drawable.ic_baseline_person_24,
 					arrayOf(
 						host?.buildAction(
-							R.string.unsuspend_all, R.drawable.ic_stat_name, Intent(
+							R.string.unsuspend_all, R.drawable.baseline_exit_to_app_24, Intent(
 								context,
 								NotificationBroadcastReceiver::class.java
 							).setAction(INTENT_ACTION_UNSUSPEND_ALL), true

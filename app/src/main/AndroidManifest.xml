@@ -196,6 +196,7 @@
 		<!-- to-do: On A13, implement com.google.android.apps.wellbeing.action.ACTION_WIND_DOWN_STATE_CHANGED -->
 		<activity
 			android:name=".ui.ShowSuspendedAppDetails"
+			android:label="@string/dialog_btn_settings"
 			android:excludeFromRecents="true"
 			android:exported="true"
 			android:permission="android.permission.SEND_SHOW_SUSPENDED_APP_DETAILS"

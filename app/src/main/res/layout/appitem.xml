@@ -19,7 +19,7 @@
 		app:layout_constraintTop_toTopOf="parent"
 		app:srcCompat="@android:drawable/sym_def_app_icon" />
 
-	<LinearLayout
+	<androidx.appcompat.widget.LinearLayoutCompat
 		android:layout_width="0dp"
 		android:layout_height="wrap_content"
 		android:layout_marginStart="10dp"
@@ -46,7 +46,7 @@
 			android:clickable="false"
 			android:text="@string/pkg_name_example"
 			android:textColor="#546E7A" />
-	</LinearLayout>
+	</androidx.appcompat.widget.LinearLayoutCompat>
 
 	<FrameLayout
 		android:id="@+id/frameLayout"

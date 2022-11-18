@@ -16,13 +16,13 @@
 	<string name="notification_focus_mode">Distracting apps are currently disabled.</string>
 	<string name="focus_mode_break">Take a break</string>
 	<string name="unknown">Unknown</string>
-	<string name="suspended_app_details_unknown">The app is suspended for an unknown reason. This probably is an bug!</string>
+	<string name="suspended_app_details_unknown">The app is suspended for an unknown reason. This probably is a bug!</string>
 	<string name="unsuspend">Unsuspend</string>
 	<string name="suspended_app_details_manually">The app was manually suspended.</string>
 	<string name="manually">Manual suspension</string>
 	<string name="notification_desc">Wellbeing is suspending some applications.</string>
 	<string name="notification_title">Apps suspended</string>
-	<string name="focus_mode_off">Disable focus mode</string>
+	<string name="focus_mode_off">Disable</string>
 	<string name="notification_focus_mode_break">You are taking a break right now!</string>
 	<string name="focus_mode_break_end">End break</string>
 	<string name="cancel">Cancel</string>

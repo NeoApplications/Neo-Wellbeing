@@ -35,17 +35,18 @@
 		android:layout_height="match_parent"
 		android:importantForAccessibility="no"
 		app:layout_behavior="@string/appbar_scrolling_view_behavior">
-		<LinearLayout
+		<androidx.appcompat.widget.LinearLayoutCompat
 			android:id="@+id/appTimerLoading"
 			android:layout_width="match_parent"
 			android:layout_height="match_parent"
-			android:gravity="center">
+			android:layout_marginTop="-152dp"
+			android:gravity="center"> <!-- -152dp = (-1) * ?attr/collapsingToolbarLayoutLargeSize -->
 
 			<ProgressBar
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content" />
 
-		</LinearLayout>
+		</androidx.appcompat.widget.LinearLayoutCompat>
 
 		<androidx.recyclerview.widget.RecyclerView
 			android:id="@+id/appTimerPkgs"

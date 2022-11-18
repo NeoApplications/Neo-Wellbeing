@@ -14,6 +14,7 @@ import androidx.appcompat.widget.LinearLayoutCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.materialswitch.MaterialSwitch;
 
 import org.eu.droid_ng.wellbeing.R;
 import org.eu.droid_ng.wellbeing.lib.State;
@@ -34,8 +35,8 @@ public class FocusModeActivity extends AppCompatActivity {
 		LayoutTransition layoutTransition = ((LinearLayoutCompat) findViewById(R.id.focusModeRoot)).getLayoutTransition();
 		layoutTransition.enableTransitionType(LayoutTransition.CHANGING);
 
-		AppCompatTextView schedule = findViewById(R.id.schedule);
-		schedule.setOnClickListener(v -> startActivity(new Intent(this, ScheduleActivity.class).putExtra("type", "focus_mode").putExtra("name", getString(R.string.focus_mode))));
+		findViewById(R.id.schedule).setOnClickListener(v ->
+						startActivity(new Intent(this, ScheduleActivity.class).putExtra("type", "focus_mode").putExtra("name", getString(R.string.focus_mode))));
 
 		WellbeingService tw = WellbeingService.get();
 		tw.addStateCallback(sc);
@@ -59,25 +60,25 @@ public class FocusModeActivity extends AppCompatActivity {
 	private void updateUi() {
 		WellbeingService tw = WellbeingService.get();
 		State state = tw.getState();
-		MaterialButton toggle = findViewById(R.id.focusModeToggle);
-		AppCompatTextView takeBreak = findViewById(R.id.focusModeBreak);
-		if (!state.isFocusModeEnabled()) {
-			toggle.setText(R.string.enable);
-			toggle.setOnClickListener(v -> tw.enableFocusMode());
-			takeBreak.setVisibility(View.GONE);
-			takeBreak.setOnClickListener(null);
-		} else {
-			toggle.setText(R.string.disable);
-			toggle.setOnClickListener(v -> tw.disableFocusMode());
-			takeBreak.setVisibility(View.VISIBLE);
-			if (state.isOnFocusModeBreakGlobal()) {
-				takeBreak.setOnClickListener(v -> tw.endFocusModeBreak());
-				takeBreak.setText(R.string.focus_mode_break_end);
+		MaterialSwitch toggle = findViewById(R.id.topsw);
+		toggle.setChecked(state.isFocusModeEnabled());
+		findViewById(R.id.topsc).setOnClickListener(v -> {
+			if (state.isFocusModeEnabled()) {
+				tw.disableFocusMode();
 			} else {
-				takeBreak.setOnClickListener(v -> tw.takeFocusModeBreakWithDialog(FocusModeActivity.this, false, null));
-				takeBreak.setText(R.string.focus_mode_break);
+				tw.enableFocusMode();
 			}
-		}
+		});
+		View takeBreak = findViewById(R.id.takeBreak);
+		((AppCompatTextView) findViewById(R.id.title)).setText(state.isOnFocusModeBreakGlobal() ? R.string.focus_mode_break_end : R.string.focus_mode_break);
+		takeBreak.setOnClickListener(v -> {
+			if (state.isOnFocusModeBreakGlobal()) {
+				tw.endFocusModeBreak();
+			} else {
+				tw.takeFocusModeBreakWithDialog(FocusModeActivity.this, false, null);
+			}
+		});
+		takeBreak.setVisibility(state.isFocusModeEnabled() ? View.VISIBLE : View.GONE);
 	}
 
 	@Override

@@ -1,17 +1,23 @@
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:android="http://schemas.android.com/apk/res/android">
 	<Preference
 		android:key="focus_mode"
-		android:title="@string/focus_mode" />
+		android:title="@string/focus_mode"
+		app:icon="@drawable/outline_badge_24" />
 	<Preference
 		android:key="bedtime_mode"
-		android:title="@string/bedtime_mode" />
+		android:title="@string/bedtime_mode"
+		app:icon="@drawable/baseline_bedtime_24" />
 	<Preference
 		android:key="timers"
-		android:title="@string/app_timers" />
+		android:title="@string/app_timers"
+		app:icon="@drawable/ic_focus_mode" />
 	<Preference
 		android:key="manual"
-		android:title="@string/manually" />
+		android:title="@string/manually"
+		app:icon="@drawable/ic_baseline_person_24" />
 	<Preference
 		android:key="settings"
-		android:title="@string/title_activity_settings" />
+		android:title="@string/title_activity_settings"
+		app:icon="@drawable/baseline_settings_24" />
 </PreferenceScreen>

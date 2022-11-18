@@ -4,5 +4,5 @@
 		android:color="?android:attr/colorAccent"/>
 
 	<item android:state_checked="true"
-		android:color="#FFF" />
+		android:color="?attr/colorOnPrimary" />
 </selector>

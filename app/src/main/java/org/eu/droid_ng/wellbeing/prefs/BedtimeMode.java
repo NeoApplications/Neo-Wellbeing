@@ -10,6 +10,7 @@ import android.os.Bundle;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.checkbox.MaterialCheckBox;
+import com.google.android.material.materialswitch.MaterialSwitch;
 
 import org.eu.droid_ng.wellbeing.R;
 import org.eu.droid_ng.wellbeing.lib.WellbeingService;
@@ -19,8 +20,8 @@ import java.util.function.Consumer;
 public class BedtimeMode extends AppCompatActivity {
 
 	private final Consumer<WellbeingService> sc = tw -> {
-		MaterialButton bt = findViewById(R.id.bedModeToggle);
-		bt.setText(tw.getState(false).isBedtimeModeEnabled() ? R.string.disable : R.string.enable);
+		MaterialSwitch bt = findViewById(R.id.topsw);
+		bt.setChecked(tw.getState(false).isBedtimeModeEnabled());
 	};
 
 	@Override
@@ -36,13 +37,13 @@ public class BedtimeMode extends AppCompatActivity {
 
 		MaterialCheckBox c = findViewById(R.id.checkBox2);
 		c.setChecked(prefs.getBoolean("greyscale", false));
-		MaterialButton bt = findViewById(R.id.bedModeToggle);
-		bt.setOnClickListener(v -> {
+		MaterialSwitch bt = findViewById(R.id.topsw);
+		findViewById(R.id.topsc).setOnClickListener(v -> {
 			boolean b = !tw.getState(false).isBedtimeModeEnabled();
 			tw.setBedtimeMode(b);
-			bt.setText(b ? R.string.disable : R.string.enable);
+			bt.setChecked(b);
 		});
-		bt.setText(tw.getState(false).isBedtimeModeEnabled() ? R.string.disable : R.string.enable);
+		bt.setChecked(tw.getState(false).isBedtimeModeEnabled());
 		findViewById(R.id.greyscaleCheckbox).setOnClickListener(v -> {
 			boolean b = !prefs.getBoolean("greyscale", false);
 			c.setChecked(b);
@@ -52,8 +53,7 @@ public class BedtimeMode extends AppCompatActivity {
 				tw.getCdm().setSaturationLevel(b ? 0 : 100);
 			}
 		});
-		AppCompatTextView schedule = findViewById(R.id.schedule1);
-		schedule.setOnClickListener(v ->
+		findViewById(R.id.schedule).setOnClickListener(v ->
 				startActivity(new Intent(this, ScheduleActivity.class).putExtra("type", "bedtime_mode")
 						.putExtra("name", getString(R.string.bedtime_mode))));
 
