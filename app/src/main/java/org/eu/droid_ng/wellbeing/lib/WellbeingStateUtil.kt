@@ -162,6 +162,9 @@ class WellbeingStateHost : Service() {
             val importance = NotificationManager.IMPORTANCE_LOW
             val channel = NotificationChannel(channelId, name, importance)
             channel.description = description
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                channel.isBlockable = true
+            }
             notificationManager.createNotificationChannel(channel)
         }
         if (intent != null) {

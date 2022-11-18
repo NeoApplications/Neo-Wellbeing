@@ -7,6 +7,10 @@
 	<string name="dialog_btn_settings">More details</string>
 	<string name="channel_description">Contains notifications like \"Focus mode is enabled\"</string>
 	<string name="channel_name">Service notifications</string>
+	<string name="channel2_description">Contains notifications like \"The app timer for this app is about to run out\"</string>
+	<string name="channel2_name">Reminders</string>
+	<string name="app_timer_reminder">The app timer for %s is about to run out</string>
+	<string name="disabled">Disabled</string>
 	<string name="app_icon_content_desc">Application icon</string>
 	<string name="suspended_app_details_app">App</string>
 	<string name="suspended_app_details_was_suspended_due_to">…was suspended due to:</string>
@@ -37,6 +41,11 @@
 	<string name="break_dialog_5">Use app for 5 minutes</string>
 	<string name="break_dialog_10">Use app for 10 minutes</string>
 	<string name="break_dialog_15">Use app for 15 minutes</string>
+	<string name="min_1">1 minute</string>
+	<string name="min_3">3 minutes</string>
+	<string name="min_5">5 minutes</string>
+	<string name="min_10">10 minutes</string>
+	<string name="min_15">15 minutes</string>
 	<string name="title_activity_settings">Settings</string>
 	<string name="app">App</string>
 	<string name="pkg_name_example" translatable="false">com.android.app</string>
@@ -91,4 +100,7 @@
 	<string name="until" translatable="false">-</string>
 	<string name="on">On</string>
 	<string name="off">Off</string>
+	<string name="app_timer_reminder_title">%d minutes left</string>
+	<string name="app_timer_reminder_pref">Remind when time is running out</string>
+	<string name="always_ask">Always ask</string>
 </resources>

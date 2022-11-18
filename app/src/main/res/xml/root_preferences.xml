@@ -36,6 +36,14 @@
 			app:title="@string/focus_mode_pref_dialog"
 			app:useSimpleSummaryProvider="true" />
 
+		<ListPreference
+			app:defaultValue="-1"
+			app:entries="@array/reminder_entries"
+			app:entryValues="@array/break_values"
+			app:key="app_timer_reminder"
+			app:title="@string/app_timer_reminder_pref"
+			app:useSimpleSummaryProvider="true" />
+
 	</PreferenceCategory>
 
 	<PreferenceCategory app:title="@string/manually">

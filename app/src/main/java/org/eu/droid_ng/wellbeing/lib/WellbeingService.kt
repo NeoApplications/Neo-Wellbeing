@@ -1,12 +1,12 @@
 package org.eu.droid_ng.wellbeing.lib
 
-import android.app.Activity
-import android.app.PendingIntent
+import android.app.*
 import android.app.usage.UsageStatsManager
 import android.content.*
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.os.BatteryManager
+import android.os.Build
 import android.os.Handler
 import android.service.quicksettings.TileService
 import android.util.Log
@@ -24,10 +24,13 @@ import org.eu.droid_ng.wellbeing.shim.PackageManagerDelegate
 import org.eu.droid_ng.wellbeing.shim.PackageManagerDelegate.SuspendDialogInfo
 import org.eu.droid_ng.wellbeing.ui.TakeBreakDialogActivity
 import java.time.Duration
+import java.time.temporal.ChronoUnit
+import java.time.temporal.TemporalUnit
 import java.util.*
 import java.util.concurrent.TimeUnit
 import java.util.function.Consumer
 import java.util.stream.Collectors
+import kotlin.time.DurationUnit
 
 
 class WellbeingService(private val context: Context) {
@@ -133,6 +136,7 @@ class WellbeingService(private val context: Context) {
 	val cdm: PackageManagerDelegate.IColorDisplayManager = PackageManagerDelegate.getColorDisplayManager(context)
 	@JvmField val usm = context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
 	private val alc = AlarmCoordinator(context)
+	private val notificationManager = context.getSystemService(NotificationManager::class.java) as NotificationManager
 
 	private val oidMap = context.getSharedPreferences("AppTimersInternal", 0)
 	private val config = context.getSharedPreferences("appTimers", 0)
@@ -144,6 +148,7 @@ class WellbeingService(private val context: Context) {
 	@JvmField var manualSuspendDialog = true
 	@JvmField var manualSuspendAllApps = true
 	@JvmField var appTimerDialogBreakTime = -1
+	private var reminderMin = -1
 
 	private var triggers: Set<Trigger> = HashSet()
 
@@ -155,6 +160,7 @@ class WellbeingService(private val context: Context) {
 		manualSuspendAllApps = prefs.getBoolean("manual_all", manualSuspendAllApps)
 		focusModeAllApps = prefs.getBoolean("focus_all", focusModeAllApps)
 		appTimerDialogBreakTime = Integer.parseInt(prefs.getString("app_timer_dialog", appTimerDialogBreakTime.toString()) ?: appTimerDialogBreakTime.toString())
+		reminderMin = Integer.parseInt(prefs.getString("app_timer_reminder", reminderMin.toString()) ?: reminderMin.toString())
 
 		loadSchedcfg()
 		alc.updateState()
@@ -197,6 +203,18 @@ class WellbeingService(private val context: Context) {
 	init {
 		Utils.clearUsageStatsCache(usm, pm, true)
 		loadSettings()
+
+		if (notificationManager.getNotificationChannel("reminder") == null) {
+			val name: CharSequence = context.getString(R.string.channel2_name)
+			val description = context.getString(R.string.channel2_description)
+			val importance = NotificationManager.IMPORTANCE_HIGH
+			val channel = NotificationChannel("reminder", name, importance)
+			channel.description = description
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+				channel.isBlockable = true
+			}
+			notificationManager.createNotificationChannel(channel)
+		}
 
 		context.registerReceiver(object : BroadcastReceiver() {
 			override fun onReceive(p0: Context?, p1: Intent?) {
@@ -288,9 +306,35 @@ class WellbeingService(private val context: Context) {
 			"AppTimer", "AppLimit" -> {
 				dropAppTimer(parsed)
 				parsed.pkgs.forEach {
-					if (it != null) {
-						updateSuspendStatusForApp(it)
-					}
+					if (it == null) return@forEach
+					updateSuspendStatusForApp(it)
+				}
+			}
+			"Reminder" -> {
+				dropAppTimer(parsed)
+				parsed.pkgs.forEach {
+					if (it == null) return@forEach
+					Log.e("AAAAAA", it)
+					val text = context.getString(
+						R.string.app_timer_reminder_title,
+						reminderMin
+					)
+					val n = Notification.Builder(context, "reminder")
+						.setWhen(System.currentTimeMillis())
+						.setSmallIcon(R.drawable.ic_focus_mode)
+						.setOnlyAlertOnce(true)
+						.setContentTitle(text)
+						.setTicker(text)
+						.setContentText(
+							context.getString(
+								R.string.app_timer_reminder,
+								getApplicationLabel(it)
+							)
+						)
+					notificationManager.notify(
+						(System.currentTimeMillis() / 1000).toInt(),
+						n.build()
+					)
 				}
 			}
 			"AppBreak" -> endBreak(parsed.pkgs)
@@ -307,9 +351,8 @@ class WellbeingService(private val context: Context) {
 		Log.i("AppTimersInternal", "end break for " + pkgs.contentToString())
 		dropAppTimer(u)
 		pkgs.forEach {
-			if (it != null) {
-				updateSuspendStatusForApp(it)
-			}
+			if (it == null) return@forEach
+			updateSuspendStatusForApp(it)
 		}
 	}
 
@@ -364,6 +407,8 @@ class WellbeingService(private val context: Context) {
 		u = ParsedUoid("AppLimit", oldLimit.toMillis(), s)
 		if (oidMap.contains(u.toString())) dropAppTimer(u)
 		u = ParsedUoid("AppBreak", 0, s)
+		if (oidMap.contains(u.toString())) dropAppTimer(u)
+		u = ParsedUoid("Reminder", 0, s)
 		if (oidMap.contains(u.toString())) dropAppTimer(u)
 		loadAppTimer(pkgName)
 	}
@@ -924,6 +969,13 @@ class WellbeingService(private val context: Context) {
 		}
 		if (!oidMap.contains(uoid)) {
 			updatePrefs(uoid, makeOid())
+		}
+		if (reminderMin > 0 && timeLimitInternal.toMinutes() > reminderMin) {
+			val u = ParsedUoid("Reminder", 0, toObserve).toString()
+			if (!oidMap.contains(u)) {
+				updatePrefs(u, makeOid())
+			}
+			setAppTimerInternal(u, toObserve, timeLimitInternal.minus(reminderMin.toLong(), ChronoUnit.MINUTES), null)
 		}
 		setAppTimerInternal(uoid, toObserve, timeLimitInternal, timeUsed)
 	}

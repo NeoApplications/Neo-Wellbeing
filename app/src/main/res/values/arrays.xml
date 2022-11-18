@@ -1,13 +1,12 @@
 <resources>
 	<string-array name="break_entries">
-		<item>Always ask</item>
-		<item>1 minute</item>
-		<item>3 minutes</item>
-		<item>5 minutes</item>
-		<item>10 minutes</item>
-		<item>15 minutes</item>
+		<item>@string/always_ask</item>
+		<item>@string/min_1</item>
+		<item>@string/min_3</item>
+		<item>@string/min_5</item>
+		<item>@string/min_10</item>
+		<item>@string/min_15</item>
 	</string-array>
-
 	<string-array name="break_values">
 		<item>-1</item>
 		<item>1</item>
@@ -15,5 +14,13 @@
 		<item>5</item>
 		<item>10</item>
 		<item>15</item>
+	</string-array>
+	<string-array name="reminder_entries">
+		<item>@string/disabled</item>
+		<item>@string/min_1</item>
+		<item>@string/min_3</item>
+		<item>@string/min_5</item>
+		<item>@string/min_10</item>
+		<item>@string/min_15</item>
 	</string-array>
 </resources>
