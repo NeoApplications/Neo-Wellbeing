@@ -86,8 +86,11 @@
 	<uses-permission android:name="android.permission.START_CROSS_PROFILE_ACTIVITIES"
 		tools:ignore="ProtectedPermissions" />
 	<uses-permission android:name="android.permission.USE_EXACT_ALARM"/>
+	<uses-permission
+		android:name="org.eu.droid_ng.wellbeing.framework.permission.BIND" />
 
 	<queries>
+		<package android:name="org.eu.droid_ng.wellbeing.framework" />
 		<intent>
 			<action android:name="android.intent.action.MAIN" />
 			<category android:name="android.intent.category.HOME" />
@@ -110,7 +113,6 @@
 		android:testOnly="false"
 		android:theme="@style/AppTheme"
 		android:forceQueryable="true"
-		android:persistent="true"
 		tools:targetApi="s">
 
 		<!-- Use activity-alias for launcher activity to allow easy enable/disable -->

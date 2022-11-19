@@ -43,4 +43,8 @@ It allows additional grants on top of privapp-permissions-platform.xml
         <permission name="android.permission.WRITE_DREAM_STATE" />
 	    <permission name="android.permission.WRITE_SECURE_SETTINGS" />
     </privapp-permissions>
+    <privapp-permissions package="org.eu.droid_ng.wellbeing.framework">
+        <permission name="android.permission.INTERACT_ACROSS_USERS" />
+        <permission name="android.permission.WRITE_SECURE_SETTINGS" />
+    </privapp-permissions>
 </permissions>

@@ -38,6 +38,8 @@ class WellbeingService(private val context: Context) {
 	// systemApp should always be true, only used for development purposes.
 	private val systemApp: Boolean = (context.applicationInfo.flags and
 			(ApplicationInfo.FLAG_UPDATED_SYSTEM_APP or ApplicationInfo.FLAG_SYSTEM)) > 1
+	private val frameworkService: WellbeingFrameworkService =
+			WellbeingFrameworkService(context, this, systemApp)
 
 	fun bindToHost(newhost: WellbeingStateHost?) {
 		host = newhost
@@ -150,6 +152,7 @@ class WellbeingService(private val context: Context) {
 	@JvmField var appTimerDialogBreakTime = -1
 	private var reminderMin = -1
 	private var airplaneState: WellbeingAirplaneState
+	private var airplaneStateLogical: Boolean = false
 
 	private var triggers: Set<Trigger> = HashSet()
 
@@ -240,10 +243,20 @@ class WellbeingService(private val context: Context) {
 				}
 			}
 		}, IntentFilter(Intent.ACTION_AIRPLANE_MODE_CHANGED))
-		val prefs = context.getSharedPreferences("restore_state", 0)
-		if (prefs.getBoolean("restore_airplane_mode", false) &&
-				!airplaneState.wellbeingAirplaneModeState) {
-			WellbeingAirplaneState.setAirplaneModeOn(context, false)
+		frameworkService.tryConnect()
+	}
+
+	fun onWellbeingFrameworkConnected(initial: Boolean) {
+		if (hasWellbeingAirplaneModeCapabilities()) {
+			if (airplaneState.wellbeingAirplaneModeState != airplaneStateLogical) {
+				setWellbeingAirplaneMode(airplaneStateLogical)
+			} else if (initial) {
+				val prefs = context.getSharedPreferences("restore_state", 0)
+				if (prefs.getBoolean("restore_airplane_mode", false) &&
+						!airplaneState.wellbeingAirplaneModeState) {
+					frameworkService.setAirplaneMode(false)
+				}
+			}
 		}
 	}
 
@@ -312,17 +325,35 @@ class WellbeingService(private val context: Context) {
 		doUpdateTile(BedtimeModeQSTile::class.java)
 	}
 
+	fun hasWellbeingAirplaneModeCapabilities(): Boolean {
+		return frameworkService.versionCode() >= 1
+	}
+
 	fun setWellbeingAirplaneMode(enable: Boolean) {
-		if (!systemApp) return
+		airplaneStateLogical = enable
 		val oldState = airplaneState
+		if (!hasWellbeingAirplaneModeCapabilities()) {
+			// Allow partial update when in state that
+			// previously had airplane mode capabilities
+			if (oldState.wellbeingAirplaneModeState && !enable) {
+				airplaneState = airplaneState.onDisableAirplaneByWellbeing()
+				if (oldState.shouldRestoreAirplaneMode() !=
+						airplaneState.shouldRestoreAirplaneMode()) {
+					val prefs = context.getSharedPreferences("restore_state", 0)
+					prefs.edit().putBoolean("restore_airplane_mode",
+							airplaneState.shouldRestoreAirplaneMode()).apply()
+				}
+			}
+			return
+		}
 		airplaneState = when(enable) {
 			true -> airplaneState.onEnableAirplaneByWellbeing()
 			false -> airplaneState.onDisableAirplaneByWellbeing()
 		}
 		if (airplaneState.airplaneModeState !=
 				oldState.airplaneModeState) {
-			WellbeingAirplaneState.setAirplaneModeOn(
-					context, airplaneState.airplaneModeState)
+			frameworkService.setAirplaneMode(
+					airplaneState.airplaneModeState)
 		}
 		if (airplaneState.shouldRestoreAirplaneMode()
 				!= oldState.shouldRestoreAirplaneMode()) {
@@ -460,6 +491,8 @@ class WellbeingService(private val context: Context) {
 	}
 
 	fun onBootCompleted() {
+		// Try to reconnect to frameworkService if the first connection failed.
+		frameworkService.tryConnect()
 		loadAppTimers()
 		doUpdateTile(FocusModeQSTile::class.java)
 	}
