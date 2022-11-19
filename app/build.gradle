@@ -68,6 +68,7 @@ def zipFile = new File(outDir, zipName)
 
 task assembleMagiskModule(type: Task) {
 	dependsOn(":app:assembleDebug")
+	dependsOn(":framework:assembleDebug")
 	doLast {
 		delete(magiskDir)
 		magiskDir.mkdirs()
@@ -77,6 +78,9 @@ task assembleMagiskModule(type: Task) {
 		file("$magiskDir.path/system/priv-app/NeoWellbeing").mkdirs()
 		Files.copy(file("$rootDir/app/build/outputs/apk/debug/app-debug.apk").toPath(),
 				file("${magiskDir.path}/system/priv-app/NeoWellbeing/NeoWellbeing.apk").toPath())
+		file("$magiskDir.path/system/priv-app/NeoWellbeingFramework").mkdirs()
+		Files.copy(file("$rootDir/framework/build/outputs/apk/debug/framework-debug.apk").toPath(),
+				file("${magiskDir.path}/system/priv-app/NeoWellbeingFramework/NeoWellbeingFramework.apk").toPath())
 		file("$magiskDir.path/system/product/overlay/NeoWellbeingOverlay").mkdirs()
 		Files.copy(file("$rootDir/NeoWellbeingOverlay/overlay.apk").toPath(),
 				file("${magiskDir.path}/system/product/overlay/NeoWellbeingOverlay/NeoWellbeingOverlay.apk").toPath())

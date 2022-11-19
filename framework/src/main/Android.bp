@@ -1,0 +1,17 @@
+android_app {
+    name: "NeoWellbeingFramework",
+    defaults: ["platform_app_defaults"],
+    static_libs: [
+        "androidx.annotation_annotation"
+    ]
+    resource_dirs: ["res"],
+
+    srcs: [
+        "aidl/**/*.aidl",
+        "java/**/*.java"
+    ],
+
+    platform_apis: true,
+    privileged: true,
+    certificate: "platform"
+}

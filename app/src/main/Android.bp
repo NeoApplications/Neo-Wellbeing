@@ -15,7 +15,12 @@ android_app {
     ]
     resource_dirs: ["res"],
 
-    srcs: ["java/**/*.java", "java/**/*.kt", "java_real/**/*.java"],
+    srcs: [
+        "aidl/**/*.aidl",
+        "java/**/*.java",
+        "java/**/*.kt",
+        "java_real/**/*.java"
+    ],
 
     platform_apis: true,
     privileged: true,

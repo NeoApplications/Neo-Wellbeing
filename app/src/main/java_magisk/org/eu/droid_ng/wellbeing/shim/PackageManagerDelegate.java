@@ -195,10 +195,16 @@ public class PackageManagerDelegate {
 			setAppSaturationLevel = realDisplayColorManager.getDeclaredMethod("setAppSaturationLevel", String.class, int.class);
 			isNightDisplayAvailable = realDisplayColorManager.getDeclaredMethod("isNightDisplayAvailable", Context.class);
 			isDisplayWhiteBalanceAvailable = realDisplayColorManager.getDeclaredMethod("isDisplayWhiteBalanceAvailable", Context.class);
-		} catch (ReflectiveOperationException e) {
+		} catch (Exception e) {
 			Log.e("PackageManagerDelegate", // Log why it's crashing
 					"This would not occur if the app was built-in into the ROM:", e);
-			return null;
+			return new IColorDisplayManager() { // Return stub then.
+				@Override public boolean isDeviceColorManaged() { return false; }
+				@Override public boolean setSaturationLevel(int saturationLevel) { return false; }
+				@Override public boolean setAppSaturationLevel(@NonNull String packageName, int saturationLevel) { return false; }
+				@Override public boolean isNightDisplayAvailable(Context context) { return false; }
+				@Override public boolean isDisplayWhiteBalanceAvailable(Context context) { return false; }
+			};
 		}
 		return new IColorDisplayManager() {
 			@Override

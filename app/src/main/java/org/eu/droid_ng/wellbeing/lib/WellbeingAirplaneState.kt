@@ -86,14 +86,5 @@ enum class WellbeingAirplaneState(val airplaneModeState: Boolean, val systemAirp
             return Settings.Global.getInt(context.contentResolver,
                     Settings.Global.AIRPLANE_MODE_ON, 0) != 0
         }
-
-        @JvmStatic
-        fun setAirplaneModeOn(context: Context, value: Boolean) {
-            Settings.Global.putInt(context.contentResolver,
-                    Settings.Global.AIRPLANE_MODE_ON,
-                    when(value) { true -> 1 false -> 0 })
-            context.sendBroadcast(Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED)
-                    .putExtra("state", value))
-        }
     }
 }
