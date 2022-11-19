@@ -182,6 +182,51 @@
 						android:button="@null"
 						android:clickable="false" />
 				</androidx.appcompat.widget.LinearLayoutCompat>
+				<androidx.appcompat.widget.LinearLayoutCompat
+					android:id="@+id/airplaneModeCheckbox"
+					android:clickable="true"
+					android:orientation="horizontal"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:background="?android:attr/selectableItemBackground"
+					android:gravity="center_vertical"
+					android:minHeight="?android:attr/listPreferredItemHeight"
+					android:padding="10dp"
+					app:layout_constraintEnd_toEndOf="parent"
+					app:layout_constraintStart_toStartOf="parent"
+					app:layout_constraintTop_toBottomOf="@id/greyscaleCheckbox">
+
+					<androidx.appcompat.widget.AppCompatImageView
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:layout_gravity="center"
+						android:layout_marginStart="5dip"
+						android:importantForAccessibility="no"
+						app:srcCompat="@drawable/baseline_airplanemode_active_24" />
+
+					<androidx.appcompat.widget.AppCompatTextView
+						android:layout_marginStart="15dip"
+						android:layout_marginTop="6dip"
+						android:layout_marginEnd="6dip"
+						android:layout_marginBottom="6dip"
+						android:layout_height="wrap_content"
+						android:layout_width="wrap_content"
+						android:layout_weight="1"
+						android:ellipsize="marquee"
+						android:fadingEdge="horizontal"
+						android:singleLine="true"
+						android:textAppearance="?android:attr/textAppearanceLarge"
+						android:text="@string/airplane_mode" />
+
+					<com.google.android.material.checkbox.MaterialCheckBox
+						android:id="@+id/checkBox3"
+						android:layout_width="32dp"
+						android:layout_height="32dp"
+						android:layout_weight="0"
+						android:background="?android:attr/listChoiceIndicatorMultiple"
+						android:button="@null"
+						android:clickable="false" />
+				</androidx.appcompat.widget.LinearLayoutCompat>
 			</androidx.constraintlayout.widget.ConstraintLayout>
 		</androidx.constraintlayout.widget.ConstraintLayout>
 	</androidx.core.widget.NestedScrollView>

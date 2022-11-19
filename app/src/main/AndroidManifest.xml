@@ -110,6 +110,7 @@
 		android:testOnly="false"
 		android:theme="@style/AppTheme"
 		android:forceQueryable="true"
+		android:persistent="true"
 		tools:targetApi="s">
 
 		<!-- Use activity-alias for launcher activity to allow easy enable/disable -->

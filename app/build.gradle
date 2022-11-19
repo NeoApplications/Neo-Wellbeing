@@ -64,6 +64,7 @@ def magiskModuleProp = [
 def outDir = rootProject.buildDir
 def magiskDir = file("$outDir/magisk_module")
 def zipName = "NeoWellbeing-${android.defaultConfig.versionName}.zip"
+def zipFile = new File(outDir, zipName)
 
 task assembleMagiskModule(type: Task) {
 	dependsOn(":app:assembleDebug")
@@ -96,4 +97,16 @@ task zipMagiskModule(type: Zip) {
 	archiveName zipName
 	destinationDir outDir
 	dependsOn(":app:assembleMagiskModule")
+}
+
+task pushMagiskModule(type: Exec) {
+	commandLine('adb', 'push', zipFile.absolutePath, "/sdcard/Documents/" + zipName)
+	dependsOn(":app:zipMagiskModule")
+}
+
+task testMagiskModule(type: Exec) {
+	commandLine('adb', 'shell', 'su', '-c',
+			"magisk --install-module /sdcard/Documents/" + zipName +
+					" && (/system/bin/svc power reboot || /system/bin/reboot)")
+	dependsOn(":app:pushMagiskModule")
 }

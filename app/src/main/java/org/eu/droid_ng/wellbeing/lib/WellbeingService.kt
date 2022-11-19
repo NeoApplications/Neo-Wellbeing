@@ -149,6 +149,7 @@ class WellbeingService(private val context: Context) {
 	@JvmField var manualSuspendAllApps = true
 	@JvmField var appTimerDialogBreakTime = -1
 	private var reminderMin = -1
+	private var airplaneState: WellbeingAirplaneState
 
 	private var triggers: Set<Trigger> = HashSet()
 
@@ -200,8 +201,17 @@ class WellbeingService(private val context: Context) {
 		s.apply()
 	}
 
+	private var bedtimeModeEnabled = false
+	private var isFocusModeEnabled = false
+	private var isFocusModeBreak /* global break */ = false
+	private val perAppState: HashMap<String /* packageName */, Int /* does NOT contain global flags like FOCUS_MODE_ENABLED or FOCUS_MODE_GLOBAL_BREAK, so always use getAppState() when reading */> = HashMap()
+
 	init {
 		Utils.clearUsageStatsCache(usm, pm, true)
+		airplaneState = when(WellbeingAirplaneState.isAirplaneModeOn(context)) {
+			true -> WellbeingAirplaneState.ENABLED_BY_SYSTEM
+			false -> WellbeingAirplaneState.DISABLED_BY_SYSTEM
+		}
 		loadSettings()
 
 		if (notificationManager.getNotificationChannel("reminder") == null) {
@@ -221,12 +231,21 @@ class WellbeingService(private val context: Context) {
 				onUpdatePowerConnection()
 			}
 		}, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
+		context.registerReceiver(object : BroadcastReceiver() {
+			override fun onReceive(p0: Context?, p1: Intent?) {
+				airplaneState = if (WellbeingAirplaneState.isAirplaneModeOn(context)) {
+					airplaneState.onReceiveAirplaneEnabled()
+				} else {
+					airplaneState.onReceiveAirplaneDisabled()
+				}
+			}
+		}, IntentFilter(Intent.ACTION_AIRPLANE_MODE_CHANGED))
+		val prefs = context.getSharedPreferences("restore_state", 0)
+		if (prefs.getBoolean("restore_airplane_mode", false) &&
+				!airplaneState.wellbeingAirplaneModeState) {
+			WellbeingAirplaneState.setAirplaneModeOn(context, false)
+		}
 	}
-
-	private var bedtimeModeEnabled = false
-	private var isFocusModeEnabled = false
-	private var isFocusModeBreak /* global break */ = false
-	private val perAppState: HashMap<String /* packageName */, Int /* does NOT contain global flags like FOCUS_MODE_ENABLED or FOCUS_MODE_GLOBAL_BREAK, so always use getAppState() when reading */> = HashMap()
 
 	// Service / Global state. Do not confuse with per-app state, that's using the same values.
 	@JvmOverloads
@@ -267,6 +286,10 @@ class WellbeingService(private val context: Context) {
 		return State(value)
 	}
 
+	fun isBedtimeModeEnabled(): Boolean {
+		return bedtimeModeEnabled
+	}
+
 	fun setBedtimeMode(enable: Boolean) {
 		bedtimeModeEnabled = enable
 
@@ -281,9 +304,32 @@ class WellbeingService(private val context: Context) {
 			}
 		}
 
+		setWellbeingAirplaneMode(enable &&
+				prefs.getBoolean("airplane_mode", false))
+
 		onStateChanged()
 
 		doUpdateTile(BedtimeModeQSTile::class.java)
+	}
+
+	fun setWellbeingAirplaneMode(enable: Boolean) {
+		if (!systemApp) return
+		val oldState = airplaneState
+		airplaneState = when(enable) {
+			true -> airplaneState.onEnableAirplaneByWellbeing()
+			false -> airplaneState.onDisableAirplaneByWellbeing()
+		}
+		if (airplaneState.airplaneModeState !=
+				oldState.airplaneModeState) {
+			WellbeingAirplaneState.setAirplaneModeOn(
+					context, airplaneState.airplaneModeState)
+		}
+		if (airplaneState.shouldRestoreAirplaneMode()
+				!= oldState.shouldRestoreAirplaneMode()) {
+			val prefs = context.getSharedPreferences("restore_state", 0)
+			prefs.edit().putBoolean("restore_airplane_mode",
+					airplaneState.shouldRestoreAirplaneMode()).apply()
+		}
 	}
 
 	fun onAppTimerExpired(observerId: Int, uniqueObserverId: String) {
