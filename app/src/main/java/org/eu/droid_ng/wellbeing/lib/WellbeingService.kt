@@ -39,7 +39,7 @@ class WellbeingService(private val context: Context) {
 	private val systemApp: Boolean = (context.applicationInfo.flags and
 			(ApplicationInfo.FLAG_UPDATED_SYSTEM_APP or ApplicationInfo.FLAG_SYSTEM)) > 1
 	private val frameworkService: WellbeingFrameworkService =
-			WellbeingFrameworkService(context, this, systemApp)
+			WellbeingFrameworkService(context, this)
 
 	fun bindToHost(newhost: WellbeingStateHost?) {
 		host = newhost
@@ -254,6 +254,7 @@ class WellbeingService(private val context: Context) {
 				val prefs = context.getSharedPreferences("restore_state", 0)
 				if (prefs.getBoolean("restore_airplane_mode", false) &&
 						!airplaneState.wellbeingAirplaneModeState) {
+					prefs.edit().remove("restore_airplane_mode").apply()
 					frameworkService.setAirplaneMode(false)
 				}
 			}
@@ -297,10 +298,6 @@ class WellbeingService(private val context: Context) {
 		}
 
 		return State(value)
-	}
-
-	fun isBedtimeModeEnabled(): Boolean {
-		return bedtimeModeEnabled
 	}
 
 	fun setBedtimeMode(enable: Boolean) {

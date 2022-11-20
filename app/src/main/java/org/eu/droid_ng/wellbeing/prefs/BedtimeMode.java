@@ -21,7 +21,7 @@ public class BedtimeMode extends AppCompatActivity {
 
 	private final Consumer<WellbeingService> sc = tw -> {
 		MaterialSwitch bt = findViewById(R.id.topsw);
-		bt.setChecked(tw.isBedtimeModeEnabled());
+		bt.setChecked(tw.getState(false).isBedtimeModeEnabled());
 	};
 
 	@Override
@@ -37,17 +37,17 @@ public class BedtimeMode extends AppCompatActivity {
 
 		MaterialSwitch bt = findViewById(R.id.topsw);
 		findViewById(R.id.topsc).setOnClickListener(v -> {
-			boolean b = !tw.isBedtimeModeEnabled();
+			boolean b = !tw.getState(false).isBedtimeModeEnabled();
 			tw.setBedtimeMode(b);
 			bt.setChecked(b);
 		});
-		bt.setChecked(tw.isBedtimeModeEnabled());
+		bt.setChecked(tw.getState(false).isBedtimeModeEnabled());
 		MaterialCheckBox checkBox2 = findViewById(R.id.checkBox2);
 		checkBox2.setChecked(prefs.getBoolean("greyscale", false));
 		findViewById(R.id.greyscaleCheckbox).setOnClickListener(v -> {
 			boolean b = !prefs.getBoolean("greyscale", false);
 			checkBox2.setChecked(b);
-			boolean g = tw.isBedtimeModeEnabled();
+			boolean g = tw.getState(false).isBedtimeModeEnabled();
 			prefs.edit().putBoolean("greyscale", b).apply();
 			if (g) {
 				tw.getCdm().setSaturationLevel(b ? 0 : 100);
@@ -58,7 +58,7 @@ public class BedtimeMode extends AppCompatActivity {
 		findViewById(R.id.airplaneModeCheckbox).setOnClickListener(v -> {
 			boolean b = !prefs.getBoolean("airplane_mode", false);
 			checkBox3.setChecked(b);
-			boolean g = tw.isBedtimeModeEnabled();
+			boolean g = tw.getState(false).isBedtimeModeEnabled();
 			prefs.edit().putBoolean("airplane_mode", b).apply();
 			if (g) {
 				tw.setWellbeingAirplaneMode(b);

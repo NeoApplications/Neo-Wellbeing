@@ -8,13 +8,14 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
-import android.provider.Settings;
 import android.util.Log;
+
+import org.eu.droid_ng.wellbeing.framework.IWellbeingFrameworkService;
 
 public class WellbeingFrameworkService implements IWellbeingFrameworkService {
     private static final Handler HANDLER = new Handler(Looper.getMainLooper());
     private static final Intent FRAMEWORK_SERVICE_INTENT =
-            new Intent("org.eu.droid_ng.wellbeing.lib.FRAMEWORK_SERVICE")
+            new Intent("org.eu.droid_ng.wellbeing.framework.FRAMEWORK_SERVICE")
                     .setPackage("org.eu.droid_ng.wellbeing.framework");
     private static final IWellbeingFrameworkService DEFAULT;
     static {
@@ -22,17 +23,15 @@ public class WellbeingFrameworkService implements IWellbeingFrameworkService {
     }
     private final Context context;
     private final WellbeingService wellbeingService;
-    private final boolean system;
     private final ServiceConnection serviceConnection;
     private IWellbeingFrameworkService wellbeingFrameworkService;
     private IBinder binder;
     private int versionCode;
     private boolean initial = true;
 
-    WellbeingFrameworkService(Context context, WellbeingService wellbeingService, boolean system) {
+    WellbeingFrameworkService(Context context, WellbeingService wellbeingService) {
         this.context = context;
         this.wellbeingService = wellbeingService;
-        this.system = system;
         this.serviceConnection = new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
@@ -113,24 +112,12 @@ public class WellbeingFrameworkService implements IWellbeingFrameworkService {
         if (binder != null && !binder.isBinderAlive()) {
             invalidateConnection();
         }
-        // Allow partial emulation of the setAirplaneMode call if connection failed.
-        if (versionCode == 0 && system && !initial) {
-            return 1;
-        }
         return versionCode;
     }
 
     @Override
     public void setAirplaneMode(boolean value) throws RemoteException {
-        if (this.versionCode < 1) {
-            if (system && !initial) {
-                // This causes SEVERE issues with UI and stuff because we
-                // cannot notify system/apps of the new airplane mode state.
-                Settings.Global.putInt(context.getContentResolver(),
-                        Settings.Global.AIRPLANE_MODE_ON, value ? 1 : 0);
-            }
-            return;
-        }
+        if (this.versionCode < 1) return;
         wellbeingFrameworkService.setAirplaneMode(value);
     }
 
