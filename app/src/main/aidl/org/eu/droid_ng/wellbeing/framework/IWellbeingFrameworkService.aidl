@@ -1,5 +1,5 @@
 // IWellbeingFrameworkService.aidl
-package org.eu.droid_ng.wellbeing.lib;
+package org.eu.droid_ng.wellbeing.framework;
 
 // Declare any non-default types here with import statements
 

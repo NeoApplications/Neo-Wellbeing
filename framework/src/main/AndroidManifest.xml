@@ -4,7 +4,7 @@
 
     <permission
         android:name="org.eu.droid_ng.wellbeing.framework.permission.BIND"
-        android:protectionLevel="signature|system" />
+        android:protectionLevel="signature|privileged" />
 
     <uses-permission
         android:name="org.eu.droid_ng.wellbeing.framework.permission.BIND" />
@@ -32,7 +32,7 @@
             android:exported="true"
             android:enabled="true">
             <intent-filter>
-                <action android:name="org.eu.droid_ng.wellbeing.lib.FRAMEWORK_SERVICE" />
+                <action android:name="org.eu.droid_ng.wellbeing.framework.FRAMEWORK_SERVICE" />
             </intent-filter>
         </service>
     </application>
