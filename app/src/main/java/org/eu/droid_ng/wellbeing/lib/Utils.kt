@@ -151,7 +151,7 @@ object Utils {
                 screenTimeTmp = screenTimeTmp.plus(duration)
                 seconds = duration.seconds
             } else seconds = 0
-            if (seconds > mostUsedPackageTime[mostUsedPackagesCacheSize - 1]) {
+            if (!restrictedPackages.contains(pkgName) && seconds > mostUsedPackageTime[mostUsedPackagesCacheSize - 1]) {
                 var index = 0
                 while (seconds <= mostUsedPackageTime[index]) {
                     index++
@@ -191,18 +191,18 @@ object Utils {
         restrictedPackages.clear()
 
         blackListedPackages.add("com.android.systemui")
+
         val resId = Resources.getSystem().getIdentifier(
                 "config_recentsComponentName", "string", "android")
         if (resId != 0) {
             val recentsComponent = ComponentName.unflattenFromString(
                     Resources.getSystem().getString(resId))
             if (recentsComponent != null)
-                blackListedPackages.add(recentsComponent.packageName)
+                restrictedPackages.add(recentsComponent.packageName)
         }
         var intent = Intent(Intent.ACTION_MAIN)
         intent.addCategory(Intent.CATEGORY_HOME)
-        addDefaultHandlersToBlacklist(pm, intent, blackListedPackages)
-        blackListedPackages.remove("com.android.settings")
+        addDefaultHandlersToBlacklist(pm, intent, restrictedPackages)
         restrictedPackages.addAll(blackListedPackages)
         restrictedPackages.add("com.android.settings")
         // Add every system dialer to the blacklist
@@ -210,8 +210,8 @@ object Utils {
         intent.addCategory(Intent.CATEGORY_DEFAULT)
         addDefaultHandlersToBlacklist(pm, intent, restrictedPackages)
         restrictedPackages.add("org.eu.droid_ng.wellbeing")
-        Log.d("Utils", "Hard Blacklisted packages: $blackListedPackages")
-        Log.d("Utils", "Soft Blacklisted packages: $restrictedPackages")
+        //Log.d("Utils", "Hard Blacklisted packages: $blackListedPackages")
+        //Log.d("Utils", "Soft Blacklisted packages: $restrictedPackages")
     }
 
     private fun addDefaultHandlersToBlacklist(pm: PackageManager, intent: Intent, blacklist: HashSet<String>) {

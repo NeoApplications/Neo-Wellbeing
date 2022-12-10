@@ -2,12 +2,16 @@ package org.eu.droid_ng.wellbeing.lib
 
 import android.app.AlarmManager
 import android.app.PendingIntent
+import android.appwidget.AppWidgetManager
+import android.appwidget.AppWidgetProvider
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.BatteryManager
-import android.util.Log
+import android.os.Handler
 import org.eu.droid_ng.wellbeing.broadcast.AlarmFiresBroadcastReceiver
+import org.eu.droid_ng.wellbeing.widget.ScreenTimeAppWidget
 import java.time.DayOfWeek
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -34,6 +38,28 @@ class ScheduleUtils {
 			dropAlarm(context, id, am, pi)
 			am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,
 				time.withSecond(0).atZone(ZoneId.systemDefault()).toEpochSecond() * 1000L, pi)
+		}
+
+		fun ensureWidgetAlarmSet(context: Context, handler: Handler, intervalSec: Long, widget: Class<out AppWidgetProvider>) {
+			val millis = intervalSec * 1000L
+			val am = context.getSystemService(AlarmManager::class.java) as AlarmManager
+			val awm = AppWidgetManager.getInstance(context)
+			val rawIntent = Intent(context, widget)
+			rawIntent.action = "org.eu.droid_ng.wellbeing.APPWIDGET_UPDATE"
+			val intent = PendingIntent.getBroadcast(context, widget.hashCode(), rawIntent, PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+			if (awm.getAppWidgetIds(ComponentName(context, widget)).isNotEmpty()) { /* widget exists */
+				// inexact + no wakeup + repeating (=android batching) alarm to save battery
+				am.setInexactRepeating(AlarmManager.ELAPSED_REALTIME, 0, millis, intent)
+				// handler for while wellbeing running
+				handler.postDelayed(object : Runnable {
+					override fun run() {
+						context.sendBroadcast(rawIntent)
+						handler.postDelayed(this, millis)
+					}
+				}, millis)
+			} else {
+				am.cancel(intent)
+			}
 		}
 	}
 }

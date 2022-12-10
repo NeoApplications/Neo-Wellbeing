@@ -4,6 +4,7 @@ import android.app.PendingIntent;
 import android.app.usage.UsageStatsManager;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -32,6 +33,16 @@ public class ScreenTimeAppWidget extends AppWidgetProvider {
             R.id.appwidget_app1_l, R.id.appwidget_app2_l, R.id.appwidget_app3_l
     };
     private PendingIntent pendingIntent;
+
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        super.onReceive(context, intent);
+
+        if ("org.eu.droid_ng.wellbeing.APPWIDGET_UPDATE".equals(intent.getAction())) {
+            AppWidgetManager awm = AppWidgetManager.getInstance(context);
+            onUpdate(context, awm, awm.getAppWidgetIds(new ComponentName(context, ScreenTimeAppWidget.class)));
+        }
+    }
 
     private void checkInitialize(Context context) {
         if (pendingIntent == null) {

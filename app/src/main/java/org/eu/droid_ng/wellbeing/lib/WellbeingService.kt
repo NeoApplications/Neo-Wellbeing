@@ -2,6 +2,7 @@ package org.eu.droid_ng.wellbeing.lib
 
 import android.app.*
 import android.app.usage.UsageStatsManager
+import android.appwidget.AppWidgetProvider
 import android.content.*
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
@@ -23,12 +24,14 @@ import org.eu.droid_ng.wellbeing.prefs.MainActivity
 import org.eu.droid_ng.wellbeing.shim.PackageManagerDelegate
 import org.eu.droid_ng.wellbeing.shim.PackageManagerDelegate.SuspendDialogInfo
 import org.eu.droid_ng.wellbeing.ui.TakeBreakDialogActivity
+import org.eu.droid_ng.wellbeing.widget.ScreenTimeAppWidget
 import java.time.Duration
 import java.time.temporal.ChronoUnit
 import java.util.*
 import java.util.concurrent.TimeUnit
 import java.util.function.Consumer
 import java.util.stream.Collectors
+
 
 class WellbeingService(private val context: Context) {
 	private var host: WellbeingStateHost? = null
@@ -214,6 +217,12 @@ class WellbeingService(private val context: Context) {
 		s.apply()
 	}
 
+	fun updateWidget(widget: Class<out AppWidgetProvider>) {
+		val intent = Intent(context, widget)
+		intent.action = "org.eu.droid_ng.wellbeing.APPWIDGET_UPDATE"
+		context.sendBroadcast(intent)
+	}
+
 	private var bedtimeModeEnabled = false
 	private var isFocusModeEnabled = false
 	private var isFocusModeBreak /* global break */ = false
@@ -225,7 +234,8 @@ class WellbeingService(private val context: Context) {
 			true -> WellbeingAirplaneState.ENABLED_BY_SYSTEM
 			false -> WellbeingAirplaneState.DISABLED_BY_SYSTEM
 		}
-		loadSettings()
+		onStateChanged() // includes loadSettings()
+		ScheduleUtils.ensureWidgetAlarmSet(context, handler, 60, ScreenTimeAppWidget::class.java)
 
 		if (notificationManager.getNotificationChannel("reminder") == null) {
 			val name: CharSequence = context.getString(R.string.channel2_name)
@@ -501,6 +511,7 @@ class WellbeingService(private val context: Context) {
 		loadAppTimers()
 		doUpdateTile(FocusModeQSTile::class.java)
 		doUpdateTile(BedtimeModeQSTile::class.java)
+		onStateChanged()
 	}
 
 	private fun doUpdateTile(tile: Class<out TileService>) {
@@ -509,6 +520,7 @@ class WellbeingService(private val context: Context) {
 
 	private fun updateServiceStatus() {
 		loadSettings()
+		updateWidget(ScreenTimeAppWidget::class.java)
 		val state = getState()
 		val needServiceRunning = state.isFocusModeEnabled() || state.isSuspendedManually() || state.isBedtimeModeEnabled()
 		val next = {
