@@ -5,7 +5,7 @@ import android.content.Intent;
 import android.os.RemoteException;
 import android.provider.Settings;
 
-import org.eu.droid_ng.wellbeing.framework.shim.UserHandlerShim;
+import org.eu.droid_ng.wellbeing.shim.UserHandlerShim;
 
 public class WellbeingFrameworkServiceImpl extends IWellbeingFrameworkService.Stub {
     private final Context context;

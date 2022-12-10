@@ -21,8 +21,6 @@ android {
         }
     }
 
-    sourceSets.main.java.srcDirs += ['src/main/java_magisk']
-
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
@@ -30,4 +28,5 @@ android {
 }
 
 dependencies {
+    implementation project(':shared')
 }

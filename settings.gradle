@@ -13,5 +13,6 @@ dependencyResolutionManagement {
 	}
 }
 rootProject.name = "NeoWellbeing"
+include ':shared'
 include ':app'
 include ':framework'

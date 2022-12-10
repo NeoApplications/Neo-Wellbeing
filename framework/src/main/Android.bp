@@ -2,13 +2,13 @@ android_app {
     name: "NeoWellbeingFramework",
     defaults: ["platform_app_defaults"],
     static_libs: [
+        "NeoWellbeing-shared",
     ]
     resource_dirs: ["res"],
 
     srcs: [
-        "aidl/**/*.aidl",
         "java/**/*.java",
-        "java_real/**/*.java"
+        "java/**/*.kt",
     ],
 
     platform_apis: true,

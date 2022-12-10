@@ -36,6 +36,8 @@ android {
 }
 
 dependencies {
+	implementation project(':shared')
+
 	def lifecycle_version = "2.5.1" // Version needs to match
 	implementation "androidx.lifecycle:lifecycle-viewmodel:$lifecycle_version"
 	implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
@@ -45,8 +47,6 @@ dependencies {
 	implementation 'androidx.preference:preference:1.2.0'
 	implementation 'androidx.appcompat:appcompat:1.5.1'
 	implementation 'com.google.android.material:material:1.7.0'
-	// For gradle builds only
-	implementation 'org.lsposed.hiddenapibypass:hiddenapibypass:4.3'
 }
 
 def magiskModuleProp = [

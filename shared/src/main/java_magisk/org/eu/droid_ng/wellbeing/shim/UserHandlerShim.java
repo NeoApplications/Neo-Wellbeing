@@ -1,4 +1,4 @@
-package org.eu.droid_ng.wellbeing.framework.shim;
+package org.eu.droid_ng.wellbeing.shim;
 
 import android.os.Process;
 import android.os.UserHandle;

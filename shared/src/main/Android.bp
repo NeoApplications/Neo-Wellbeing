@@ -1,0 +1,15 @@
+android_library {
+    name: "NeoWellbeing-shared",
+    resource_dirs: ["res"],
+
+    static_libs: [
+        "androidx.annotation_annotation",
+    ],
+
+    srcs: [
+        "java/**/*.java",
+        "java/**/*.kt",
+    ],
+
+    platform_apis: true,
+}

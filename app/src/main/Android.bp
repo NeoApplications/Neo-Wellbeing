@@ -2,6 +2,7 @@ android_app {
     name: "NeoWellbeing",
     defaults: ["platform_app_defaults"],
     static_libs: [
+        "NeoWellbeing-shared",
         "androidx.annotation_annotation",
         "androidx.core_core",
         "androidx.recyclerview_recyclerview",
@@ -16,10 +17,8 @@ android_app {
     resource_dirs: ["res"],
 
     srcs: [
-        "aidl/**/*.aidl",
         "java/**/*.java",
         "java/**/*.kt",
-        "java_real/**/*.java"
     ],
 
     platform_apis: true,
