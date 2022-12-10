@@ -72,7 +72,7 @@
 	<string name="app_timer_exceed_f">The app timer for %s has elapsed.</string>
 	<string name="about">About</string>
 	<string name="about_1_title">Neo Wellbeing</string>
-	<string name="about_1_desc">An project by the Neo Applications Collective</string>
+	<string name="about_1_desc">A project by the Neo Applications Collective</string>
 	<string name="bug_title">Open bug viewer</string>
 	<string name="bug_desc">That you found this hidden entry means that you found an bug in the program. Please click here for more details. Thank you for using Neo Wellbeing :)</string>
 	<string name="share">Share</string>
@@ -104,4 +104,7 @@
 	<string name="app_timer_reminder_title">%d minutes left</string>
 	<string name="app_timer_reminder_pref">Remind when time is running out</string>
 	<string name="always_ask">Always ask</string>
+	<string name="whitelist_title">Whitelist mode</string>
+	<string name="blacklist_desc">Suspend all apps that you selected</string>
+	<string name="whitelist_desc">Suspend all apps except those you selected</string>
 </resources>

@@ -24,6 +24,12 @@
 			app:summaryOn="@string/manually_all_on"
 			app:title="@string/manually_all" />
 
+		<SwitchPreferenceCompat
+			app:key="focus_whitelist"
+			app:summaryOff="@string/blacklist_desc"
+			app:summaryOn="@string/whitelist_desc"
+			app:title="@string/whitelist_title" />
+
 	</PreferenceCategory>
 
 	<PreferenceCategory app:title="@string/app_timers">

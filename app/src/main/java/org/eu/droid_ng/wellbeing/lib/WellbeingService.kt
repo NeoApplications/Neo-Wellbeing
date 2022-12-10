@@ -153,33 +153,39 @@ class WellbeingService(private val context: Context) {
 	private val alc = AlarmCoordinator(context)
 	private val notificationManager = context.getSystemService(NotificationManager::class.java) as NotificationManager
 
+	private var airplaneState: WellbeingAirplaneState
+	private var airplaneStateLogical: Boolean = false
+	private var triggers: Set<Trigger> = HashSet()
+
 	private val oidMap = context.getSharedPreferences("AppTimersInternal", 0)
 	private val config = context.getSharedPreferences("appTimers", 0)
 	private val sched = context.getSharedPreferences("sched", 0)
 
 	@JvmField var focusModeAllApps = true
-	@JvmField var focusModeBreakTimeDialog = -1
-	@JvmField var focusModeBreakTimeNotification = -1
-	@JvmField var manualSuspendDialog = true
-	@JvmField var manualSuspendAllApps = true
-	@JvmField var appTimerDialogBreakTime = -1
+	private var focusModeInvertSelection = false
+	private var focusModeBreakTimeDialog = -1
+	private var focusModeBreakTimeNotification = -1
+	private var manualSuspendDialog = false
+	private var manualSuspendAllApps = false
+	private var appTimerDialogBreakTime = -1
+	private var bedtimeGreyscale = true
+	private var bedtimeAirplaneMode = true
 	private var reminderMin = -1
-	private var airplaneState: WellbeingAirplaneState
-	private var airplaneStateLogical: Boolean = false
-
-	private var triggers: Set<Trigger> = HashSet()
 
 	private fun loadSettings() {
 		val prefs = context.getSharedPreferences("service", 0)
+		val bedmode = context.getSharedPreferences("bedtime_mode", 0)
 		focusModeBreakTimeNotification = Integer.parseInt(prefs.getString("focus_notification", focusModeBreakTimeNotification.toString()) ?: focusModeBreakTimeNotification.toString())
 		focusModeBreakTimeDialog = Integer.parseInt(prefs.getString("focus_dialog", focusModeBreakTimeDialog.toString()) ?: focusModeBreakTimeDialog.toString())
 		manualSuspendDialog = prefs.getBoolean("manual_dialog", manualSuspendDialog)
 		manualSuspendAllApps = prefs.getBoolean("manual_all", manualSuspendAllApps)
 		focusModeAllApps = prefs.getBoolean("focus_all", focusModeAllApps)
+		focusModeInvertSelection = prefs.getBoolean("focus_whitelist", focusModeInvertSelection)
 		appTimerDialogBreakTime = Integer.parseInt(prefs.getString("app_timer_dialog", appTimerDialogBreakTime.toString()) ?: appTimerDialogBreakTime.toString())
 		reminderMin = Integer.parseInt(prefs.getString("app_timer_reminder", reminderMin.toString()) ?: reminderMin.toString())
+		bedtimeGreyscale = bedmode.getBoolean("greyscale", bedtimeGreyscale)
+		bedtimeAirplaneMode = bedmode.getBoolean("airplane_mode", bedtimeAirplaneMode)
 
-		loadSchedcfg()
 		alc.updateState()
 	}
 
@@ -321,21 +327,21 @@ class WellbeingService(private val context: Context) {
 	}
 
 	fun setBedtimeMode(enable: Boolean) {
+		loadSettings()
 		bedtimeModeEnabled = enable
 
-		val prefs = context.getSharedPreferences("bedtime_mode", 0)
 		if (enable) {
-			if (prefs.getBoolean("greyscale", false)) {
+			if (bedtimeGreyscale) {
 				cdm.setSaturationLevel(0)
 			}
 		} else {
-			if (prefs.getBoolean("greyscale", false)) {
+			if (bedtimeGreyscale) {
 				cdm.setSaturationLevel(100)
 			}
 		}
 
 		setWellbeingAirplaneMode(enable &&
-				prefs.getBoolean("airplane_mode", false))
+				bedtimeAirplaneMode)
 
 		onStateChanged()
 
@@ -520,6 +526,7 @@ class WellbeingService(private val context: Context) {
 
 	private fun updateServiceStatus() {
 		loadSettings()
+		loadSchedcfg()
 		updateWidget(ScreenTimeAppWidget::class.java)
 		val state = getState()
 		val needServiceRunning = state.isFocusModeEnabled() || state.isSuspendedManually() || state.isBedtimeModeEnabled()
@@ -738,7 +745,13 @@ class WellbeingService(private val context: Context) {
 		updateSuspendStatusForApp(s)
 	}
 
+	private fun isValidFocusPkg(packageName: String): Boolean {
+		return !Utils.blackListedPackages.contains(packageName) && !Utils.restrictedPackages.contains(packageName)
+	}
+
 	fun enableFocusMode() {
+		loadSettings()
+
 		val spref = context.getSharedPreferences("appLists", 0)
 		val st = spref.getStringSet("focus_mode", null)
 		if (st == null) {
@@ -749,8 +762,9 @@ class WellbeingService(private val context: Context) {
 		isFocusModeEnabled = true
 		isFocusModeBreak = false
 
-		for (s in st)
-			setFocusModeStateForPkgInternal(s, suspend = true, forBreak = false, forAppBreak = false)
+		for (s in getInstalledApplications(PackageManager.GET_META_DATA))
+			if (((!focusModeInvertSelection && st.contains(s.packageName)) || (focusModeInvertSelection && !st.contains(s.packageName))) && isValidFocusPkg(s.packageName))
+				setFocusModeStateForPkgInternal(s.packageName, suspend = true, forBreak = false, forAppBreak = false)
 
 		onStateChanged()
 
@@ -758,6 +772,8 @@ class WellbeingService(private val context: Context) {
 	}
 
 	fun disableFocusMode() {
+		loadSettings()
+
 		val spref = context.getSharedPreferences("appLists", 0)
 		val st = spref.getStringSet("focus_mode", null)
 		if (st == null) {
@@ -774,8 +790,9 @@ class WellbeingService(private val context: Context) {
 		isFocusModeEnabled = false
 		isFocusModeBreak = false
 
-		for (s in st)
-			setFocusModeStateForPkgInternal(s, suspend = false, forBreak = false, forAppBreak = false)
+		for (s in getInstalledApplications(PackageManager.GET_META_DATA))
+			if (((!focusModeInvertSelection && st.contains(s.packageName)) || (focusModeInvertSelection && !st.contains(s.packageName))) && isValidFocusPkg(s.packageName))
+				setFocusModeStateForPkgInternal(s.packageName, suspend = false, forBreak = false, forAppBreak = false)
 
 		onStateChanged()
 
@@ -783,6 +800,8 @@ class WellbeingService(private val context: Context) {
 	}
 
 	fun onFocusModePreferenceChanged(packageName: String) {
+		loadSettings()
+
 		val spref = context.getSharedPreferences("appLists", 0)
 		val st = spref.getStringSet("focus_mode", null)
 		if (st == null) {
@@ -790,10 +809,14 @@ class WellbeingService(private val context: Context) {
 			return
 		}
 
-		setFocusModeStateForPkgInternal(packageName, isFocusModeEnabled && st.contains(packageName) && !isFocusModeBreak, isFocusModeEnabled && isFocusModeBreak, false)
+		setFocusModeStateForPkgInternal(packageName, isFocusModeEnabled && isValidFocusPkg(packageName) &&
+				((!focusModeInvertSelection && st.contains(packageName)) || (focusModeInvertSelection && !st.contains(packageName)))
+				&& !isFocusModeBreak, isFocusModeEnabled && isFocusModeBreak, false)
 	}
 
 	fun takeFocusModeBreakWithDialog(activityContext: Activity, endActivity: Boolean, packageNames: Array<String>?) {
+		loadSettings()
+
 		val optionsS: Array<String> = Arrays.stream(breakTimeOptions).mapToObj { i ->
 			context.resources.getQuantityString(R.plurals.break_mins, i, i)
 		}.toArray { arrayOfNulls<String>(it) }
@@ -812,6 +835,8 @@ class WellbeingService(private val context: Context) {
 
 	@JvmOverloads
 	fun endFocusModeBreak(needCancel: Boolean = true) {
+		loadSettings()
+
 		if (!isFocusModeEnabled) {
 			BUG("Focus mode not active")
 			return
@@ -844,6 +869,8 @@ class WellbeingService(private val context: Context) {
 	private val oneAppUnsuspendCallbacks = ArrayList<Runnable>()
 
 	private fun takeFocusModeBreak(packageNames: Array<String>?, breakMins: Int) {
+		loadSettings()
+
 		if (packageNames == null) {
 			takeFocusModeBreak(breakMins)
 			return
@@ -875,6 +902,8 @@ class WellbeingService(private val context: Context) {
 	}
 
 	fun takeFocusModeBreak(breakMins: Int) {
+		loadSettings()
+
 		if (!isFocusModeEnabled) {
 			BUG("Focus mode not active")
 			return
@@ -902,6 +931,8 @@ class WellbeingService(private val context: Context) {
 	}
 
 	fun manualSuspend(packageNamesI: Array<String>?) {
+		loadSettings()
+
 		val packageNames: Array<String> = if (packageNamesI == null) {
 			val spref = context.getSharedPreferences("appLists", 0)
 			val packageNamesT = spref.getStringSet("manual_suspend", null)
@@ -921,6 +952,8 @@ class WellbeingService(private val context: Context) {
 	}
 
 	fun manualUnsuspend(packageNamesI: Array<String>?) {
+		loadSettings()
+
 		val packageNames: Array<String> = if (packageNamesI == null) {
 			val spref = context.getSharedPreferences("appLists", 0)
 			val packageNamesT = spref.getStringSet("manual_suspend", null)
