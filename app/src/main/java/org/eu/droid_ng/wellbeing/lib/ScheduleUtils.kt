@@ -118,6 +118,7 @@ class TimeChargerTriggerCondition(
 				it
 			}
 		}
+		BugUtils.BUG("schedule debugging: $start -> $end")
 		ScheduleUtils.setAlarm(applicationContext, iid, start)
 		ScheduleUtils.setAlarm(applicationContext, "expire::$iid", end)
 	}

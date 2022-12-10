@@ -58,7 +58,7 @@ class WellbeingStateClient(context: Context) {
     }
 
     //backward compatibility does what we want, so ignore warning
-    @SuppressWarnings("deprecation")
+    @Suppress("deprecation")
     fun isServiceRunning(): Boolean {
         val manager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
         for (service in manager.getRunningServices(Int.MAX_VALUE)) {
@@ -271,7 +271,7 @@ class WellbeingStateHost : Service() {
 
     fun stop() {
         mStopped = true
-        stopForeground(true)
+        stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()
     }
 

@@ -56,8 +56,11 @@ public class TimeSettingView extends AppCompatTextView {
 			amPmSymbol = "";
 		} else {
 			hour = data.getHour() % 12;
+			if (hour == 0) {
+				hour = 12;
+			}
 			minute = data.getMinute();
-			amPmSymbol = " " + (data.getHour() / 12 == 0 ? "AM" : "PM");
+			amPmSymbol = " " + (data.getHour() < 12 ? "AM" : "PM");
 		}
 		String s = extraText + " " + String.format(Locale.ROOT, "%02d", hour) + ":" + String.format(Locale.ROOT, "%02d", minute) + amPmSymbol;
 		SpannableString spannableString = new SpannableString(s);

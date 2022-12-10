@@ -25,13 +25,10 @@ import org.eu.droid_ng.wellbeing.shim.PackageManagerDelegate.SuspendDialogInfo
 import org.eu.droid_ng.wellbeing.ui.TakeBreakDialogActivity
 import java.time.Duration
 import java.time.temporal.ChronoUnit
-import java.time.temporal.TemporalUnit
 import java.util.*
 import java.util.concurrent.TimeUnit
 import java.util.function.Consumer
 import java.util.stream.Collectors
-import kotlin.time.DurationUnit
-
 
 class WellbeingService(private val context: Context) {
 	private var host: WellbeingStateHost? = null
@@ -90,24 +87,37 @@ class WellbeingService(private val context: Context) {
 		host?.stop()
 	}
 
+
 	@JvmOverloads
 	fun getInstalledApplications(flags: Int = 0): List<ApplicationInfo> {
-		return pm.getInstalledApplications(when(systemApp) {
+		val newflags = (when(systemApp) {
 			true -> Utils.PACKAGE_MANAGER_MATCH_INSTANT
 			false -> 0
 		} or flags)
+		return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+			pm.getInstalledApplications(PackageManager.ApplicationInfoFlags.of(newflags.toLong()))
+		} else {
+			@Suppress("deprecation")
+			pm.getInstalledApplications(newflags)
+		}
 	}
 
 	@JvmOverloads
 	@Throws(PackageManager.NameNotFoundException::class)
 	fun getApplicationInfo(packageName: String, matchUninstalled: Boolean = true, flags: Int = 0): ApplicationInfo {
-		return pm.getApplicationInfo(packageName, when(matchUninstalled) {
+		val newflags = when(matchUninstalled) {
 			true -> PackageManager.MATCH_UNINSTALLED_PACKAGES
 			false -> 0
 		} or when(systemApp) {
 			true -> Utils.PACKAGE_MANAGER_MATCH_INSTANT
 			false -> 0
-		} or PackageManager.MATCH_ALL or flags)
+		} or PackageManager.MATCH_ALL or flags
+		return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+			pm.getApplicationInfo(packageName, PackageManager.ApplicationInfoFlags.of(newflags.toLong()))
+		} else {
+			@Suppress("deprecation")
+			pm.getApplicationInfo(packageName, newflags)
+		}
 	}
 
 	@JvmOverloads
@@ -322,7 +332,7 @@ class WellbeingService(private val context: Context) {
 		doUpdateTile(BedtimeModeQSTile::class.java)
 	}
 
-	fun hasWellbeingAirplaneModeCapabilities(): Boolean {
+	private fun hasWellbeingAirplaneModeCapabilities(): Boolean {
 		return frameworkService.versionCode() >= 1
 	}
 
@@ -388,7 +398,6 @@ class WellbeingService(private val context: Context) {
 				dropAppTimer(parsed)
 				parsed.pkgs.forEach {
 					if (it == null) return@forEach
-					Log.e("AAAAAA", it)
 					val text = context.getString(
 						R.string.app_timer_reminder_title,
 						reminderMin
@@ -422,7 +431,6 @@ class WellbeingService(private val context: Context) {
 	private fun endBreak(pkgs: Array<String?>) {
 		val u = ParsedUoid("AppBreak", 0, pkgs)
 		if (!oidMap.contains(u.toString())) return
-		Log.i("AppTimersInternal", "end break for " + pkgs.contentToString())
 		dropAppTimer(u)
 		pkgs.forEach {
 			if (it == null) return@forEach
@@ -444,7 +452,7 @@ class WellbeingService(private val context: Context) {
 		if (!oidMap.contains(u)) {
 			updatePrefs(u, makeOid())
 		}
-		setAppTimerInternal(u, packageNames, Duration.ofMinutes(breakMins.toLong()), null)
+		setAppTimerInternal(u, packageNames, Duration.ofMinutes(breakMins.toLong()), getTimeUsed(usm, packageNames))
 		packageNames.forEach {
 			if (it != null) {
 				updateSuspendStatusForApp(it)
@@ -492,6 +500,7 @@ class WellbeingService(private val context: Context) {
 		frameworkService.tryConnect()
 		loadAppTimers()
 		doUpdateTile(FocusModeQSTile::class.java)
+		doUpdateTile(BedtimeModeQSTile::class.java)
 	}
 
 	private fun doUpdateTile(tile: Class<out TileService>) {
