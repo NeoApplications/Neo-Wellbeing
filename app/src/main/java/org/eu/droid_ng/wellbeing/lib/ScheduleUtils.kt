@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.BatteryManager
+import android.util.Log
 import org.eu.droid_ng.wellbeing.broadcast.AlarmFiresBroadcastReceiver
 import java.time.DayOfWeek
 import java.time.LocalDateTime
@@ -81,7 +82,7 @@ class TimeChargerTriggerCondition(
 			}
 			r
 		} else now
-		val offset = cwd.dayOfWeek.ordinal
+		var offset = cwd.dayOfWeek.ordinal
 		var nwd = cwd
 		for (i in 1..7) {
 			val j = (i + offset) % 7
@@ -101,6 +102,7 @@ class TimeChargerTriggerCondition(
 			}
 		}
 		nwd = start
+		offset = start.dayOfWeek.ordinal
 		for (i in 1..7) {
 			val j = (i + offset) % 7
 			if (weekdays[j]) {
@@ -118,7 +120,6 @@ class TimeChargerTriggerCondition(
 				it
 			}
 		}
-		BugUtils.BUG("schedule debugging: $start -> $end")
 		ScheduleUtils.setAlarm(applicationContext, iid, start)
 		ScheduleUtils.setAlarm(applicationContext, "expire::$iid", end)
 	}
