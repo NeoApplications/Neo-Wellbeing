@@ -10,6 +10,7 @@ import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.SwitchPreference;
 
 import org.eu.droid_ng.wellbeing.R;
+import org.eu.droid_ng.wellbeing.ui.DashboardActivity;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -33,6 +34,12 @@ public class MainActivity extends AppCompatActivity {
 		@Override
 		public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
 			setPreferencesFromResource(R.xml.main_preferences, rootKey);
+			Preference dashboard = findPreference("dashboard");
+			assert dashboard != null;
+			dashboard.setOnPreferenceClickListener(p -> {
+				startActivity(new Intent(getActivity(), DashboardActivity.class));
+				return true;
+			});
 			Preference focusMode = findPreference("focus_mode");
 			assert focusMode != null;
 			focusMode.setOnPreferenceClickListener(p -> {

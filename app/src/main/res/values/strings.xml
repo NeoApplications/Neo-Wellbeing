@@ -107,4 +107,7 @@
 	<string name="whitelist_title">Whitelist mode</string>
 	<string name="blacklist_desc">Suspend all apps that you selected</string>
 	<string name="whitelist_desc">Suspend all apps except those you selected</string>
+	<string name="main_cat1_desc">Manage screen time</string>
+	<string name="other">Other</string>
+	<string name="dashboard">Dashboard</string>
 </resources>

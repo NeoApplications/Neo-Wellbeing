@@ -1,301 +1,326 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-	xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools">
 
-	<uses-permission
-		android:name="android.permission.SUSPEND_APPS"
-		tools:ignore="ProtectedPermissions" />
-	<uses-permission android:name="android.permission.WAKE_LOCK" />
-	<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-	<uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-	<uses-permission
-		android:name="android.permission.SYSTEM_APPLICATION_OVERLAY"
-		tools:ignore="ProtectedPermissions" />
-	<uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-	<uses-permission
-		android:name="android.permission.PACKAGE_USAGE_STATS"
-		tools:ignore="ProtectedPermissions" />
-	<uses-permission
-		android:name="android.permission.OBSERVE_APP_USAGE"
-		tools:ignore="ProtectedPermissions" />
-	<uses-permission
-		android:name="android.permission.CONTROL_DISPLAY_SATURATION"
-		tools:ignore="ProtectedPermissions" />
-	<uses-permission
-		android:name="android.permission.WRITE_SECURE_SETTINGS"
-		tools:ignore="ProtectedPermissions" />
-	<uses-permission
-		android:name="android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME"
-		tools:ignore="ProtectedPermissions" />
-	<uses-permission
-		android:name="android.permission.ACCESS_INSTANT_APPS"
-		tools:ignore="ProtectedPermissions" />
-	<uses-permission
-		android:name="android.permission.INTERACT_ACROSS_PROFILES"
-		tools:ignore="ProtectedPermissions" />
-	<uses-permission
-		android:name="android.permission.START_ACTIVITIES_FROM_BACKGROUND"
-		tools:ignore="ProtectedPermissions" />
-	<uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
-	<uses-permission
-		android:name="android.permission.MODIFY_PHONE_STATE"
-		tools:ignore="ProtectedPermissions" />
-	<uses-permission
-		android:name="android.permission.MODIFY_QUIET_MODE"
-		tools:ignore="ProtectedPermissions" />
-	<uses-permission
-		android:name="android.permission.READ_DREAM_STATE"
-		tools:ignore="ProtectedPermissions" />
-	<uses-permission
-		android:name="android.permission.WRITE_DREAM_STATE"
-		tools:ignore="ProtectedPermissions" />
-	<uses-permission
-		android:name="android.permission.READ_WALLPAPER_INTERNAL"
-		tools:ignore="ProtectedPermissions" />
-	<uses-permission
-		android:name="android.permission.SET_WALLPAPER_COMPONENT"
-		tools:ignore="ProtectedPermissions" />
-	<uses-permission android:name="android.permission.SET_WALLPAPER" />
-	<uses-permission android:name="android.permission.SET_WALLPAPER_DIM_AMOUNT"
-		tools:ignore="ProtectedPermissions" />
-	<uses-permission android:name="android.permission.GET_PACKAGE_SIZE" />
-	<uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
-	<uses-permission android:name="android.permission.VIBRATE" />
-	<uses-permission
-		android:name="android.permission.QUERY_ALL_PACKAGES"
-		tools:ignore="QueryAllPackagesPermission" />
-	<uses-permission
-		android:name="android.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS"
-		tools:ignore="ProtectedPermissions" />
-	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-	<uses-permission
-		android:name="android.permission.MANAGE_ROLE_HOLDERS"
-		tools:ignore="ProtectedPermissions" />
-	<uses-permission android:name="android.permission.LAUNCH_MULTI_PANE_SETTINGS_DEEP_LINK"
-		tools:ignore="ProtectedPermissions" />
-	<uses-permission
-		android:name="android.permission.REAL_GET_TASKS"
-		tools:ignore="ProtectedPermissions" />
-	<uses-permission
-		android:name="android.permission.START_TASKS_FROM_RECENTS"
-		tools:ignore="ProtectedPermissions" />
-	<uses-permission
-		android:name="android.permission.MODIFY_DAY_NIGHT_MODE"
-		tools:ignore="ProtectedPermissions" />
-	<uses-permission android:name="android.permission.ACCESS_AMBIENT_CONTEXT_EVENT" />
-	<uses-permission android:name="android.permission.START_CROSS_PROFILE_ACTIVITIES"
-		tools:ignore="ProtectedPermissions" />
-	<uses-permission android:name="android.permission.USE_EXACT_ALARM"/>
-	<uses-permission
-		android:name="org.eu.droid_ng.wellbeing.framework.permission.BIND" />
+    <uses-permission
+        android:name="android.permission.SUSPEND_APPS"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission
+        android:name="android.permission.SYSTEM_APPLICATION_OVERLAY"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission
+        android:name="android.permission.PACKAGE_USAGE_STATS"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission
+        android:name="android.permission.OBSERVE_APP_USAGE"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission
+        android:name="android.permission.CONTROL_DISPLAY_SATURATION"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission
+        android:name="android.permission.WRITE_SECURE_SETTINGS"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission
+        android:name="android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission
+        android:name="android.permission.ACCESS_INSTANT_APPS"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission
+        android:name="android.permission.INTERACT_ACROSS_PROFILES"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission
+        android:name="android.permission.START_ACTIVITIES_FROM_BACKGROUND"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission
+        android:name="android.permission.MODIFY_PHONE_STATE"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission
+        android:name="android.permission.MODIFY_QUIET_MODE"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission
+        android:name="android.permission.READ_DREAM_STATE"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission
+        android:name="android.permission.WRITE_DREAM_STATE"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission
+        android:name="android.permission.READ_WALLPAPER_INTERNAL"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission
+        android:name="android.permission.SET_WALLPAPER_COMPONENT"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.SET_WALLPAPER" />
+    <uses-permission
+        android:name="android.permission.SET_WALLPAPER_DIM_AMOUNT"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.GET_PACKAGE_SIZE" />
+    <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission
+        android:name="android.permission.QUERY_ALL_PACKAGES"
+        tools:ignore="QueryAllPackagesPermission" />
+    <uses-permission
+        android:name="android.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission
+        android:name="android.permission.MANAGE_ROLE_HOLDERS"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission
+        android:name="android.permission.LAUNCH_MULTI_PANE_SETTINGS_DEEP_LINK"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission
+        android:name="android.permission.REAL_GET_TASKS"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission
+        android:name="android.permission.START_TASKS_FROM_RECENTS"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission
+        android:name="android.permission.MODIFY_DAY_NIGHT_MODE"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.ACCESS_AMBIENT_CONTEXT_EVENT" />
+    <uses-permission
+        android:name="android.permission.START_CROSS_PROFILE_ACTIVITIES"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <uses-permission android:name="org.eu.droid_ng.wellbeing.framework.permission.BIND" />
 
-	<queries>
-		<package android:name="org.eu.droid_ng.wellbeing.framework" />
-		<intent>
-			<action android:name="android.intent.action.MAIN" />
-			<category android:name="android.intent.category.HOME" />
-		</intent>
-		<intent>
-			<action android:name="android.intent.action.DIAL" />
-			<category android:name="android.intent.category.DEFAULT" />
-		</intent>
-	</queries>
+    <queries>
+        <package android:name="org.eu.droid_ng.wellbeing.framework" />
 
-	<application
-		android:allowBackup="true"
-		android:name=".Wellbeing"
-		android:dataExtractionRules="@xml/data_extraction_rules"
-		android:fullBackupContent="@xml/backup_rules"
-		android:icon="@mipmap/ic_launcher"
-		android:label="@string/app_name"
-		android:roundIcon="@mipmap/ic_launcher_round"
-		android:supportsRtl="true"
-		android:testOnly="false"
-		android:theme="@style/AppTheme"
-		android:forceQueryable="true"
-		tools:targetApi="s">
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
 
-		<!-- Use activity-alias for launcher activity to allow easy enable/disable -->
-		<activity-alias
-			android:name=".MainActivity"
-			android:targetActivity=".prefs.MainActivity"
-			android:exported="true">
-			<intent-filter>
-				<action android:name="android.intent.action.MAIN" />
-				<category android:name="android.intent.category.LAUNCHER" />
-			</intent-filter>
-		</activity-alias>
-		<!-- Use activity-alias for settings activity to allow easy enable/disable -->
-		<activity-alias
-			android:name=".SettingsActivity"
-			android:targetActivity=".prefs.MainActivity"
-			android:exported="true">
-			<intent-filter>
-				<action android:name="com.android.settings.action.IA_SETTINGS" />
-				<category android:name="android.intent.category.DEFAULT" />
-			</intent-filter>
-			<meta-data
-				android:name="com.android.settings.category"
-				android:value="com.android.settings.category.ia.homepage" />
-			<meta-data
-				android:name="com.android.settings.summary"
-				android:resource="@string/setting_desc" />
-			<meta-data
-				android:name="com.android.settings.title"
-				android:resource="@string/app_name" />
-			<meta-data
-				android:name="com.android.settings.icon"
-				android:resource="@drawable/ic_settings" />
-			<meta-data
-				android:name="com.android.settings.order"
-				android:value="1" />
-			<meta-data
-				android:name="com.android.settings.bg.argb"
-				android:value="-16725933" />
-			<meta-data
-				android:name="com.android.settings.keyhint"
-				android:value="neo_wellbeing" />
-		</activity-alias>
-		<activity
-			android:name=".prefs.MainActivity"
-			android:exported="true">
-			<intent-filter>
-				<action android:name="android.intent.action.MAIN" />
-				<category android:name="android.intent.category.MONKEY" />
-			</intent-filter>
-			<intent-filter>
-				<action android:name="com.google.android.apps.wellbeing.action.HOME" />
-				<category android:name="android.intent.category.DEFAULT" />
-			</intent-filter>
-		</activity>
-		<activity
-			android:name=".prefs.FocusModeActivity"
-			android:label="@string/focus_mode"
-			android:exported="false" />
-		<activity
-			android:name=".prefs.ManualSuspendActivity"
-			android:label="@string/manually"
-			android:exported="false" />
-		<activity
-			android:name=".prefs.SettingsActivity"
-			android:label="@string/title_activity_settings"
-			android:exported="false" />
-		<activity
-			android:name=".prefs.BedtimeMode"
-			android:label="@string/bedtime_mode"
-			android:exported="false" />
-		<activity
-			android:name=".prefs.AppTimers"
-			android:label="@string/app_timers"
-			android:exported="false" />
-		<activity
-			android:name=".prefs.ScheduleActivity"
-			android:label="@string/schedule"
-			android:exported="false" />
-		<!-- to-do: On A13, implement com.google.android.apps.wellbeing.action.ACTION_WIND_DOWN_STATE_CHANGED -->
-		<activity
-			android:name=".ui.ShowSuspendedAppDetails"
-			android:label="@string/dialog_btn_settings"
-			android:excludeFromRecents="true"
-			android:exported="true"
-			android:permission="android.permission.SEND_SHOW_SUSPENDED_APP_DETAILS"
-			android:taskAffinity="">
-			<intent-filter>
-				<action android:name="android.intent.action.SHOW_SUSPENDED_APP_DETAILS" />
-				<category android:name="android.intent.category.DEFAULT" />
-			</intent-filter>
-		</activity>
-		<activity
-			android:name=".ui.TakeBreakDialogActivity"
-			android:excludeFromRecents="true"
-			android:exported="false"
-			android:label="@string/focus_mode_break"
-			android:taskAffinity="" />
-		<receiver
-			android:name=".broadcast.ManuallyUnsuspendBroadcastReceiver"
-			android:enabled="true"
-			android:exported="true">
-			<intent-filter>
-				<action android:name="android.intent.action.PACKAGE_UNSUSPENDED_MANUALLY" />
+            <category android:name="android.intent.category.HOME" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.DIAL" />
 
-				<category android:name="android.intent.category.DEFAULT" />
-			</intent-filter>
-		</receiver>
-		<receiver
-			android:name=".widget.ScreenTimeAppWidget"
-			android:exported="false">
-			<intent-filter>
-				<action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-			</intent-filter>
-			<intent-filter>
-				<action android:name="org.eu.droid_ng.wellbeing.APPWIDGET_UPDATE" /> <!-- for manually updating -->
-			</intent-filter>
+            <category android:name="android.intent.category.DEFAULT" />
+        </intent>
+    </queries>
 
-			<meta-data
-				android:name="android.appwidget.provider"
-				android:resource="@xml/appwidget_screen_time" />
-		</receiver>
-		<receiver
-			android:name=".broadcast.BootReceiver"
-			android:enabled="true"
-			android:exported="true">
-			<intent-filter>
-				<action android:name="android.intent.action.BOOT_COMPLETED"/>
-			</intent-filter>
-		</receiver>
-		<receiver
-			android:name=".broadcast.NextAlarmChangedReceiver"
-			android:enabled="true"
-			android:exported="false">
-			<intent-filter>
-				<action android:name="android.app.action.NEXT_ALARM_CLOCK_CHANGED">
-				</action>
-			</intent-filter>
-		</receiver>
-		<receiver
-			android:name=".broadcast.AppTimersBroadcastReceiver"
-			android:enabled="true"
-			android:exported="false" />
-		<receiver
-			android:name=".broadcast.NotificationBroadcastReceiver"
-			android:enabled="true"
-			android:exported="false" />
-		<receiver
-			android:name=".broadcast.AlarmFiresBroadcastReceiver"
-			android:enabled="true"
-			android:exported="false" />
-		<service
-			android:name=".lib.FocusModeQSTile"
-			android:label="@string/focus_mode"
-			android:icon="@drawable/outline_badge_24"
-			android:exported="true"
-			android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
-			<intent-filter>
-				<action android:name="android.service.quicksettings.action.QS_TILE" />
-			</intent-filter>
-			<meta-data android:name="android.service.quicksettings.ACTIVE_TILE"
-				android:value="true" />
-			<meta-data android:name="android.service.quicksettings.TOGGLEABLE_TILE"
-				android:value="true" />
-		</service>
-		<service
-			android:name=".lib.BedtimeModeQSTile"
-			android:label="@string/bedtime_mode"
-			android:icon="@drawable/baseline_bedtime_24"
-			android:exported="true"
-			android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
-			<intent-filter>
-				<action android:name="android.service.quicksettings.action.QS_TILE" />
-			</intent-filter>
-			<meta-data android:name="android.service.quicksettings.ACTIVE_TILE"
-				android:value="true" />
-			<meta-data android:name="android.service.quicksettings.TOGGLEABLE_TILE"
-				android:value="true" />
-		</service>
-		<service
-			android:name=".lib.WellbeingStateHost"
-			android:enabled="true"
-			android:exported="false" />
-	</application>
+    <application
+        android:name=".Wellbeing"
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:forceQueryable="true"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:testOnly="false"
+        android:theme="@style/AppTheme"
+        tools:targetApi="s">
+        <activity
+            android:name=".prefs.MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.MONKEY" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="com.google.android.apps.wellbeing.action.HOME" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <!-- Use activity-alias for launcher activity to allow easy enable/disable -->
+        <activity-alias
+            android:name=".MainActivity"
+            android:exported="true"
+            android:targetActivity=".prefs.MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        <!-- Use activity-alias for settings activity to allow easy enable/disable -->
+        <activity-alias
+            android:name=".SettingsActivity"
+            android:exported="true"
+            android:targetActivity=".prefs.MainActivity">
+            <intent-filter>
+                <action android:name="com.android.settings.action.IA_SETTINGS" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+
+            <meta-data
+                android:name="com.android.settings.category"
+                android:value="com.android.settings.category.ia.homepage" />
+            <meta-data
+                android:name="com.android.settings.summary"
+                android:resource="@string/setting_desc" />
+            <meta-data
+                android:name="com.android.settings.title"
+                android:resource="@string/app_name" />
+            <meta-data
+                android:name="com.android.settings.icon"
+                android:resource="@drawable/ic_settings" />
+            <meta-data
+                android:name="com.android.settings.order"
+                android:value="1" />
+            <meta-data
+                android:name="com.android.settings.bg.argb"
+                android:value="-16725933" />
+            <meta-data
+                android:name="com.android.settings.keyhint"
+                android:value="neo_wellbeing" />
+        </activity-alias>
+
+        <activity
+            android:name=".ui.DashboardActivity"
+            android:exported="false"
+            android:label="@string/dashboard" />
+        <activity
+            android:name=".prefs.FocusModeActivity"
+            android:exported="false"
+            android:label="@string/focus_mode" />
+        <activity
+            android:name=".prefs.BedtimeMode"
+            android:exported="false"
+            android:label="@string/bedtime_mode" />
+        <activity
+            android:name=".prefs.AppTimers"
+            android:exported="false"
+            android:label="@string/app_timers" />
+        <activity
+            android:name=".prefs.ManualSuspendActivity"
+            android:exported="false"
+            android:label="@string/manually" />
+        <activity
+            android:name=".prefs.SettingsActivity"
+            android:exported="false"
+            android:label="@string/title_activity_settings" />
+
+        <activity
+            android:name=".prefs.ScheduleActivity"
+            android:exported="false"
+            android:label="@string/schedule" />
+        <activity
+            android:name=".ui.ShowSuspendedAppDetails"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:label="@string/dialog_btn_settings"
+            android:permission="android.permission.SEND_SHOW_SUSPENDED_APP_DETAILS"
+            android:taskAffinity="">
+            <intent-filter>
+                <action android:name="android.intent.action.SHOW_SUSPENDED_APP_DETAILS" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".ui.TakeBreakDialogActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:label="@string/focus_mode_break"
+            android:taskAffinity="" />
+
+        <receiver
+            android:name=".widget.ScreenTimeAppWidget"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="org.eu.droid_ng.wellbeing.APPWIDGET_UPDATE" /> <!-- for manually updating -->
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/appwidget_screen_time" />
+        </receiver>
+
+        <receiver
+            android:name=".broadcast.ManuallyUnsuspendBroadcastReceiver"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.PACKAGE_UNSUSPENDED_MANUALLY" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name=".broadcast.BootReceiver"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name=".broadcast.NextAlarmChangedReceiver"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.app.action.NEXT_ALARM_CLOCK_CHANGED" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name=".broadcast.AppTimersBroadcastReceiver"
+            android:enabled="true"
+            android:exported="false" />
+        <receiver
+            android:name=".broadcast.NotificationBroadcastReceiver"
+            android:enabled="true"
+            android:exported="false" />
+        <receiver
+            android:name=".broadcast.AlarmFiresBroadcastReceiver"
+            android:enabled="true"
+            android:exported="false" />
+
+        <service
+            android:name=".lib.FocusModeQSTile"
+            android:exported="true"
+            android:icon="@drawable/outline_badge_24"
+            android:label="@string/focus_mode"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.service.quicksettings.ACTIVE_TILE"
+                android:value="true" />
+            <meta-data
+                android:name="android.service.quicksettings.TOGGLEABLE_TILE"
+                android:value="true" />
+        </service>
+        <service
+            android:name=".lib.BedtimeModeQSTile"
+            android:exported="true"
+            android:icon="@drawable/baseline_bedtime_24"
+            android:label="@string/bedtime_mode"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.service.quicksettings.ACTIVE_TILE"
+                android:value="true" />
+            <meta-data
+                android:name="android.service.quicksettings.TOGGLEABLE_TILE"
+                android:value="true" />
+        </service>
+        <service
+            android:name=".lib.WellbeingStateHost"
+            android:enabled="true"
+            android:exported="false" />
+
+        <!-- to-do: On A13, implement com.google.android.apps.wellbeing.action.ACTION_WIND_DOWN_STATE_CHANGED -->
+    </application>
 
 </manifest>
