@@ -15,10 +15,26 @@ android {
         versionName "1.0"
     }
 
+    signingConfigs {
+        release {
+            if (project.hasProperty('RELEASE_KEY_ALIAS')) {
+                storeFile file(RELEASE_STORE_FILE)
+                storePassword RELEASE_STORE_PASSWORD
+                keyAlias RELEASE_KEY_ALIAS
+                keyPassword RELEASE_KEY_PASSWORD
+                v1SigningEnabled true
+                v2SigningEnabled true
+            }
+        }
+    }
+
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            if (project.hasProperty('RELEASE_KEY_ALIAS')) {
+                signingConfig signingConfigs.release
+            }
         }
     }
 
@@ -26,9 +42,11 @@ android {
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
     }
+    kotlinOptions {
+        jvmTarget = '11'
+    }
 }
 
 dependencies {
     implementation project(':shared')
-    implementation 'androidx.core:core-ktx:+'
 }

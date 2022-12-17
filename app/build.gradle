@@ -6,6 +6,7 @@ plugins {
 }
 
 android {
+	namespace 'org.eu.droid_ng.wellbeing'
 	compileSdk 33
 
 	defaultConfig {
@@ -16,10 +17,27 @@ android {
 		versionName "0.2.1"
 	}
 
+
+	signingConfigs {
+		release {
+			if (project.hasProperty('RELEASE_KEY_ALIAS')) {
+				storeFile file(RELEASE_STORE_FILE)
+				storePassword RELEASE_STORE_PASSWORD
+				keyAlias RELEASE_KEY_ALIAS
+				keyPassword RELEASE_KEY_PASSWORD
+				v1SigningEnabled true
+				v2SigningEnabled true
+			}
+		}
+	}
+
 	buildTypes {
 		release {
-			minifyEnabled false
+			minifyEnabled true
 			proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+			if (project.hasProperty('RELEASE_KEY_ALIAS')) {
+				signingConfig signingConfigs.release
+			}
 		}
 	}
 
@@ -32,7 +50,6 @@ android {
 	kotlinOptions {
 		jvmTarget = '11'
 	}
-	namespace 'org.eu.droid_ng.wellbeing'
 }
 
 dependencies {
@@ -69,8 +86,8 @@ def zipName = "NeoWellbeing-${android.defaultConfig.versionName}.zip"
 def zipFile = new File(outDir, zipName)
 
 task assembleMagiskModule(type: Task) {
-	dependsOn(":app:assembleDebug")
-	dependsOn(":framework:assembleDebug")
+	dependsOn(":app:assembleRelease")
+	dependsOn(":framework:assembleRelease")
 	doLast {
 		delete(magiskDir)
 		magiskDir.mkdirs()
@@ -78,10 +95,10 @@ task assembleMagiskModule(type: Task) {
 		magiskModuleProp.each { k, v -> modulePropText += "$k=$v\n" }
 		file("$magiskDir/module.prop").text = modulePropText
 		file("$magiskDir.path/system/priv-app/NeoWellbeing").mkdirs()
-		Files.copy(file("$rootDir/app/build/outputs/apk/debug/app-debug.apk").toPath(),
+		Files.copy(file("$rootDir/app/build/outputs/apk/release/app-release.apk").toPath(),
 				file("${magiskDir.path}/system/priv-app/NeoWellbeing/NeoWellbeing.apk").toPath())
 		file("$magiskDir.path/system/priv-app/NeoWellbeingFramework").mkdirs()
-		Files.copy(file("$rootDir/framework/build/outputs/apk/debug/framework-debug.apk").toPath(),
+		Files.copy(file("$rootDir/framework/build/outputs/apk/release/framework-release.apk").toPath(),
 				file("${magiskDir.path}/system/priv-app/NeoWellbeingFramework/NeoWellbeingFramework.apk").toPath())
 		file("$magiskDir.path/system/product/overlay/NeoWellbeingOverlay").mkdirs()
 		Files.copy(file("$rootDir/NeoWellbeingOverlay/overlay.apk").toPath(),
