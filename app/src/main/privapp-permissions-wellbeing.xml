@@ -13,12 +13,12 @@
   ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License
-  -->
+-->
 
 <!--
-This XML file declares which signature|privileged permissions should be granted to privileged
-applications on droid-ng.
-It allows additional grants on top of privapp-permissions-platform.xml
+    This XML file declares which signature|privileged permissions should be granted to privileged
+    applications on droid-ng.
+    It allows additional grants on top of privapp-permissions-platform.xml
 -->
 <permissions>
     <privapp-permissions package="org.eu.droid_ng.wellbeing">

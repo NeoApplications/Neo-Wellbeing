@@ -14,7 +14,9 @@ class Wellbeing : Application() {
 			return application.getServiceInternal()
 		}
 	}
+
 	private lateinit var service: WellbeingService
+
 	override fun onCreate() {
 		super.onCreate()
 		application = this

@@ -47,15 +47,10 @@ class WellbeingFrameworkService internal constructor(
 
 			override fun onBindingDied(name: ComponentName) {
 				invalidateConnection()
-				context.unbindService(this)
 			}
 
 			override fun onNullBinding(name: ComponentName) {
 				invalidateConnection()
-				context.unbindService(this)
-				if (initial) {
-					notifyWellbeingService()
-				}
 			}
 		}
 	}
@@ -80,7 +75,7 @@ class WellbeingFrameworkService internal constructor(
 			try {
 				context.bindService(
 					FRAMEWORK_SERVICE_INTENT, serviceConnection,
-					Context.BIND_AUTO_CREATE or Context.BIND_INCLUDE_CAPABILITIES
+					Context.BIND_NOT_FOREGROUND or Context.BIND_ALLOW_OOM_MANAGEMENT or Context.BIND_WAIVE_PRIORITY or Context.BIND_ABOVE_CLIENT
 				)
 			} catch (e: Exception) {
 				Log.e("WellbeingFrameworkService", "Failed to bind framework service", e)

@@ -26,7 +26,7 @@ public class DashboardActivity extends AppCompatActivity {
 		assert actionBar != null;
 		actionBar.setDisplayHomeAsUpEnabled(true);
 
-		PieChart pie = (PieChart) findViewById(R.id.chart);
+		PieChart pie = findViewById(R.id.chart);
 		List<PieEntry> entries = new ArrayList<>();
 		entries.add(new PieEntry(18.5f, "App1"));
 		entries.add(new PieEntry(26.7f, "App2"));
