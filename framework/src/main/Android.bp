@@ -2,8 +2,11 @@ android_app {
     name: "NeoWellbeingFramework",
     defaults: ["platform_app_defaults"],
     static_libs: [
+        "androidx.room_room-runtime",
         "NeoWellbeing-shared",
-    ]
+    ],
+    plugins: ["androidx.room_room-compiler-plugin"],
+
     resource_dirs: ["res"],
 
     srcs: [
@@ -13,5 +16,5 @@ android_app {
 
     platform_apis: true,
     privileged: true,
-    certificate: "platform"
+    certificate: "platform",
 }

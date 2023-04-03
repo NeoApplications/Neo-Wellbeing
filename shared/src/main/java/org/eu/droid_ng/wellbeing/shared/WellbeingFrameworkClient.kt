@@ -1,4 +1,4 @@
-package org.eu.droid_ng.wellbeing.lib
+package org.eu.droid_ng.wellbeing.shared
 
 import android.content.ComponentName
 import android.content.Context
@@ -10,10 +10,12 @@ import android.os.Looper
 import android.os.RemoteException
 import android.util.Log
 import org.eu.droid_ng.wellbeing.framework.IWellbeingFrameworkService
+import java.time.LocalDateTime
+import java.time.ZoneId
 
-class WellbeingFrameworkService internal constructor(
+class WellbeingFrameworkClient constructor(
 	private val context: Context,
-	private val wellbeingService: WellbeingService
+	private val wellbeingService: ConnectionCallback
 ) : IWellbeingFrameworkService {
 	private val serviceConnection: ServiceConnection
 	private var wellbeingFrameworkService: IWellbeingFrameworkService? = null
@@ -42,7 +44,7 @@ class WellbeingFrameworkService internal constructor(
 
 			override fun onServiceDisconnected(name: ComponentName) {
 				invalidateConnection()
-				HANDLER.post { tryConnect() }
+				if (versionCode > -2) HANDLER.post { tryConnect() }
 			}
 
 			override fun onBindingDied(name: ComponentName) {
@@ -59,6 +61,7 @@ class WellbeingFrameworkService internal constructor(
 		wellbeingFrameworkService = DEFAULT
 		versionCode = 0
 		binder = null
+		wellbeingService.onWellbeingFrameworkDisconnected()
 	}
 
 	private fun notifyWellbeingService() {
@@ -69,7 +72,7 @@ class WellbeingFrameworkService internal constructor(
 	}
 
 	fun tryConnect() {
-		if (versionCode == -1) return
+		if (versionCode() < 0) return
 		if (binder == null || !(binder!!.isBinderAlive && binder!!.pingBinder())) {
 			versionCode = -1
 			try {
@@ -89,6 +92,15 @@ class WellbeingFrameworkService internal constructor(
 		}
 	}
 
+	fun tryDisconnect() {
+		if (versionCode() < 1) return
+		if (binder != null && binder!!.isBinderAlive && binder!!.pingBinder()) {
+			versionCode = -2
+			context.unbindService(serviceConnection)
+		}
+	}
+
+	// since 1
 	override fun versionCode(): Int {
 		if (binder != null && !binder!!.isBinderAlive) {
 			invalidateConnection()
@@ -96,10 +108,31 @@ class WellbeingFrameworkService internal constructor(
 		return versionCode
 	}
 
+	// since 1
 	@Throws(RemoteException::class)
 	override fun setAirplaneMode(value: Boolean) {
-		if (versionCode < 1) return
+		if (versionCode() < 1) return
 		wellbeingFrameworkService!!.setAirplaneMode(value)
+	}
+
+	// since 2
+	@Throws(RemoteException::class)
+	override fun onNotificationPosted(packageName: String) {
+		if (versionCode() < 2) return
+		wellbeingFrameworkService!!.onNotificationPosted(packageName)
+	}
+
+	// since 2
+	@Throws(RemoteException::class)
+	override fun getEventCount(type: String, from: Long, to: Long, dimension: Int): Long {
+		if (versionCode() < 2) return -1L
+		return wellbeingFrameworkService!!.getEventCount(type, from, to, dimension)
+	}
+
+	// since 2
+	@Throws(RemoteException::class)
+	fun getEventCount(type: String, from: LocalDateTime, to: LocalDateTime, dimension: TimeDimension): Long {
+		return getEventCount(type, from.atZone(ZoneId.systemDefault()).toEpochSecond(), to.atZone(ZoneId.systemDefault()).toEpochSecond(), dimension.ordinal)
 	}
 
 	override fun asBinder(): IBinder {
@@ -117,5 +150,10 @@ class WellbeingFrameworkService internal constructor(
 			IWellbeingFrameworkService.Stub.setDefaultImpl(
 				IWellbeingFrameworkService.Default().also { DEFAULT = it })
 		}
+	}
+
+	interface ConnectionCallback {
+		fun onWellbeingFrameworkConnected(initial: Boolean)
+		fun onWellbeingFrameworkDisconnected()
 	}
 }

@@ -4,11 +4,15 @@ android_library {
 
     static_libs: [
         "androidx.annotation_annotation",
+        "androidx.room_room-runtime",
     ],
+    plugins: ["androidx.room_room-compiler-plugin"],
 
     srcs: [
         "java/**/*.java",
         "java/**/*.kt",
+        "aidl/**/*.aidl",
+        "java_real/**/*.java",
     ],
 
     platform_apis: true,

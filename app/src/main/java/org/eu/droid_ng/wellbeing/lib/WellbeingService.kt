@@ -21,11 +21,14 @@ import org.eu.droid_ng.wellbeing.join
 import org.eu.droid_ng.wellbeing.lib.BugUtils.Companion.BUG
 import org.eu.droid_ng.wellbeing.lib.Utils.getTimeUsed
 import org.eu.droid_ng.wellbeing.prefs.MainActivity
+import org.eu.droid_ng.wellbeing.shared.TimeDimension
+import org.eu.droid_ng.wellbeing.shared.WellbeingFrameworkClient
 import org.eu.droid_ng.wellbeing.shim.PackageManagerDelegate
 import org.eu.droid_ng.wellbeing.shim.PackageManagerDelegate.SuspendDialogInfo
 import org.eu.droid_ng.wellbeing.ui.TakeBreakDialogActivity
 import org.eu.droid_ng.wellbeing.widget.ScreenTimeAppWidget
 import java.time.Duration
+import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -33,13 +36,13 @@ import java.util.function.Consumer
 import java.util.stream.Collectors
 
 
-class WellbeingService(private val context: Context) {
+class WellbeingService(private val context: Context) : WellbeingFrameworkClient.ConnectionCallback {
 	private var host: WellbeingStateHost? = null
 	// systemApp should always be true, only used for development purposes.
 	private val systemApp: Boolean = (context.applicationInfo.flags and
 			(ApplicationInfo.FLAG_UPDATED_SYSTEM_APP or ApplicationInfo.FLAG_SYSTEM)) > 1
-	private val frameworkService: WellbeingFrameworkService =
-			WellbeingFrameworkService(context, this)
+	private val frameworkService: WellbeingFrameworkClient =
+			WellbeingFrameworkClient(context, this)
 
 	fun bindToHost(newhost: WellbeingStateHost?) {
 		host = newhost
@@ -63,6 +66,8 @@ class WellbeingService(private val context: Context) {
 	private fun onStateChanged() {
 		updateServiceStatus()
 		stateCallbacks.forEach { it.accept(this) }
+
+		Log.i("WellbeingImpl", "found " + frameworkService.getEventCount("unlock", LocalDateTime.now().minusMonths(1), LocalDateTime.now(), TimeDimension.MONTH) + " unlocks")
 	}
 
 	private val onServiceStartedCallbacks: ArrayList<Runnable> = ArrayList()
@@ -89,7 +94,6 @@ class WellbeingService(private val context: Context) {
 	private fun stopService() {
 		host?.stop()
 	}
-
 
 	@JvmOverloads
 	fun getInstalledApplications(flags: Int = 0): List<ApplicationInfo> {
@@ -272,7 +276,7 @@ class WellbeingService(private val context: Context) {
 		frameworkService.tryConnect()
 	}
 
-	fun onWellbeingFrameworkConnected(initial: Boolean) {
+	override fun onWellbeingFrameworkConnected(initial: Boolean) {
 		if (hasWellbeingAirplaneModeCapabilities()) {
 			if (airplaneState.wellbeingAirplaneModeState != airplaneStateLogical) {
 				setWellbeingAirplaneMode(airplaneStateLogical)
@@ -286,6 +290,8 @@ class WellbeingService(private val context: Context) {
 			}
 		}
 	}
+
+	override fun onWellbeingFrameworkDisconnected() {}
 
 	// Service / Global state. Do not confuse with per-app state, that's using the same values.
 	@JvmOverloads

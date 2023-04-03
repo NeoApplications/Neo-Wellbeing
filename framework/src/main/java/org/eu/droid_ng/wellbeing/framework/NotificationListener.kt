@@ -1,42 +1,33 @@
 package org.eu.droid_ng.wellbeing.framework
 
-import android.os.Handler
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
+import org.eu.droid_ng.wellbeing.shared.WellbeingFrameworkClient
 
-class NotificationListener : NotificationListenerService() {
-	private var service: WellbeingFrameworkServiceImpl? = null
-	private lateinit var handler: Handler
+class NotificationListener : NotificationListenerService(), WellbeingFrameworkClient.ConnectionCallback {
+	private var service: WellbeingFrameworkClient? = null
 	private val seenNotifications = ArrayList<Pair<String, Int>>()
 	private var missedNotifications: ArrayList<String>? = ArrayList()
 
 	override fun onCreate() {
 		super.onCreate()
-		handler = Handler(mainLooper)
+		service = WellbeingFrameworkClient(this, this)
+	}
+
+	override fun onDestroy() {
+		super.onDestroy()
+		service?.tryDisconnect()
 	}
 
 	override fun onListenerConnected() {
 		super.onListenerConnected()
-		connectToService()
-	}
-
-	fun connectToService() {
-		if (service != null)
-			return
-		if (Framework.hasService()) {
-			service = Framework.getService()
-			missedNotifications?.forEach { service?.onNotificationPosted(it) }
-			missedNotifications = null
-		} else {
-			handler.postDelayed({ connectToService() }, 500)
-		}
+		service?.tryConnect()
 	}
 
 	override fun onListenerDisconnected() {
 		super.onListenerDisconnected()
 		seenNotifications.clear()
-		missedNotifications = ArrayList()
-		service = null
+		service?.tryDisconnect()
 	}
 
 	override fun onNotificationPosted(sbn: StatusBarNotification?) {
@@ -48,5 +39,14 @@ class NotificationListener : NotificationListenerService() {
 				service?.onNotificationPosted(n.packageName)
 			}
 		}
+	}
+
+	override fun onWellbeingFrameworkConnected(initial: Boolean) {
+		missedNotifications?.forEach { service?.onNotificationPosted(it) }
+		missedNotifications = null
+	}
+
+	override fun onWellbeingFrameworkDisconnected() {
+		missedNotifications = ArrayList()
 	}
 }

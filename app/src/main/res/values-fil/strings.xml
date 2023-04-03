@@ -65,7 +65,7 @@
 	<string name="app_timers">Orasan sa app</string>
 	<string name="screen_time">Oras sa screen</string>
 	<string name="ok">Sige</string>
-	<string name="desc_container">%s (ginamit %s)</string>
+	<string name="desc_container">%1$s (ginamit %2$s)</string>
 	<string name="app_timer_exceed">Naubos na ang oras para sa app na ito.</string>
 	<string name="app_timer_exceed_f">Naubos na ang oras para sa %s.</string>
 	<string name="about">Tungkol</string>
