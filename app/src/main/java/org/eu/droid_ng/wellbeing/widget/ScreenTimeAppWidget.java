@@ -61,8 +61,7 @@ public class ScreenTimeAppWidget extends AppWidgetProvider {
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         checkInitialize(context);
-        Utils.clearUsageStatsCache(WellbeingService.get().usm, context.getPackageManager(), true);
-
+        Utils.clearUsageStatsCache(WellbeingService.get().usm, context.getPackageManager(), WellbeingService.get().getPmd(), true);
 
         for (int appWidgetId : appWidgetIds) {
             appWidgetManager.updateAppWidget(appWidgetId,

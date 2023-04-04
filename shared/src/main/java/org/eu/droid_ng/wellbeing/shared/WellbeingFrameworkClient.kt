@@ -124,15 +124,29 @@ class WellbeingFrameworkClient constructor(
 
 	// since 2
 	@Throws(RemoteException::class)
-	override fun getEventCount(type: String, from: Long, to: Long, dimension: Int): Long {
+	override fun getEventCount(type: String, dimension: Int, from: Long, to: Long): Long {
 		if (versionCode() < 2) return -1L
-		return wellbeingFrameworkService!!.getEventCount(type, from, to, dimension)
+		return wellbeingFrameworkService!!.getEventCount(type, dimension, from, to)
 	}
 
 	// since 2
 	@Throws(RemoteException::class)
-	fun getEventCount(type: String, from: LocalDateTime, to: LocalDateTime, dimension: TimeDimension): Long {
-		return getEventCount(type, from.atZone(ZoneId.systemDefault()).toEpochSecond(), to.atZone(ZoneId.systemDefault()).toEpochSecond(), dimension.ordinal)
+	fun getEventCount(type: String, dimension: TimeDimension, from: LocalDateTime, to: LocalDateTime): Long {
+		return getEventCount(type, dimension.ordinal, from.atZone(ZoneId.systemDefault()).toEpochSecond(), to.atZone(ZoneId.systemDefault()).toEpochSecond())
+	}
+
+	// since 2
+	@Throws(RemoteException::class)
+	override fun getTypesForPrefix(prefix: String, dimension: Int, from: Long, to: Long): Map<Any?, Any?> {
+		if (versionCode() < 2) return hashMapOf()
+		return wellbeingFrameworkService!!.getTypesForPrefix(prefix, dimension, from, to)
+	}
+
+	// since 2
+	@Throws(RemoteException::class)
+	fun getTypesForPrefix(prefix: String, dimension: TimeDimension, from: LocalDateTime, to: LocalDateTime): Map<String, Long> {
+		return getTypesForPrefix(prefix, dimension.ordinal, from.atZone(ZoneId.systemDefault()).toEpochSecond(), to.atZone(ZoneId.systemDefault()).toEpochSecond())
+			.mapKeys { entry -> entry.key as String }.mapValues { entry -> entry.value as Long }
 	}
 
 	override fun asBinder(): IBinder {

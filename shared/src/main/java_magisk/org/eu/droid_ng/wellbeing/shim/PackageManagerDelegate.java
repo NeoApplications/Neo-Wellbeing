@@ -35,6 +35,7 @@ public class PackageManagerDelegate {
 	private static boolean success;
 	private static Method realSuspendDialogInfoBuilderBuild;
 	private static Method setPackagesSuspended;
+	private static Method getUnsuspendablePackages;
 	private static Constructor<?> realSuspendDialogInfoCst;
 	private static Constructor<?> realSuspendDialogInfoBuilderCst;
 	private static Method getIconResId;
@@ -71,6 +72,7 @@ public class PackageManagerDelegate {
 			Class<?> realSuspendDialogInfoBuilder = Class.forName("android.content.pm.SuspendDialogInfo$Builder");
 			setPackagesSuspended = PackageManager.class.getDeclaredMethod("setPackagesSuspended", String[].class,
 					boolean.class, PersistableBundle.class, PersistableBundle.class, realSuspendDialogInfo);
+			getUnsuspendablePackages = PackageManager.class.getDeclaredMethod("getUnsuspendablePackages", String[].class);
 			try {
 				realSuspendDialogInfoBuilderBuild =
 						realSuspendDialogInfoBuilder.getMethod("build");
@@ -273,8 +275,19 @@ public class PackageManagerDelegate {
 	public String[] setPackagesSuspended(@Nullable String[] packageNames, boolean suspend, @Nullable PersistableBundle appExtras, @Nullable PersistableBundle launcherExtras, @Nullable SuspendDialogInfo dialogInfo) {
 		if (success && (dialogInfo == null || dialogInfo.real != null)) {
 			try {
-				setPackagesSuspended.invoke(this.pm, packageNames, suspend, appExtras,
+				return (String[]) setPackagesSuspended.invoke(this.pm, packageNames, suspend, appExtras,
 						launcherExtras, dialogInfo == null ? null : dialogInfo.real);
+			} catch (ReflectiveOperationException ignored) {}
+		}
+
+		/* stub */
+		return new String[]{};
+	}
+
+	public String[] getUnsuspendablePackages(String[] packageNames) {
+		if (success) {
+			try {
+				return (String[]) getUnsuspendablePackages.invoke(this.pm, (Object) packageNames);
 			} catch (ReflectiveOperationException ignored) {}
 		}
 

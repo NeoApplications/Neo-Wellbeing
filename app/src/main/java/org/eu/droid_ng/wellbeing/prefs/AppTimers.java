@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -35,6 +36,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class AppTimers extends AppCompatActivity {
@@ -112,8 +114,8 @@ public class AppTimers extends AppCompatActivity {
 				return !Utils.blackListedPackages.contains(i.packageName) && (isUser || hasLauncherIcon.contains(i.packageName));
 			}).sorted((a, b) -> {
 				// Enabled goes first
-				boolean hasA = enabledMap.getOrDefault(a.packageName, 0) != 0;
-				boolean hasB = enabledMap.getOrDefault(b.packageName, 0) != 0;
+				boolean hasA = !Objects.equals(enabledMap.getOrDefault(a.packageName, 0), 0);
+				boolean hasB = !Objects.equals(enabledMap.getOrDefault(b.packageName, 0), 0);
 				if (hasA && hasB)
 					return nc.compare(a, b);
 				else if (hasA)
@@ -174,13 +176,14 @@ public class AppTimers extends AppCompatActivity {
 
 			public void apply(ApplicationInfo info, int mins) {
 				final boolean restricted = Utils.restrictedPackages.contains(info.packageName);
-				appIcon.setImageDrawable(pm.getApplicationIcon(info));
-				appName.setText(pm.getApplicationLabel(info));
+				appIcon.setImageDrawable(getAppIconForPkgName(info.packageName));
+				appName.setText(getAppNameForPkgName(info.packageName));
 				applyText(mins, Math.toIntExact(Utils.getTimeUsed(ati.usm, info.packageName).toMinutes()));
 				actionButton.setEnabled(!restricted);
 				container.setOnClickListener(view -> {
 					if (restricted) return;
-					int realmins = enabledMap.getOrDefault(info.packageName, 0);
+					Integer realmins = enabledMap.getOrDefault(info.packageName, 0);
+					if (realmins == null) return;
 					NumberPicker numberPicker = new NumberPicker(AppTimers.this);
 					numberPicker.setMinValue(0);
 					numberPicker.setMaxValue(9999); //i mean why not
@@ -202,7 +205,7 @@ public class AppTimers extends AppCompatActivity {
 				prefs.edit().putInt(pkgName, mins).apply();
 				applyText(mins, Math.toIntExact(Utils.getTimeUsed(ati.usm, pkgName).toMinutes()));
 				new Thread(() -> {
-					Utils.clearUsageStatsCache(ati.usm, pm, true);
+					Utils.clearUsageStatsCache(ati.usm, pm, WellbeingService.get().getPmd(), true);
 					h.post(() -> {
 						applyText(mins, Math.toIntExact(Utils.getTimeUsed(ati.usm, pkgName).toMinutes()));
 						ati.onUpdateAppTimerPreference(pkgName, Duration.ofMinutes(oldmins));
@@ -215,5 +218,30 @@ public class AppTimers extends AppCompatActivity {
 			}
 		}
 	}
+
+	public String getAppNameForPkgName(String tag) {
+		return appNames.computeIfAbsent(tag, packageName -> {
+			PackageManager pm = getPackageManager();
+			try {
+				ApplicationInfo i = pm.getApplicationInfo(packageName, 0);
+				return pm.getApplicationLabel(i).toString();
+			} catch (PackageManager.NameNotFoundException e) {
+				return packageName;
+			}
+		});
+	}
+
+	public Drawable getAppIconForPkgName(String tag) {
+		return appIcons.computeIfAbsent(tag, packageName -> {
+			PackageManager pm = getPackageManager();
+			try {
+				return pm.getApplicationIcon(packageName);
+			} catch (PackageManager.NameNotFoundException e) {
+				return AppCompatResources.getDrawable(AppTimers.this, android.R.drawable.sym_def_app_icon);
+			}
+		});
+	}
+	public final HashMap<String, Drawable> appIcons = new HashMap<>();
+	public final HashMap<String, String> appNames = new HashMap<>();
 
 }

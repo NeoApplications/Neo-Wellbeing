@@ -125,6 +125,10 @@ public class PackageManagerDelegate {
 		return pm.setPackagesSuspended(packageNames, suspend, appExtras, launcherExtras, dialogInfo == null ? null : dialogInfo.real);
 	}
 
+	public String[] getUnsuspendablePackages(String[] packageNames) {
+		return pm.getUnsuspendablePackages(packageNames);
+	}
+
 	public static class SuspendDialogInfo {
 		android.content.pm.SuspendDialogInfo real;
 

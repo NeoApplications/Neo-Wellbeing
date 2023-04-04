@@ -10,5 +10,6 @@ interface IWellbeingFrameworkService {
 
     // since 2
     void onNotificationPosted(String packageName) = 2;
-    long getEventCount(String type, long from, long to, int dimension) = 3;
+    long getEventCount(String type, int dimension, long from, long to) = 3;
+    Map getTypesForPrefix(String prefix, int dimension, long from, long to) = 4;
 }

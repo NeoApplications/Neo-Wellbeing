@@ -30,23 +30,51 @@
 
 	</com.google.android.material.appbar.AppBarLayout>
 
-	<androidx.core.widget.NestedScrollView
+	<FrameLayout
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
 		android:importantForAccessibility="no"
 		app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
 		<androidx.appcompat.widget.LinearLayoutCompat
+			android:id="@+id/dashboardLoading"
+			android:layout_width="match_parent"
 			android:layout_height="match_parent"
-			android:layout_width="match_parent">
+			android:layout_marginTop="-152dp"
+			android:gravity="center"> <!-- -152dp = (-1) * ?attr/collapsingToolbarLayoutLargeSize -->
 
-			<com.github.mikephil.charting.charts.PieChart
-				android:id="@+id/chart"
-				android:layout_width="match_parent"
-				android:layout_height="200dp" />
+			<ProgressBar
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content" />
 
 		</androidx.appcompat.widget.LinearLayoutCompat>
 
-	</androidx.core.widget.NestedScrollView>
+		<androidx.core.widget.NestedScrollView
+			android:id="@+id/dashboardContainer"
+			android:visibility="gone"
+			android:layout_width="match_parent"
+			android:layout_height="match_parent">
+
+			<androidx.appcompat.widget.LinearLayoutCompat
+				android:orientation="vertical"
+				android:layout_height="match_parent"
+				android:layout_width="match_parent">
+
+				<com.github.mikephil.charting.charts.PieChart
+					android:id="@+id/chart"
+					android:layout_width="match_parent"
+					android:layout_height="200dp" />
+
+				<androidx.recyclerview.widget.RecyclerView
+					android:id="@+id/dashboardPkgs"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					app:layoutManager="LinearLayoutManager" />
+
+			</androidx.appcompat.widget.LinearLayoutCompat>
+
+		</androidx.core.widget.NestedScrollView>
+
+	</FrameLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

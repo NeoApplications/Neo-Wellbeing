@@ -110,4 +110,5 @@
 	<string name="main_cat1_desc">Manage screen time</string>
 	<string name="other">Other</string>
 	<string name="dashboard">Dashboard</string>
+	<string name="notifications_count">%d notifications</string>
 </resources>

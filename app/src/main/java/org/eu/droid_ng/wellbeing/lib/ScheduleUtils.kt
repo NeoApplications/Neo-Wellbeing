@@ -61,6 +61,21 @@ class ScheduleUtils {
 				am.cancel(intent)
 			}
 		}
+
+		fun ensureStatProcessorAlarmSet(context: Context, handler: Handler) {
+			val am = context.getSystemService(AlarmManager::class.java) as AlarmManager
+			val millis = 12 * 60 * 60 * 1000L // 12 hours
+			val intent = getPintentForId(context, "__STATS")
+			// inexact + no wakeup + repeating (=android batching) alarm to save battery
+			am.setInexactRepeating(AlarmManager.ELAPSED_REALTIME, 0, millis, intent)
+			// handler for while wellbeing running
+			handler.postDelayed(object : Runnable {
+				override fun run() {
+					WellbeingService.get().onProcessStats()
+					handler.postDelayed(this, millis)
+				}
+			}, millis)
+		}
 	}
 }
 

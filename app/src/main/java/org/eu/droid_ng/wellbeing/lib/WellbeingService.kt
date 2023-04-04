@@ -9,6 +9,7 @@ import android.content.pm.PackageManager
 import android.os.BatteryManager
 import android.os.Build
 import android.os.Handler
+import android.os.HandlerThread
 import android.service.quicksettings.TileService
 import android.util.Log
 import android.widget.Toast
@@ -21,6 +22,7 @@ import org.eu.droid_ng.wellbeing.join
 import org.eu.droid_ng.wellbeing.lib.BugUtils.Companion.BUG
 import org.eu.droid_ng.wellbeing.lib.Utils.getTimeUsed
 import org.eu.droid_ng.wellbeing.prefs.MainActivity
+import org.eu.droid_ng.wellbeing.shared.Database
 import org.eu.droid_ng.wellbeing.shared.TimeDimension
 import org.eu.droid_ng.wellbeing.shared.WellbeingFrameworkClient
 import org.eu.droid_ng.wellbeing.shim.PackageManagerDelegate
@@ -29,6 +31,8 @@ import org.eu.droid_ng.wellbeing.ui.TakeBreakDialogActivity
 import org.eu.droid_ng.wellbeing.widget.ScreenTimeAppWidget
 import java.time.Duration
 import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -67,7 +71,7 @@ class WellbeingService(private val context: Context) : WellbeingFrameworkClient.
 		updateServiceStatus()
 		stateCallbacks.forEach { it.accept(this) }
 
-		Log.i("WellbeingImpl", "found " + frameworkService.getEventCount("unlock", LocalDateTime.now().minusMonths(1), LocalDateTime.now(), TimeDimension.MONTH) + " unlocks")
+		Log.i("WellbeingImpl", "found " + frameworkService.getEventCount("unlock", TimeDimension.MONTH, LocalDateTime.now().minusMonths(1), LocalDateTime.now()) + " unlocks")
 	}
 
 	private val onServiceStartedCallbacks: ArrayList<Runnable> = ArrayList()
@@ -151,11 +155,14 @@ class WellbeingService(private val context: Context) : WellbeingFrameworkClient.
 
 	private val handler = Handler.createAsync(context.mainLooper)
 	private val pm = context.packageManager
-	private val pmd = PackageManagerDelegate(pm)
+	val pmd = PackageManagerDelegate(pm)
 	val cdm: PackageManagerDelegate.IColorDisplayManager = PackageManagerDelegate.getColorDisplayManager(context)
 	@JvmField val usm = context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
 	private val alc = AlarmCoordinator(context)
 	private val notificationManager = context.getSystemService(NotificationManager::class.java) as NotificationManager
+	private val bgThread: HandlerThread = HandlerThread("WellbeingService")
+	private val bgHandler: Handler
+	private val db: Database
 
 	private var airplaneState: WellbeingAirplaneState
 	private var airplaneStateLogical: Boolean = false
@@ -227,7 +234,7 @@ class WellbeingService(private val context: Context) : WellbeingFrameworkClient.
 		s.apply()
 	}
 
-	fun updateWidget(widget: Class<out AppWidgetProvider>) {
+	private fun updateWidget(widget: Class<out AppWidgetProvider>) {
 		val intent = Intent(context, widget)
 		intent.action = "org.eu.droid_ng.wellbeing.APPWIDGET_UPDATE"
 		context.sendBroadcast(intent)
@@ -239,13 +246,17 @@ class WellbeingService(private val context: Context) : WellbeingFrameworkClient.
 	private val perAppState: HashMap<String /* packageName */, Int /* does NOT contain global flags like FOCUS_MODE_ENABLED or FOCUS_MODE_GLOBAL_BREAK, so always use getAppState() when reading */> = HashMap()
 
 	init {
-		Utils.clearUsageStatsCache(usm, pm, true)
+		bgThread.start()
+		bgHandler = Handler(bgThread.looper)
+		db = Database(context, bgHandler, 0)
+		Utils.clearUsageStatsCache(usm, pm, pmd, true)
 		airplaneState = when(WellbeingAirplaneState.isAirplaneModeOn(context)) {
 			true -> WellbeingAirplaneState.ENABLED_BY_SYSTEM
 			false -> WellbeingAirplaneState.DISABLED_BY_SYSTEM
 		}
 		onStateChanged() // includes loadSettings()
 		ScheduleUtils.ensureWidgetAlarmSet(context, handler, 60, ScreenTimeAppWidget::class.java)
+		ScheduleUtils.ensureStatProcessorAlarmSet(context, handler)
 
 		if (notificationManager.getNotificationChannel("reminder") == null) {
 			val name: CharSequence = context.getString(R.string.channel2_name)
@@ -803,6 +814,44 @@ class WellbeingService(private val context: Context) : WellbeingFrameworkClient.
 		onStateChanged()
 
 		doUpdateTile(FocusModeQSTile::class.java)
+	}
+
+	// Runs every 12 hours
+	fun onProcessStats() {
+		bgHandler.post {
+			val z = ZoneId.systemDefault()
+			val startTime =
+				LocalDateTime.now().minusDays(1).with(LocalTime.MIN) // Start of yesterday
+			val endTime =
+				startTime.with(LocalTime.MAX).atZone(z).toEpochSecond() * 1000 // End of yesterday
+			val result =
+				Utils.calculateUsageStats(usm, startTime.atZone(z).toEpochSecond() * 1000, endTime)
+			val calculatedScreenTime = result.first
+			val calculatedUsageStats = result.second.first
+			db.insert("usage", startTime, TimeDimension.DAY, calculatedScreenTime.toMinutes())
+			db.consolidate("usage")
+			calculatedUsageStats.forEach {
+				val key = "usage_${it.key}"
+				db.insert(key, startTime, TimeDimension.DAY, it.value.toMinutes())
+				db.consolidate(key)
+			}
+		}
+	}
+
+	fun getEventStatsByType(type: String, dimension: TimeDimension, from: LocalDateTime, to: LocalDateTime): Long {
+		return db.getCountFor(type, dimension, from, to)
+	}
+
+	fun getEventStatsByPrefix(prefix: String, dimension: TimeDimension, from: LocalDateTime, to: LocalDateTime): Map<String, Long> {
+		return db.getTypesForPrefix(prefix, dimension, from, to)
+	}
+
+	fun getRemoteEventStatsByType(type: String, dimension: TimeDimension, from: LocalDateTime, to: LocalDateTime): Long {
+		return frameworkService.getEventCount(type, dimension, from, to)
+	}
+
+	fun getRemoteEventStatsByPrefix(prefix: String, dimension: TimeDimension, from: LocalDateTime, to: LocalDateTime): Map<String, Long> {
+		return frameworkService.getTypesForPrefix(prefix, dimension, from, to)
 	}
 
 	fun onFocusModePreferenceChanged(packageName: String) {

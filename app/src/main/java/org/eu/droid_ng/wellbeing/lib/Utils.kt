@@ -8,8 +8,10 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.util.Log
+import org.eu.droid_ng.wellbeing.shim.PackageManagerDelegate
 import java.time.*
 import java.util.*
+
 
 object Utils {
     private const val mostUsedPackagesCacheSize: Int = 3
@@ -34,12 +36,12 @@ object Utils {
     }
 
     @JvmStatic
-    fun clearUsageStatsCache(usm: UsageStatsManager?, pm: PackageManager?, recalculate: Boolean) {
+    fun clearUsageStatsCache(usm: UsageStatsManager?, pm: PackageManager?, pmd: PackageManagerDelegate?, recalculate: Boolean) {
         calculatedUsageStats = null
         calculatedScreenTime = null
         mostUsedPackages = null
         if (recalculate) {
-            updateApplicationBlackLists(pm!!)
+            updateApplicationBlackLists(pm!!, pmd!!)
             checkInitializeCache(usm!!)
         }
     }
@@ -72,18 +74,25 @@ object Utils {
         return mostUsedPackages!!
     }
 
+    private fun checkInitializeCache(usm: UsageStatsManager) {
+        if (calculatedUsageStats != null) return
+        // Cache not available. Calculate it once and keep it.
+        val z = ZoneId.systemDefault()
+        val startTime = LocalDateTime.now().with(LocalTime.MIN) // Start of day
+            .atZone(z).toEpochSecond() * 1000
+        val result = calculateUsageStats(usm, startTime, System.currentTimeMillis())
+        calculatedScreenTime = result.first
+        calculatedUsageStats = result.second.first
+        mostUsedPackages = result.second.second
+    }
+
     /*
      * When writing this code, I learnt a lesson. UsageStats and UsageEvents APIs are fucking dumb.
      * I had cases of user opening the app 3 times and closing it 2 times, cases of user opening the app 2 times without closing it at all...
      * But in the very end this works. And it's about 3 trillion times faster than UsageStatsManager queries.
      */
-    private fun checkInitializeCache(usm: UsageStatsManager) {
-        if (calculatedUsageStats != null) return
-        // Cache not available. Calculate it once and keep it.
-        val z = ZoneId.systemDefault()
-        val startTime = LocalDateTime.of(LocalDate.now(z), LocalTime.MIDNIGHT).atZone(z)
-                .toEpochSecond() * 1000
-        val usageEvents: UsageEvents = usm.queryEvents(startTime, System.currentTimeMillis())
+    fun calculateUsageStats(usm: UsageStatsManager, startTimeMillis: Long, endTimeMillis: Long): Pair<Duration, Pair<HashMap<String, Duration>, Array<String>>> {
+        val usageEvents: UsageEvents = usm.queryEvents(startTimeMillis, endTimeMillis)
         var currentEvent: UsageEvents.Event
         val e = HashMap<String, ArrayList<UsageEvents.Event>>()
         while (usageEvents.hasNextEvent()) {
@@ -99,7 +108,7 @@ object Utils {
             }
         }
         // Calculate usageStats
-        calculatedUsageStats = HashMap<String, Duration>()
+        val myCalculatedUsageStats = HashMap<String, Duration>()
         e.forEach { (pkgName: String, events: ArrayList<UsageEvents.Event>) ->
             var i = 0
             while (i < events.size) {
@@ -136,7 +145,7 @@ object Utils {
                     continue
                     // did not find ending
                 }
-                calculatedUsageStats!![pkgName] = calculatedUsageStats!!.getOrDefault(pkgName, Duration.ZERO)
+                myCalculatedUsageStats[pkgName] = myCalculatedUsageStats.getOrDefault(pkgName, Duration.ZERO)
                         .plus(Duration.ofMillis(eventTwo.timeStamp - eventOne.timeStamp))
                 i += 2
             }
@@ -145,7 +154,7 @@ object Utils {
         var screenTimeTmp: Duration = Duration.ZERO
         val mostUsedPackagesTmp = arrayOfNulls<String>(mostUsedPackagesCacheSize)
         val mostUsedPackageTime = Array(mostUsedPackagesCacheSize) { mostUsedPackagesMinUsageInSeconds }
-        calculatedUsageStats!!.forEach { (pkgName: String, duration: Duration) ->
+        myCalculatedUsageStats.forEach { (pkgName: String, duration: Duration) ->
             val seconds: Long
             if (!blackListedPackages.contains(pkgName)) {
                 screenTimeTmp = screenTimeTmp.plus(duration)
@@ -166,12 +175,12 @@ object Utils {
                 mostUsedPackageTime[index] = seconds
             }
         }
-        calculatedScreenTime = screenTimeTmp
+        val myMostUsedPackages: Array<String>
         if (mostUsedPackagesTmp[mostUsedPackagesCacheSize - 1] != null) {
             @Suppress("UNCHECKED_CAST")
-            mostUsedPackages = mostUsedPackagesTmp as Array<String>
+            myMostUsedPackages = mostUsedPackagesTmp as Array<String>
         } else if (mostUsedPackagesTmp[0] == null) {
-            mostUsedPackages = emptyArray()
+            myMostUsedPackages = emptyArray()
         } else {
             var arraySize = mostUsedPackagesCacheSize
             while (arraySize --> 0) {
@@ -181,12 +190,13 @@ object Utils {
                 }
             }
             @Suppress("UNCHECKED_CAST")
-            mostUsedPackages = mostUsedPackagesTmp.copyOf(arraySize) as Array<String>
+            myMostUsedPackages = mostUsedPackagesTmp.copyOf(arraySize) as Array<String>
         }
+        return Pair(screenTimeTmp, Pair(myCalculatedUsageStats, myMostUsedPackages))
     }
 
     @SuppressLint("DiscouragedApi")
-    private fun updateApplicationBlackLists(pm: PackageManager) {
+    private fun updateApplicationBlackLists(pm: PackageManager, pmd: PackageManagerDelegate) {
         blackListedPackages.clear()
         restrictedPackages.clear()
 
@@ -212,6 +222,8 @@ object Utils {
         restrictedPackages.add("org.eu.droid_ng.wellbeing")
         //Log.d("Utils", "Hard Blacklisted packages: $blackListedPackages")
         //Log.d("Utils", "Soft Blacklisted packages: $restrictedPackages")
+        val packages = pm.getInstalledApplications(PackageManager.GET_META_DATA).map { it.packageName }.toTypedArray()
+        restrictedPackages.addAll(pmd.getUnsuspendablePackages(packages))
     }
 
     private fun addDefaultHandlersToBlacklist(pm: PackageManager, intent: Intent, blacklist: HashSet<String>) {

@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +16,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.eu.droid_ng.wellbeing.R;
@@ -23,6 +25,7 @@ import org.eu.droid_ng.wellbeing.lib.Utils;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -30,6 +33,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 class PackageRecyclerViewAdapter extends RecyclerView.Adapter<PackageRecyclerViewAdapter.PackageNameViewHolder> {
+	private final Context mContext;
 	private final LayoutInflater inflater;
 	private final List<ApplicationInfo> mData;
 	private final List<String> enabledArr;
@@ -39,10 +43,11 @@ class PackageRecyclerViewAdapter extends RecyclerView.Adapter<PackageRecyclerVie
 	private final Consumer<String> callback;
 
 	public PackageRecyclerViewAdapter(Context context, List<ApplicationInfo> mData, String settingsKey, @Nullable Consumer<String> callback) {
-		this.inflater = LayoutInflater.from(context);
-		this.pm = context.getPackageManager();
+		this.mContext = context;
+		this.inflater = LayoutInflater.from(mContext);
+		this.pm = mContext.getPackageManager();
 		this.callback = callback;
-		prefs = context.getSharedPreferences("appLists", 0);
+		prefs = mContext.getSharedPreferences("appLists", 0);
 		this.settingsKey = settingsKey;
 		Set<String> focusAppsS = prefs.getStringSet(this.settingsKey, new HashSet<>());
 		enabledArr = new ArrayList<>(focusAppsS);
@@ -97,7 +102,7 @@ class PackageRecyclerViewAdapter extends RecyclerView.Adapter<PackageRecyclerVie
 	@Override
 	public void onBindViewHolder(@NonNull PackageNameViewHolder holder, int position) {
 		ApplicationInfo i = getItem(position);
-		holder.apply(i);
+		holder.apply(i.packageName);
 	}
 
 	public class PackageNameViewHolder extends RecyclerView.ViewHolder {
@@ -117,26 +122,51 @@ class PackageRecyclerViewAdapter extends RecyclerView.Adapter<PackageRecyclerVie
 		}
 
 		@SuppressLint("ApplySharedPref")
-		public void apply(ApplicationInfo info) {
-			appIcon.setImageDrawable(pm.getApplicationIcon(info));
-			appName.setText(pm.getApplicationLabel(info));
-			pkgName.setText(info.packageName);
-			checkBox.setChecked(enabledArr.contains(info.packageName));
+		public void apply(String packageName) {
+			appIcon.setImageDrawable(getAppIconForPkgName(packageName));
+			appName.setText(getAppNameForPkgName(packageName));
+			pkgName.setText(packageName);
+			checkBox.setChecked(enabledArr.contains(packageName));
 			container.setOnClickListener(view -> {
-				boolean enabled = enabledArr.contains(info.packageName);
+				boolean enabled = enabledArr.contains(packageName);
 				enabled = !enabled;
 				checkBox.setChecked(enabled);
 				if (enabled) {
-					enabledArr.add(info.packageName);
+					enabledArr.add(packageName);
 				} else {
-					enabledArr.remove(info.packageName);
+					enabledArr.remove(packageName);
 				}
 				prefs.edit().putStringSet(settingsKey, new HashSet<>(enabledArr)).commit();
 				if (callback != null) {
-					callback.accept(info.packageName);
+					callback.accept(packageName);
 				}
 			});
 		}
 	}
+
+
+	public String getAppNameForPkgName(String tag) {
+		return appNames.computeIfAbsent(tag, packageName -> {
+			try {
+				ApplicationInfo i = pm.getApplicationInfo(packageName, 0);
+				return pm.getApplicationLabel(i).toString();
+			} catch (PackageManager.NameNotFoundException e) {
+				return packageName;
+			}
+		});
+	}
+
+	public Drawable getAppIconForPkgName(String tag) {
+		return appIcons.computeIfAbsent(tag, packageName -> {
+			try {
+				return pm.getApplicationIcon(packageName);
+			} catch (PackageManager.NameNotFoundException e) {
+				return AppCompatResources.getDrawable(mContext, android.R.drawable.sym_def_app_icon);
+			}
+		});
+	}
+	public final HashMap<String, Drawable> appIcons = new HashMap<>();
+	public final HashMap<String, String> appNames = new HashMap<>();
+
 }
 

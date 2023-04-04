@@ -34,7 +34,7 @@ class WellbeingFrameworkServiceImpl(context: Context) :
 	override fun start() {
 		bgHandler.post {
 			Framework.setService(this)
-			db = Database(context, bgHandler)
+			db = Database(context, bgHandler, 60 * 60 * 1000)
 			tracksScreenUnlock = !isInWorkProfile()
 			// Ensure we have notification permission
 			val nm = context.getSystemService(NotificationManager::class.java)
@@ -90,19 +90,20 @@ class WellbeingFrameworkServiceImpl(context: Context) :
 	}
 
 	private fun doCountScreenUnlock() {
-		// TODO
-		Log.i(TAG, "counted screen unlock")
 		db.incrementNow("unlock")
 	}
 
 	private fun doCountNotificationPosted(packageName: String) {
-		// TODO
-		Log.i(TAG, "counted notification by $packageName")
-		db.incrementNow("notif_$packageName")
+		db.incrementNow("notif_$packageName") // Per-app
+		db.incrementNow("notif") // Total count
 	}
 
-	private fun doGetEventCount(type: String, from: LocalDateTime, to: LocalDateTime, dimension: TimeDimension): Long {
+	private fun doGetEventCount(type: String, dimension: TimeDimension, from: LocalDateTime, to: LocalDateTime): Long {
 		return db.getCountFor(type, dimension, from, to)
+	}
+
+	private fun doGetTypesForPrefix(type: String, dimension: TimeDimension, from: LocalDateTime, to: LocalDateTime): Map<String, Long> {
+		return db.getTypesForPrefix(type, dimension, from, to)
 	}
 
 	fun onScreenUnlock() {
@@ -144,12 +145,21 @@ class WellbeingFrameworkServiceImpl(context: Context) :
 
 	// since 2
 	@Throws(RemoteException::class)
-	override fun getEventCount(type: String, from: Long, to: Long, dimension: Int): Long {
-		Log.i("wellbeingh", "getEventCount()")
+	override fun getEventCount(type: String, dimension: Int, from: Long, to: Long): Long {
 		return doGetEventCount(type,
+			TimeDimension.values()[dimension],
 			LocalDateTime.ofInstant(Instant.ofEpochSecond(from), ZoneId.systemDefault()),
-			LocalDateTime.ofInstant(Instant.ofEpochSecond(to), ZoneId.systemDefault()),
-			TimeDimension.values()[dimension]
+			LocalDateTime.ofInstant(Instant.ofEpochSecond(to), ZoneId.systemDefault())
+		)
+	}
+
+	// since 2
+	@Throws(RemoteException::class)
+	override fun getTypesForPrefix(type: String, dimension: Int, from: Long, to: Long): Map<out Any?, Any?> {
+		return doGetTypesForPrefix(type,
+			TimeDimension.values()[dimension],
+			LocalDateTime.ofInstant(Instant.ofEpochSecond(from), ZoneId.systemDefault()),
+			LocalDateTime.ofInstant(Instant.ofEpochSecond(to), ZoneId.systemDefault())
 		)
 	}
 }
