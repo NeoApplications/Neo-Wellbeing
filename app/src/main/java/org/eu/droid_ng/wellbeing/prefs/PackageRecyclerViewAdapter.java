@@ -54,8 +54,8 @@ class PackageRecyclerViewAdapter extends RecyclerView.Adapter<PackageRecyclerVie
 		Collator collator = Collator.getInstance();
 		// Sort alphabetically by display name
 		Comparator<ApplicationInfo> nc = (a, b) -> {
-			CharSequence displayA = pm.getApplicationLabel(a);
-			CharSequence displayB = pm.getApplicationLabel(b);
+			CharSequence displayA = getAppNameForPkgName(a.packageName);
+			CharSequence displayB = getAppNameForPkgName(b.packageName);
 			return collator.compare(displayA, displayB);
 		};
 		Intent mainIntent = new Intent(Intent.ACTION_MAIN, null)

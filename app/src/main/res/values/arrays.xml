@@ -23,4 +23,21 @@
 		<item>@string/min_10</item>
 		<item>@string/min_15</item>
 	</string-array>
+	<string-array name="chip_what_entries">
+		<item>@string/screen_time</item>
+		<item>@string/notifications</item>
+		<item>@string/unlocks</item>
+	</string-array>
+	<string-array name="chip_when_entries">
+		<item>@string/when_year</item>
+		<item>@string/when_month</item>
+		<item>@string/when_day</item>
+		<item>@string/when_hour</item>
+	</string-array>
+	<string-array name="chip_this_entries">
+		<item>@string/this_year</item>
+		<item>@string/this_month</item>
+		<item>@string/this_day</item>
+		<item>@string/this_hour</item>
+	</string-array>
 </resources>

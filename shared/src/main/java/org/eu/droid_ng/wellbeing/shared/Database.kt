@@ -13,11 +13,10 @@ import androidx.room.Query
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.Update
+import java.time.Instant
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
-import java.time.temporal.WeekFields
-import java.util.Locale
 
 @Entity(primaryKeys = ["date", "unit", "type"])
 private data class StatEntry(
@@ -34,40 +33,51 @@ private data class StatEntry(
 }
 
 enum class TimeDimension {
-	YEAR, MONTH, WEEK, DAY, HOUR, ERROR
+	YEAR, MONTH, DAY, HOUR, ERROR
 }
 
-private object UnixTime {
-	private fun ofHour(date: LocalDateTime): Long {
-		return date.withMinute(0).withSecond(0).withNano(0).atZone(ZoneId.systemDefault()).toEpochSecond()
+object ExactTime {
+	fun ofHour(date: LocalDateTime): LocalDateTime {
+		return date.withMinute(0).withSecond(0).withNano(0)
 	}
 
-	private fun ofDay(date: LocalDateTime): Long {
+	fun ofDay(date: LocalDateTime): LocalDateTime {
 		return ofHour(date.with(LocalTime.MIN))
 	}
 
-	private fun ofWeek(date: LocalDateTime): Long {
-		return ofDay(date.with(WeekFields.of(Locale.getDefault()).dayOfWeek(), 1))
-	}
-
-	private fun ofMonth(date: LocalDateTime): Long {
+	fun ofMonth(date: LocalDateTime): LocalDateTime {
 		return ofDay(date.withDayOfMonth(1))
 	}
 
-	private fun ofYear(date: LocalDateTime): Long {
+	fun ofYear(date: LocalDateTime): LocalDateTime {
 		return ofMonth(date.withMonth(1))
 	}
 
-	fun of(date: LocalDateTime, dimension: TimeDimension): Long {
+	fun ofUnit(date: LocalDateTime, dimension: TimeDimension): LocalDateTime {
 		return when(dimension) {
 			TimeDimension.YEAR -> ofYear(date)
 			TimeDimension.MONTH -> ofMonth(date)
-			TimeDimension.WEEK -> ofWeek(date)
 			TimeDimension.DAY -> ofDay(date)
 			TimeDimension.HOUR -> ofHour(date)
-			else -> -1
+			else -> LocalDateTime.now()
 		}
 	}
+
+	fun of(date: LocalDateTime, dimension: TimeDimension): Long {
+		return ofUnit(date, dimension).atZone(ZoneId.systemDefault()).toEpochSecond()
+	}
+
+	fun plus(old: LocalDateTime, dimension: TimeDimension?, count: Int): LocalDateTime {
+		when (dimension) {
+			TimeDimension.YEAR -> return old.plusYears(count.toLong())
+			TimeDimension.MONTH -> return old.plusMonths(count.toLong())
+			TimeDimension.DAY -> return old.plusDays(count.toLong())
+			TimeDimension.HOUR -> return old.plusHours(count.toLong())
+			else -> {}
+		}
+		throw IllegalArgumentException()
+	}
+
 }
 
 @Dao
@@ -80,6 +90,11 @@ private abstract class StatDao {
 
 	@Delete
 	abstract fun delete(stat: StatEntry)
+
+	@Query(
+		"SELECT MIN(statentry.date) FROM statentry WHERE statentry.type = :type"
+	)
+	abstract fun getEarliest(type: String): Long
 
 	@Query(
 		"SELECT * FROM statentry WHERE statentry.type LIKE :prefix || '%' AND statentry.unit = :unit AND " +
@@ -100,11 +115,11 @@ private abstract class StatDao {
 	abstract fun findStatsOfTypeWhere(type: String, unit: TimeDimension, date: Long): List<StatEntry>
 
 	fun insert(type: String, date: LocalDateTime, dimension: TimeDimension, count: Long) {
-		insert(StatEntry(UnixTime.of(date, dimension), dimension, type, count))
+		insert(StatEntry(ExactTime.of(date, dimension), dimension, type, count))
 	}
 
 	fun increment(type: String, date: LocalDateTime, dimension: TimeDimension) {
-		val results = findStatsOfTypeWhere(type, dimension, UnixTime.of(date, dimension))
+		val results = findStatsOfTypeWhere(type, dimension, ExactTime.of(date, dimension))
 		if (results.size > 1) {
 			// Should never happen
 			Log.e("WellbeingDatabase", "FATAL, destroying invalid data! results.size > 1")
@@ -156,8 +171,8 @@ class Database(context: Context, private val bgHandler: Handler, private val con
 		while (lastConsolidate == -1L) {
 			Thread.sleep(100)
 		}
-		val tfrom = UnixTime.of(from, dimension)
-		val tto = UnixTime.of(to, dimension)
+		val tfrom = ExactTime.of(from, dimension)
+		val tto = ExactTime.of(to, dimension)
 		val results = dao.findStatsOfTypeBetween(type, dimension, tfrom, tto)
 		if (results.isEmpty()) {
 			val newdim = TimeDimension.values()[dimension.ordinal + 1]
@@ -174,8 +189,8 @@ class Database(context: Context, private val bgHandler: Handler, private val con
 		while (lastConsolidate == -1L) {
 			Thread.sleep(100)
 		}
-		val tfrom = UnixTime.of(from, dimension)
-		val tto = UnixTime.of(to, dimension)
+		val tfrom = ExactTime.of(from, dimension)
+		val tto = ExactTime.of(to, dimension)
 		val results = dao.findStatsOfPrefixBetween(prefix, dimension, tfrom, tto)
 		if (results.isEmpty()) {
 			val newdim = TimeDimension.values()[dimension.ordinal + 1]
@@ -202,19 +217,21 @@ class Database(context: Context, private val bgHandler: Handler, private val con
 	fun consolidate(type: String, every: Boolean = false) {
 		if (lastConsolidate == -1L) return
 		lastConsolidate = -1L
-		consolidateUnit(type, TimeDimension.DAY, { it.minusDays(1) }, every, LocalDateTime.now().minusDays(7)) // hour -> day. store hourly stats for 7 days
-		consolidateUnit(type, TimeDimension.WEEK, { it.minusWeeks(1) }, every, LocalDateTime.now().minusMonths(1)) // day -> week. store daily stats for a month
-		consolidateUnit(type, TimeDimension.MONTH, { it.minusMonths(1) }, every, LocalDateTime.now().minusYears(1)) // week -> month. store weekly stats for a year
-		consolidateUnit(type, TimeDimension.YEAR, { it.minusYears(1) }, every, LocalDateTime.now().minusYears(10)) // month -> year. store monthly stats for 10 years
+		val earliest = LocalDateTime.ofInstant(
+			Instant.ofEpochSecond(dao.getEarliest(type)), ZoneId.systemDefault())
+		consolidateUnit(type, TimeDimension.DAY, { it.minusDays(1) }, false, earliest, LocalDateTime.now().minusDays(7)) // hour -> day. store hourly stats for 7 days
+		consolidateUnit(type, TimeDimension.MONTH, { it.minusMonths(1) }, false, earliest, LocalDateTime.now().minusMonths(3)) // day -> month. store daily stats for 3 months
+		consolidateUnit(type, TimeDimension.YEAR, { it.minusYears(1) }, every, earliest, LocalDateTime.now().minusYears(10)) // month -> year. store monthly stats for 10 years
 		lastConsolidate = System.currentTimeMillis()
 	}
 
-	private fun consolidateUnit(type: String, dimension: TimeDimension, genFrom: (LocalDateTime) -> LocalDateTime, every: Boolean, last: LocalDateTime = LocalDateTime.now()) {
+	private fun consolidateUnit(type: String, dimension: TimeDimension, genFrom: (LocalDateTime) -> LocalDateTime, every: Boolean, earliest: LocalDateTime, last: LocalDateTime = LocalDateTime.now()) {
+		if (!ExactTime.ofUnit(last, dimension).isAfter(earliest)) return
 		val from = genFrom(last)
-		val to = UnixTime.of(last, dimension)
+		val to = ExactTime.of(last, dimension)
 		val newdim = TimeDimension.values()[dimension.ordinal + 1]
 		if (newdim == TimeDimension.ERROR) return
-		val results = dao.findStatsOfTypeBetween(type, newdim, UnixTime.of(from, dimension), to)
+		val results = dao.findStatsOfTypeBetween(type, newdim, ExactTime.of(from, dimension), to)
 		var count = 0L
 		results.forEach {
 			count += it.count
@@ -224,7 +241,7 @@ class Database(context: Context, private val bgHandler: Handler, private val con
 			dao.insert(type, from, dimension, count)
 		}
 		if (every || results.isNotEmpty()) {
-			consolidateUnit(type, dimension, genFrom, every, from)
+			consolidateUnit(type, dimension, genFrom, every, earliest, from)
 		}
 	}
 }

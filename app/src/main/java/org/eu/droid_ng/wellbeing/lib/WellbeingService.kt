@@ -23,6 +23,7 @@ import org.eu.droid_ng.wellbeing.lib.BugUtils.Companion.BUG
 import org.eu.droid_ng.wellbeing.lib.Utils.getTimeUsed
 import org.eu.droid_ng.wellbeing.prefs.MainActivity
 import org.eu.droid_ng.wellbeing.shared.Database
+import org.eu.droid_ng.wellbeing.shared.ExactTime
 import org.eu.droid_ng.wellbeing.shared.TimeDimension
 import org.eu.droid_ng.wellbeing.shared.WellbeingFrameworkClient
 import org.eu.droid_ng.wellbeing.shim.PackageManagerDelegate
@@ -31,8 +32,6 @@ import org.eu.droid_ng.wellbeing.ui.TakeBreakDialogActivity
 import org.eu.droid_ng.wellbeing.widget.ScreenTimeAppWidget
 import java.time.Duration
 import java.time.LocalDateTime
-import java.time.LocalTime
-import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -161,7 +160,7 @@ class WellbeingService(private val context: Context) : WellbeingFrameworkClient.
 	private val alc = AlarmCoordinator(context)
 	private val notificationManager = context.getSystemService(NotificationManager::class.java) as NotificationManager
 	private val bgThread: HandlerThread = HandlerThread("WellbeingService")
-	private val bgHandler: Handler
+	val bgHandler: Handler
 	private val db: Database
 
 	private var airplaneState: WellbeingAirplaneState
@@ -182,6 +181,7 @@ class WellbeingService(private val context: Context) : WellbeingFrameworkClient.
 	private var bedtimeGreyscale = true
 	private var bedtimeAirplaneMode = true
 	private var reminderMin = -1
+	private var lastStatsProcessed = 0L
 
 	private fun loadSettings() {
 		val prefs = context.getSharedPreferences("service", 0)
@@ -817,25 +817,44 @@ class WellbeingService(private val context: Context) : WellbeingFrameworkClient.
 	}
 
 	// Runs every 12 hours
-	fun onProcessStats() {
-		bgHandler.post {
-			val z = ZoneId.systemDefault()
-			val startTime =
-				LocalDateTime.now().minusDays(1).with(LocalTime.MIN) // Start of yesterday
-			val endTime =
-				startTime.with(LocalTime.MAX).atZone(z).toEpochSecond() * 1000 // End of yesterday
+	fun onProcessStats(inBackground: Boolean) {
+		val knownKeys = HashSet<String>()
+		knownKeys.add("usage")
+		// Data saved for ~10 days. We make sure we don't delete correct data, so even if there is no data, it's OK.
+		val absStart = ExactTime.plus(LocalDateTime.now(), TimeDimension.DAY, if (!inBackground) -3 else -10)
+		val absEnd =  ExactTime.plus(LocalDateTime.now(), TimeDimension.DAY, 1)
+		val dimension = TimeDimension.HOUR
+		var startTime = absStart
+		var endTime =
+			ExactTime.plus(startTime, dimension, 1)
+		while ((startTime.isAfter(absStart) || startTime.isEqual(absStart)) && startTime.isBefore(absEnd) && endTime.isAfter(absStart) && (endTime.isBefore(absEnd) || endTime.isEqual(absEnd))) {
 			val result =
-				Utils.calculateUsageStats(usm, startTime.atZone(z).toEpochSecond() * 1000, endTime)
+				Utils.calculateUsageStats(
+					usm,
+					ExactTime.of(startTime, dimension) * 1000L,
+					(ExactTime.of(endTime, dimension) - 1L) * 1000L
+				)
 			val calculatedScreenTime = result.first
 			val calculatedUsageStats = result.second.first
-			db.insert("usage", startTime, TimeDimension.DAY, calculatedScreenTime.toMinutes())
-			db.consolidate("usage")
+			val curValue =
+				db.getCountFor("usage", dimension, startTime,  ExactTime.plus(startTime, dimension, 1))
+			val newValue = calculatedScreenTime.toMinutes()
+			if (newValue > curValue)
+				db.insert("usage", startTime, dimension, calculatedScreenTime.toMinutes())
 			calculatedUsageStats.forEach {
 				val key = "usage_${it.key}"
-				db.insert(key, startTime, TimeDimension.DAY, it.value.toMinutes())
-				db.consolidate(key)
+				val curVal =
+					db.getCountFor(key, dimension, startTime,  ExactTime.plus(startTime, dimension, 1))
+				val newVal = it.value.toMinutes()
+				if (newVal > curVal)
+					db.insert(key, startTime, dimension, it.value.toMinutes())
+				knownKeys.add(key)
 			}
+			startTime = endTime
+			endTime = ExactTime.plus(startTime, dimension, 1)
 		}
+		knownKeys.forEach { db.consolidate(it, true) }
+		lastStatsProcessed = System.currentTimeMillis()
 	}
 
 	fun getEventStatsByType(type: String, dimension: TimeDimension, from: LocalDateTime, to: LocalDateTime): Long {
@@ -1216,6 +1235,10 @@ class WellbeingService(private val context: Context) : WellbeingFrameworkClient.
 	fun onAlarmFired(id: String) {
 		if ("alc" == id) {
 			alc.fired()
+			return
+		}
+		if ("__STATS" == id) {
+			bgHandler.post { onProcessStats(true) }
 			return
 		}
 		var t = false

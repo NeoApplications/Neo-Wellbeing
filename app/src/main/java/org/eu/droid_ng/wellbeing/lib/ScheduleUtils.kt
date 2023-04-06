@@ -71,7 +71,7 @@ class ScheduleUtils {
 			// handler for while wellbeing running
 			handler.postDelayed(object : Runnable {
 				override fun run() {
-					WellbeingService.get().onProcessStats()
+					WellbeingService.get().bgHandler.post { WellbeingService.get().onProcessStats(true) }
 					handler.postDelayed(this, millis)
 				}
 			}, millis)

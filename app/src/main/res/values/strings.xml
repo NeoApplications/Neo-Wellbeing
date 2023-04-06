@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
 	<string name="app_name" translatable="false">Neo Wellbeing</string>
 	<string name="loading">Loading…</string>
 	<string name="setting_desc">Focus mode, bedtime mode, app timers</string>
@@ -110,5 +110,22 @@
 	<string name="main_cat1_desc">Manage screen time</string>
 	<string name="other">Other</string>
 	<string name="dashboard">Dashboard</string>
+	<string name="notifications">Notifications</string>
 	<string name="notifications_count">%d notifications</string>
+	<string name="unlocks">Unlocks</string>
+	<string name="this_year">This year</string>
+	<string name="this_month">This month</string>
+	<string name="this_day">Today</string>
+	<string name="this_hour">This hour</string>
+	<string name="when_year">By year</string>
+	<string name="when_month">By month</string>
+	<string name="when_day">By day</string>
+	<string name="when_hour">By hour</string>
+	<string name="stat_view_name">%s - %s</string>
+	<string name="total">Total: %d</string>
+	<string name="select_hour">Select hour</string>
+	<string name="select_date">Select date</string>
+	<string name="stat_to_display">Statistic to display</string>
+	<string name="time_dimension_to_display">Time dimension to display</string>
+	<string name="no_data">No data</string>
 </resources>

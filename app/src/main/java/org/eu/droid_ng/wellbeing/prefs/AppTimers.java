@@ -98,8 +98,8 @@ public class AppTimers extends AppCompatActivity {
 				Duration durationB = Utils.getTimeUsed(ati.usm, b.packageName);
 				int x = durationA.compareTo(durationB);
 				if (x != 0) return -x;
-				CharSequence displayA = pm.getApplicationLabel(a);
-				CharSequence displayB = pm.getApplicationLabel(b);
+				CharSequence displayA = getAppNameForPkgName(a.packageName);
+				CharSequence displayB = getAppNameForPkgName(b.packageName);
 				return collator.compare(displayA, displayB);
 			};
 			Intent mainIntent = new Intent(Intent.ACTION_MAIN, null)
