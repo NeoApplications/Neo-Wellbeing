@@ -21,13 +21,13 @@ import org.eu.droid_ng.wellbeing.broadcast.NotificationBroadcastReceiver
 import org.eu.droid_ng.wellbeing.join
 import org.eu.droid_ng.wellbeing.lib.BugUtils.Companion.BUG
 import org.eu.droid_ng.wellbeing.lib.Utils.getTimeUsed
-import org.eu.droid_ng.wellbeing.prefs.MainActivity
 import org.eu.droid_ng.wellbeing.shared.Database
 import org.eu.droid_ng.wellbeing.shared.ExactTime
 import org.eu.droid_ng.wellbeing.shared.TimeDimension
 import org.eu.droid_ng.wellbeing.shared.WellbeingFrameworkClient
 import org.eu.droid_ng.wellbeing.shim.PackageManagerDelegate
 import org.eu.droid_ng.wellbeing.shim.PackageManagerDelegate.SuspendDialogInfo
+import org.eu.droid_ng.wellbeing.ui.MainActivity
 import org.eu.droid_ng.wellbeing.ui.TakeBreakDialogActivity
 import org.eu.droid_ng.wellbeing.widget.ScreenTimeAppWidget
 import java.time.Duration

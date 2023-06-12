@@ -124,7 +124,7 @@
         android:theme="@style/AppTheme"
         tools:targetApi="s">
         <activity
-            android:name=".prefs.MainActivity"
+            android:name=".ui.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -141,7 +141,7 @@
         <activity-alias
             android:name=".MainActivity"
             android:exported="true"
-            android:targetActivity=".prefs.MainActivity">
+            android:targetActivity=".ui.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -152,7 +152,7 @@
         <activity-alias
             android:name=".SettingsActivity"
             android:exported="true"
-            android:targetActivity=".prefs.MainActivity">
+            android:targetActivity=".ui.MainActivity">
             <intent-filter>
                 <action android:name="com.android.settings.action.IA_SETTINGS" />
 
