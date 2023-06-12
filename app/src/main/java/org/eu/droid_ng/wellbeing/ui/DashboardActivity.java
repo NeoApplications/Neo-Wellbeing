@@ -74,7 +74,7 @@ public class DashboardActivity extends AppCompatActivity {
 	public String[] whatStrings;
 	public String[] whenStrings;
 	public String[] thisStrings;
-	public int whatValue = WhatStat.NOTIFICATIONS.ordinal();
+	public int whatValue = WhatStat.SCREEN_TIME.ordinal();
 	public int whenValue = TimeDimension.DAY.ordinal();
 	public LocalDateTime mStart;
 	private Chip chipWhen, chipWhat, chipStart;
