@@ -10,9 +10,9 @@ import android.os.Binder
 import android.os.Build
 import android.os.IBinder
 import android.widget.Toast
-import org.eu.droid_ng.wellbeing.prefs.MainActivity
 import org.eu.droid_ng.wellbeing.R
 import org.eu.droid_ng.wellbeing.lib.WellbeingStateHost.LocalBinder
+import org.eu.droid_ng.wellbeing.ui.MainActivity
 import java.util.function.Consumer
 
 // Helper to connect to WellbeingStateHost
