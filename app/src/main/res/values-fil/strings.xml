@@ -104,7 +104,6 @@
 	<string name="whitelist_title">Allowlist mode</string>
 	<string name="blacklist_desc">Suspindehin lahat ng mga pinili mong app</string>
 	<string name="whitelist_desc">Suspindehin lahat maliban sa mga pinili mong app</string>
-	<string name="main_cat1_desc">Pamahalaan ang oras sa screen</string>
 	<string name="other">Iba pa</string>
 	<string name="dashboard">Dashboard</string>
 </resources>

@@ -1,6 +1,6 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <PreferenceCategory android:title="@string/main_cat1_desc">
+    <PreferenceCategory android:title="@string/main_preference_category_one_title">
         <Preference
             android:key="dashboard"
             android:title="@string/dashboard"
@@ -12,7 +12,7 @@
         <Preference
             android:key="focus_mode"
             android:title="@string/focus_mode"
-            app:icon="@drawable/outline_badge_24">
+            app:icon="@drawable/ic_baseline_person_24">
             <intent
                 android:targetClass="org.eu.droid_ng.wellbeing.prefs.FocusModeActivity"
                 android:targetPackage="org.eu.droid_ng.wellbeing" />
@@ -20,7 +20,7 @@
         <Preference
             android:key="bedtime_mode"
             android:title="@string/bedtime_mode"
-            app:icon="@drawable/baseline_bedtime_24">
+            app:icon="@drawable/ic_baseline_king_bed_24dp">
             <intent
                 android:targetClass="org.eu.droid_ng.wellbeing.prefs.BedtimeMode"
                 android:targetPackage="org.eu.droid_ng.wellbeing" />
@@ -28,7 +28,7 @@
         <Preference
             android:key="timers"
             android:title="@string/app_timers"
-            app:icon="@drawable/ic_focus_mode">
+            app:icon="@drawable/ic_baseline_access_time_24dp">
             <intent
                 android:targetClass="org.eu.droid_ng.wellbeing.prefs.AppTimers"
                 android:targetPackage="org.eu.droid_ng.wellbeing" />
@@ -36,13 +36,13 @@
         <Preference
             android:key="manual"
             android:title="@string/manually"
-            app:icon="@drawable/ic_baseline_person_24">
+            app:icon="@drawable/ic_baseline_app_blocking_24">
             <intent
                 android:targetClass="org.eu.droid_ng.wellbeing.prefs.ManualSuspendActivity"
                 android:targetPackage="org.eu.droid_ng.wellbeing" />
         </Preference>
     </PreferenceCategory>
-    <PreferenceCategory android:title="@string/other">
+    <PreferenceCategory android:title="@string/main_preference_category_two_title">
         <Preference
             android:key="settings"
             android:title="@string/title_activity_settings"
