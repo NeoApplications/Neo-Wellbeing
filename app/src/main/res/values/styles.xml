@@ -1,19 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-	<style name="AppTheme" parent="AppTheme.Base" />
-	<style name="AppWidgetTheme" parent="AppTheme.Base" />
-	<style name="AppTheme.Base" parent="Theme.Material3.DynamicColors.DayNight">
-		<item name="colorPrimaryDark">@android:color/transparent</item> <!-- Status bar color -->
-		<item name="colorPrimaryVariant">@android:color/transparent</item>
-		<item name="windowActionBar">false</item>
-		<item name="windowNoTitle">true</item>
-		<item name="alertDialogTheme">@style/AppTheme.AlertDialog</item>
-	</style>
-	<style name="AppTheme.AlertDialog" parent="ThemeOverlay.Material3.MaterialAlertDialog">
-		<item name="dialogCornerRadius">28dp</item>
-		<item name="cornerFamily">rounded</item>
-		<item name="android:colorBackground">?attr/colorSurface</item>
-		<item name="android:layout" tools:ignore="PrivateResource">@layout/m3_alert_dialog</item>
-	</style>
-	<style name="AppTheme.TonalButton" parent="ThemeOverlay.Material3.Button.TonalButton" />
+
+    <style name="AppTheme" parent="AppTheme.Base" />
+
+    <style name="AppWidgetTheme" parent="AppTheme.Base" />
+
+    <style name="AppTheme.Base" parent="Theme.Material3.DynamicColors.DayNight">
+        <item name="colorPrimaryDark">@android:color/transparent</item> <!-- Status bar color -->
+        <item name="colorPrimaryVariant">@android:color/transparent</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="alertDialogTheme">@style/AppTheme.AlertDialog</item>
+        <item name="preferenceTheme">@style/MaterialPreferenceThemeOverlay</item>
+    </style>
+
+    <style name="AppTheme.AlertDialog" parent="ThemeOverlay.Material3.MaterialAlertDialog">
+        <item name="dialogCornerRadius">28dp</item>
+        <item name="cornerFamily">rounded</item>
+        <item name="android:colorBackground">?attr/colorSurface</item>
+        <item name="android:layout" tools:ignore="PrivateResource">@layout/m3_alert_dialog</item>
+    </style>
+
+    <style name="AppTheme.TonalButton" parent="ThemeOverlay.Material3.Button.TonalButton" />
+
+    <!-- Custom Preference Theme -->
+    <style name="MaterialPreferenceThemeOverlay" parent="PreferenceThemeOverlay">
+        <item name="switchPreferenceCompatStyle">@style/Preference.SwitchPreferenceCompat</item>
+    </style>
+
+    <!-- Custom Switch Preference Theme -->
+    <style name="Preference.SwitchPreferenceCompat" parent="Preference.SwitchPreferenceCompat.Material">
+        <item name="android:widgetLayout">@layout/preference_material_switch</item>
+    </style>
+
 </resources>
