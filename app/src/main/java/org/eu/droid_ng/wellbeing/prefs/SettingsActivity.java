@@ -13,9 +13,6 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
-import androidx.preference.PreferenceGroup;
-import androidx.preference.SwitchPreference;
-import androidx.preference.SwitchPreferenceCompat;
 
 import org.eu.droid_ng.wellbeing.R;
 import org.eu.droid_ng.wellbeing.lib.BugUtils;
@@ -53,7 +50,6 @@ public class SettingsActivity extends AppCompatActivity {
 		public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
 			getPreferenceManager().setSharedPreferencesName("service");
 			setPreferencesFromResource(R.xml.root_preferences, rootKey);
-			applyMaterial3(getPreferenceScreen());
 
 			if (!PackageManagerDelegate.canSetNeutralButtonAction()) {
 				((Preference) Objects.requireNonNull(findPreference("manual_dialog"))).setEnabled(false);
@@ -95,18 +91,6 @@ public class SettingsActivity extends AppCompatActivity {
 							.show();
 					return true;
 				});
-			}
-		}
-
-		public static void applyMaterial3(Preference p) {
-			if (p instanceof PreferenceGroup) {
-				PreferenceGroup pg = (PreferenceGroup) p;
-				for (int i = 0; i < pg.getPreferenceCount(); i++) {
-					applyMaterial3(pg.getPreference(i));
-				}
-			}
-			if (p instanceof SwitchPreferenceCompat) {
-				p.setWidgetLayoutResource(R.layout.preference_material_switch);
 			}
 		}
 	}
