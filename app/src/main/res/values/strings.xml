@@ -5,6 +5,7 @@
     <!-- Main Preference -->
     <string name="main_preference_category_one_title">Wellbeing settings</string>
     <string name="main_preference_category_two_title">@string/other</string>
+    <string name="main_preference_focus_mode_summary">Tap to set up</string>
 
     <string name="loading">Loading…</string>
     <string name="setting_desc">Focus mode, bedtime mode, app timers</string>
