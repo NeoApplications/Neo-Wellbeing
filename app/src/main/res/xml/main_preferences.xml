@@ -4,7 +4,7 @@
         <Preference
             android:key="dashboard"
             android:title="@string/dashboard"
-            app:icon="@drawable/baseline_dashboard_24">
+            app:icon="@drawable/ic_baseline_dashboard_24dp">
             <intent
                 android:targetClass="org.eu.droid_ng.wellbeing.ui.DashboardActivity"
                 android:targetPackage="org.eu.droid_ng.wellbeing" />
@@ -12,7 +12,7 @@
         <Preference
             android:key="focus_mode"
             android:title="@string/focus_mode"
-            app:icon="@drawable/ic_baseline_person_24"
+            app:icon="@drawable/ic_baseline_person_24dp"
             app:summary="@string/main_preference_focus_mode_summary">
             <intent
                 android:targetClass="org.eu.droid_ng.wellbeing.prefs.FocusModeActivity"
@@ -47,7 +47,7 @@
         <Preference
             android:key="settings"
             android:title="@string/title_activity_settings"
-            app:icon="@drawable/baseline_settings_24">
+            app:icon="@drawable/ic_baseline_settings_24dp">
             <intent
                 android:targetClass="org.eu.droid_ng.wellbeing.prefs.SettingsActivity"
                 android:targetPackage="org.eu.droid_ng.wellbeing" />
