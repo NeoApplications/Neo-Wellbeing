@@ -1,20 +1,17 @@
 package org.eu.droid_ng.wellbeing.ui
 
 import android.animation.LayoutTransition
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.AppCompatTextView
 import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.appbar.MaterialToolbar
-import com.google.android.material.materialswitch.MaterialSwitch
 import org.eu.droid_ng.wellbeing.R
 import org.eu.droid_ng.wellbeing.lib.WellbeingService
 import org.eu.droid_ng.wellbeing.prefs.PackageRecyclerViewAdapter
-import org.eu.droid_ng.wellbeing.prefs.ScheduleActivity
+import org.eu.droid_ng.wellbeing.widget.MainSwitchBar
 import java.util.function.Consumer
 
 class FocusModeActivity : AppCompatActivity() {
@@ -39,14 +36,14 @@ class FocusModeActivity : AppCompatActivity() {
             (findViewById<View>(R.id.focusModeRoot) as LinearLayoutCompat).layoutTransition
         layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
         // Open schedule screen
-        findViewById<View>(R.id.schedule).setOnClickListener {
-            startActivity(
-                Intent(
-                    this,
-                    ScheduleActivity::class.java
-                ).putExtra("type", "focus_mode").putExtra("name", getString(R.string.focus_mode))
-            )
-        }
+//        findViewById<View>(R.id.schedule)?.setOnClickListener {
+//            startActivity(
+//                Intent(
+//                    this,
+//                    ScheduleActivity::class.java
+//                ).putExtra("type", "focus_mode").putExtra("name", getString(R.string.focus_mode))
+//            )
+//        }
         // Add state call back to the service
         service.addStateCallback(stateCallback)
         val r = findViewById<RecyclerView>(R.id.focusModePkgs)
@@ -59,6 +56,16 @@ class FocusModeActivity : AppCompatActivity() {
                 packageName!!
             )
         }
+        // Handle on click for main switch
+        findViewById<MainSwitchBar>(R.id.mainSwitchBar)?.setOnClickListener {
+            val state = service.getState()
+            if (state.isFocusModeEnabled()) {
+                service.disableFocusMode()
+            } else {
+                service.enableFocusMode()
+            }
+        }
+
         updateUi()
     }
 
@@ -69,25 +76,21 @@ class FocusModeActivity : AppCompatActivity() {
 
     private fun updateUi() {
         val state = service.getState()
-        val toggle = findViewById<MaterialSwitch>(R.id.topsw)
-        toggle.isChecked = state.isFocusModeEnabled()
-        findViewById<View>(R.id.topsc).setOnClickListener { v: View? ->
-            if (state.isFocusModeEnabled()) {
-                service.disableFocusMode()
-            } else {
-                service.enableFocusMode()
-            }
-        }
-        val takeBreak = findViewById<View>(R.id.takeBreak)
-        (findViewById<View>(R.id.title) as AppCompatTextView).setText(if (state.isOnFocusModeBreakGlobal()) R.string.focus_mode_break_end else R.string.focus_mode_break)
-        takeBreak.setOnClickListener { v: View? ->
-            if (state.isOnFocusModeBreakGlobal()) {
-                service.endFocusModeBreak()
-            } else {
-                service.takeFocusModeBreakWithDialog(this@FocusModeActivity, false, null)
-            }
-        }
-        takeBreak.visibility = if (state.isFocusModeEnabled()) View.VISIBLE else View.GONE
+        updateMainSwitch(state.isFocusModeEnabled())
+//        val takeBreak = findViewById<View>(R.id.takeBreak)
+//        (findViewById<View>(R.id.title) as AppCompatTextView).setText(if (state.isOnFocusModeBreakGlobal()) R.string.focus_mode_break_end else R.string.focus_mode_break)
+//        takeBreak.setOnClickListener { v: View? ->
+//            if (state.isOnFocusModeBreakGlobal()) {
+//                service.endFocusModeBreak()
+//            } else {
+//                service.takeFocusModeBreakWithDialog(this@FocusModeActivity, false, null)
+//            }
+//        }
+//        takeBreak.visibility = if (state.isFocusModeEnabled()) View.VISIBLE else View.GONE
+    }
+
+    private fun updateMainSwitch(checked: Boolean) {
+        findViewById<MainSwitchBar>(R.id.mainSwitchBar)?.isChecked = checked
     }
 
     override fun onSupportNavigateUp(): Boolean {
