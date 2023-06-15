@@ -49,6 +49,13 @@
                 android:layout_height="wrap_content"
                 android:text="@string/focus_mode_main_switch_bar_text" />
 
+            <com.google.android.material.textview.MaterialTextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="20dp"
+                android:text="@string/focus_mode_summary_text"
+                android:textSize="16sp" />
+
             <androidx.appcompat.widget.LinearLayoutCompat
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
