@@ -1,6 +1,7 @@
 package org.eu.droid_ng.wellbeing.ui
 
 import android.animation.LayoutTransition
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.View
@@ -8,9 +9,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.appbar.MaterialToolbar
+import com.google.android.material.textview.MaterialTextView
 import org.eu.droid_ng.wellbeing.R
 import org.eu.droid_ng.wellbeing.lib.WellbeingService
 import org.eu.droid_ng.wellbeing.prefs.PackageRecyclerViewAdapter
+import org.eu.droid_ng.wellbeing.prefs.ScheduleActivity
 import org.eu.droid_ng.wellbeing.widget.MainSwitchBar
 import java.util.function.Consumer
 
@@ -36,14 +39,13 @@ class FocusModeActivity : AppCompatActivity() {
             (findViewById<View>(R.id.focusModeRoot) as LinearLayoutCompat).layoutTransition
         layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
         // Open schedule screen
-//        findViewById<View>(R.id.schedule)?.setOnClickListener {
-//            startActivity(
-//                Intent(
-//                    this,
-//                    ScheduleActivity::class.java
-//                ).putExtra("type", "focus_mode").putExtra("name", getString(R.string.focus_mode))
-//            )
-//        }
+        findViewById<MaterialTextView>(R.id.schedule)?.setOnClickListener {
+            startActivity(
+                Intent(this, ScheduleActivity::class.java)
+                    .putExtra("type", "focus_mode")
+                    .putExtra("name", getString(R.string.focus_mode))
+            )
+        }
         // Add state call back to the service
         service.addStateCallback(stateCallback)
         val r = findViewById<RecyclerView>(R.id.focusModePkgs)
@@ -65,7 +67,6 @@ class FocusModeActivity : AppCompatActivity() {
                 service.enableFocusMode()
             }
         }
-
         updateUi()
     }
 

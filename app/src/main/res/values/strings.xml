@@ -10,6 +10,9 @@
     <!-- Focus Mode -->
     <string name="focus_mode_main_switch_bar_text">Enable Focus mode</string>
     <string name="focus_mode_summary_text">Focus mode is blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah</string>
+    <string name="focus_mode_settings_title_text">Focus mode settings</string>
+    <string name="focus_mode_set_schedule_text">Set a schedule</string>
+
     <string name="loading">Loading…</string>
     <string name="setting_desc">Focus mode, bedtime mode, app timers</string>
     <string name="dialog_title">App is blocked</string>

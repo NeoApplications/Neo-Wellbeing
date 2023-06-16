@@ -56,6 +56,26 @@
                 android:text="@string/focus_mode_summary_text"
                 android:textSize="16sp" />
 
+            <com.google.android.material.textview.MaterialTextView
+                style="@style/AppTheme.ListSeparator"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="20dp"
+                android:text="@string/focus_mode_settings_title_text" />
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/schedule"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawablePadding="10dp"
+                android:ellipsize="marquee"
+                android:paddingHorizontal="20dp"
+                android:paddingVertical="10dp"
+                android:singleLine="true"
+                android:text="@string/focus_mode_set_schedule_text"
+                android:textAppearance="?android:textAppearanceListItem"
+                app:drawableStartCompat="@drawable/ic_baseline_access_time_24dp" />
+
             <androidx.appcompat.widget.LinearLayoutCompat
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
