@@ -32,7 +32,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-class PackageRecyclerViewAdapter extends RecyclerView.Adapter<PackageRecyclerViewAdapter.PackageNameViewHolder> {
+public class PackageRecyclerViewAdapter extends RecyclerView.Adapter<PackageRecyclerViewAdapter.PackageNameViewHolder> {
 	private final Context mContext;
 	private final LayoutInflater inflater;
 	private final List<ApplicationInfo> mData;

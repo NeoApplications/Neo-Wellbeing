@@ -187,7 +187,7 @@
             android:exported="false"
             android:label="@string/dashboard" />
         <activity
-            android:name=".prefs.FocusModeActivity"
+            android:name=".ui.FocusModeActivity"
             android:exported="false"
             android:label="@string/focus_mode" />
         <activity
