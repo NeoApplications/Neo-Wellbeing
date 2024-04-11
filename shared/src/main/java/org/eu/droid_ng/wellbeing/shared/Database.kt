@@ -124,7 +124,7 @@ private abstract class StatDao {
 			// Should never happen
 			Log.e("WellbeingDatabase", "FATAL, destroying invalid data! results.size > 1")
 			Log.e("WellbeingDatabase", results[0].toString())
-			for (i in 1..results.size) {
+			for (i in 1..<results.size) {
 				Log.e("WellbeingDatabase", results[i].toString())
 				delete(results[i])
 			}

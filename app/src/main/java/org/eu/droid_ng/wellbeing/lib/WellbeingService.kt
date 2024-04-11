@@ -347,18 +347,11 @@ class WellbeingService(private val context: Context) : WellbeingFrameworkClient.
 		loadSettings()
 		bedtimeModeEnabled = enable
 
-		if (enable) {
-			if (bedtimeGreyscale) {
-				cdm.setSaturationLevel(0)
-			}
-		} else {
-			if (bedtimeGreyscale) {
-				cdm.setSaturationLevel(100)
-			}
+		if (bedtimeGreyscale) {
+			cdm.setSaturationLevel(if (enable) 0 else 100)
 		}
 
-		setWellbeingAirplaneMode(enable &&
-				bedtimeAirplaneMode)
+		setWellbeingAirplaneMode(enable && bedtimeAirplaneMode)
 
 		onStateChanged()
 
