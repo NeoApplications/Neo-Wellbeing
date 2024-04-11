@@ -28,7 +28,7 @@ android {
     }
 
     buildTypes {
-        named("release") {
+        release {
             isMinifyEnabled = true
             setProguardFiles(listOf(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"))
             if (project.hasProperty("RELEASE_KEY_ALIAS")) {

@@ -30,9 +30,17 @@ android {
 	}
 
 	buildTypes {
-		named("release") {
+		release {
 			isMinifyEnabled = true
 			setProguardFiles(listOf(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"))
+			if (project.hasProperty("RELEASE_KEY_ALIAS")) {
+				signingConfig = signingConfigs.getByName("release")
+			} else {
+				logger.warn("Using debug signing configs!")
+				signingConfig = signingConfigs.getByName("debug")
+			}
+		}
+		debug {
 			if (project.hasProperty("RELEASE_KEY_ALIAS")) {
 				signingConfig = signingConfigs.getByName("release")
 			} else {
