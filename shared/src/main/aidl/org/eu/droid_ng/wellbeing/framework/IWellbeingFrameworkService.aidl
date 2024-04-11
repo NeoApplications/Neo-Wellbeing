@@ -3,6 +3,7 @@ package org.eu.droid_ng.wellbeing.framework;
 
 // Declare any non-default types here with import statements
 
+@JavaDefault
 interface IWellbeingFrameworkService {
     // since 1
     int versionCode() = 0;

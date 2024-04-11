@@ -10,10 +10,10 @@ dependencyResolutionManagement {
 	repositories {
 		google()
 		mavenCentral()
-		maven { url 'https://jitpack.io' }
+		maven("https://jitpack.io")
 	}
 }
 rootProject.name = "NeoWellbeing"
-include ':shared'
-include ':app'
-include ':framework'
+include(":shared")
+include(":app")
+include(":framework")

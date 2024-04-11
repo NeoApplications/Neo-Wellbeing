@@ -13,7 +13,7 @@ import org.eu.droid_ng.wellbeing.framework.IWellbeingFrameworkService
 import java.time.LocalDateTime
 import java.time.ZoneId
 
-class WellbeingFrameworkClient constructor(
+class WellbeingFrameworkClient(
 	private val context: Context,
 	private val wellbeingService: ConnectionCallback
 ) : IWellbeingFrameworkService {
