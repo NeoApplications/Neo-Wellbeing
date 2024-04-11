@@ -18,10 +18,6 @@ android {
 		versionName = "0.2.2"
 	}
 
-	buildFeatures {
-		aidl = true
-	}
-
 	signingConfigs {
 		register("release") {
 			if (project.hasProperty("RELEASE_KEY_ALIAS")) {
@@ -77,50 +73,54 @@ dependencies {
 	implementation("com.github.AppDevNext:AndroidChart:3.1.0.15")
 }
 
+val outDir = rootProject.layout.buildDirectory.asFile.get()
+val magiskDir = File("$outDir/magisk_module")
+val zipName = "NeoWellbeing-${android.defaultConfig.versionName}.zip"
+val zipFile = File(outDir, zipName)
 val magiskModuleProp = mapOf(
-		"id" to "neo_wellbeing",
-		"name" to "Neo Wellbeing systemless",
-		"version" to android.defaultConfig.versionName,
-		"versionCode" to android.defaultConfig.versionCode,
-		"minApi" to android.defaultConfig.minSdk,
-		"support" to "https://github.com/NeoApplications/Neo-Wellbeing",
-		"config" to "org.eu.droid_ng.wellbeing",
-		"author" to "nift4",
-		"description" to "Neo Wellbeing is an open source reimplementation of Wellbeing"
+	"id" to "neo_wellbeing",
+	"name" to "Neo Wellbeing systemless",
+	"version" to android.defaultConfig.versionName,
+	"versionCode" to android.defaultConfig.versionCode,
+	"minApi" to android.defaultConfig.minSdk,
+	"support" to "https://github.com/NeoApplications/Neo-Wellbeing",
+	"config" to "org.eu.droid_ng.wellbeing",
+	"author" to "nift4",
+	"description" to "Neo Wellbeing is an open source reimplementation of Wellbeing"
 )
 
-val outDir = rootProject.layout.buildDirectory
-val magiskDir = file("$outDir/magisk_module")
-val zipName = "NeoWellbeing-${android.defaultConfig.versionName}.zip"
-val zipFile = File(outDir.asFile.get(), zipName)
-
 tasks.register("assembleMagiskModule", Task::class) {
+	val root = rootDir
+	val magisk = magiskDir
+	var modulePropText = ""
+	val appApk = file("$root/app/build/outputs/apk/release/app-release.apk")
+	val frameworkApk = file("$root/framework/build/outputs/apk/release/framework-release.apk")
+	magiskModuleProp.forEach { (k, v) -> modulePropText += "$k=$v\n" }
+
 	dependsOn(":app:assembleRelease")
 	dependsOn(":framework:assembleRelease")
 	doLast {
-		delete(magiskDir)
-		magiskDir.mkdirs()
-		var modulePropText = ""
-		magiskModuleProp.forEach { k, v -> modulePropText += "$k=$v\n" }
-		file("$magiskDir/module.prop").writeText(modulePropText)
-		file("$magiskDir.path/system/priv-app/NeoWellbeing").mkdirs()
-		Files.copy(file("$rootDir/app/build/outputs/apk/release/app-release.apk").toPath(),
-				file("${magiskDir.path}/system/priv-app/NeoWellbeing/NeoWellbeing.apk").toPath())
-		file("$magiskDir.path/system/priv-app/NeoWellbeingFramework").mkdirs()
-		Files.copy(file("$rootDir/framework/build/outputs/apk/release/framework-release.apk").toPath(),
-				file("${magiskDir.path}/system/priv-app/NeoWellbeingFramework/NeoWellbeingFramework.apk").toPath())
-		file("$magiskDir.path/system/product/overlay/NeoWellbeingOverlay").mkdirs()
-		Files.copy(file("$rootDir/NeoWellbeingOverlay/overlay.apk").toPath(),
-				file("${magiskDir.path}/system/product/overlay/NeoWellbeingOverlay/NeoWellbeingOverlay.apk").toPath())
-		file("$magiskDir.path/system/etc/permissions").mkdirs()
-		Files.copy(file("$rootDir/app/src/main/privapp-permissions-wellbeing.xml").toPath(),
-				file("${magiskDir.path}/system/etc/permissions/privapp-permissions-wellbeing.xml").toPath())
-		file("$magiskDir.path/META-INF/com/google/android").mkdirs()
-		file("$magiskDir.path/META-INF/com/google/android/updater-script").writeText("#MAGISK")
-		Files.copy(file("$rootDir/app/update-binary").toPath(),
-				file("$magiskDir.path/META-INF/com/google/android/update-binary").toPath())
-		Files.copy(file("$rootDir/app/customize.sh").toPath(),
-				file("$magiskDir.path/customize.sh").toPath())
+		magisk.deleteRecursively()
+		magisk.mkdirs()
+		File("$magisk/module.prop").writeText(modulePropText)
+		File("${magisk.path}/system/priv-app/NeoWellbeing").mkdirs()
+		Files.copy(appApk.toPath(),
+				File("${magisk.path}/system/priv-app/NeoWellbeing/NeoWellbeing.apk").toPath())
+		File("${magisk.path}/system/priv-app/NeoWellbeingFramework").mkdirs()
+		Files.copy(frameworkApk.toPath(),
+				File("${magisk.path}/system/priv-app/NeoWellbeingFramework/NeoWellbeingFramework.apk").toPath())
+		File("${magisk.path}/system/product/overlay/NeoWellbeingOverlay").mkdirs()
+		Files.copy(File("$root/NeoWellbeingOverlay/overlay.apk").toPath(),
+				File("${magisk.path}/system/product/overlay/NeoWellbeingOverlay/NeoWellbeingOverlay.apk").toPath())
+		File("${magisk.path}/system/etc/permissions").mkdirs()
+		Files.copy(File("$root/app/src/main/privapp-permissions-wellbeing.xml").toPath(),
+				File("${magisk.path}/system/etc/permissions/privapp-permissions-wellbeing.xml").toPath())
+		File("${magisk.path}/META-INF/com/google/android").mkdirs()
+		File("${magisk.path}/META-INF/com/google/android/updater-script").writeText("#MAGISK")
+		Files.copy(File("$root/app/update-binary").toPath(),
+				File("${magisk.path}/META-INF/com/google/android/update-binary").toPath())
+		Files.copy(File("$root/app/customize.sh").toPath(),
+				File("${magisk.path}/customize.sh").toPath())
 	}
 }
 
@@ -137,6 +137,7 @@ tasks.register("pushMagiskModule", Exec::class) {
 }
 
 tasks.register("testMagiskModule", Exec::class) {
+	setIgnoreExitValue(true)
 	commandLine("adb", "shell", "su", "-c",
 			"magisk --install-module /sdcard/Documents/" + zipName +
 					" && (/system/bin/svc power reboot || /system/bin/reboot)")

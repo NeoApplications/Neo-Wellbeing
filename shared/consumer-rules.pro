@@ -1,0 +1,1 @@
+-keep class org.eu.droid_ng.wellbeing.*

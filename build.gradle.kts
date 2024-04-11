@@ -10,6 +10,7 @@ tasks.withType(JavaCompile::class.java) {
 	options.compilerArgs.add("-Xlint:all")
 }
 
+val dir = rootProject.layout.buildDirectory.get().asFile
 tasks.register("clean", type = Delete::class) {
-	delete(rootProject.layout.buildDirectory)
+	delete(dir)
 }
