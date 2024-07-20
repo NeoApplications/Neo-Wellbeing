@@ -12,7 +12,7 @@ class WellbeingFrameworkService : Service() {
 	private var wellbeingFrameworkService: BaseWellbeingFrameworkService? = null
 
 	override fun onBind(intent: Intent): IBinder? {
-		return if ("org.eu.droid_ng.wellbeing.framework.FRAMEWORK_SERVICE" == intent.action && wellbeingFrameworkService != null)
+		return if ("org.eu.droid_ng.wellbeing.framework.FRAMEWORK_SERVICE" == intent.action)
 			wellbeingFrameworkService
 		else
 			null
@@ -48,7 +48,6 @@ class WellbeingFrameworkService : Service() {
 			@JvmStatic protected val TAG = "WellbeingFrameworkService"
 		}
 
-		protected val uiHandler = Handler(context.mainLooper)
 		protected lateinit var bgHandler: Handler
 		private lateinit var bgThread: HandlerThread
 

@@ -25,8 +25,11 @@ class Framework : Application() {
 	private var service: WellbeingFrameworkServiceImpl? = null
 
 	init {
-		// While it's... quite bad if we get uncaught exceptions, it's even worse if we crash. If Android can't keep us alive, the device gets thrown into a bootloop
-		Thread.setDefaultUncaughtExceptionHandler { _, e -> Log.e("WellbeingFramework", Log.getStackTraceString(e)) }
+		// While it's... quite bad if we get uncaught exceptions, it's even worse if we crash.
+		// If Android can't keep us alive, the device gets thrown into a boot loop.
+		// This is also why this app should be kept as simple as possible.
+		Thread.setDefaultUncaughtExceptionHandler { _, e ->
+			Log.e("WellbeingFramework", Log.getStackTraceString(e)) }
 	}
 
 	override fun onCreate() {

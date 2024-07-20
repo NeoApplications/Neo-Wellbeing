@@ -158,11 +158,10 @@ class WellbeingFrameworkClient(
 		private val FRAMEWORK_SERVICE_INTENT =
 			Intent("org.eu.droid_ng.wellbeing.framework.FRAMEWORK_SERVICE")
 				.setPackage("org.eu.droid_ng.wellbeing.framework")
-		private var DEFAULT: IWellbeingFrameworkService? = null
+		private val DEFAULT: IWellbeingFrameworkService = IWellbeingFrameworkService.Default()
 
 		init {
-			IWellbeingFrameworkService.Stub.setDefaultImpl(
-				IWellbeingFrameworkService.Default().also { DEFAULT = it })
+			IWellbeingFrameworkService.Stub.setDefaultImpl(DEFAULT)
 		}
 	}
 

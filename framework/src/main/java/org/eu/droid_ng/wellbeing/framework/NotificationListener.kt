@@ -6,8 +6,8 @@ import org.eu.droid_ng.wellbeing.shared.WellbeingFrameworkClient
 
 class NotificationListener : NotificationListenerService(), WellbeingFrameworkClient.ConnectionCallback {
 	private var service: WellbeingFrameworkClient? = null
-	private val seenNotifications = ArrayList<Pair<String, Int>>()
-	private var missedNotifications: ArrayList<String>? = ArrayList()
+	private val seenNotifications = HashSet<Notification>()
+	private var missedNotifications: ArrayList<Notification>? = ArrayList()
 
 	override fun onCreate() {
 		super.onCreate()
@@ -17,6 +17,7 @@ class NotificationListener : NotificationListenerService(), WellbeingFrameworkCl
 	override fun onDestroy() {
 		super.onDestroy()
 		service?.tryDisconnect()
+		service = null
 	}
 
 	override fun onListenerConnected() {
@@ -28,25 +29,41 @@ class NotificationListener : NotificationListenerService(), WellbeingFrameworkCl
 		super.onListenerDisconnected()
 		seenNotifications.clear()
 		service?.tryDisconnect()
+		service = null
 	}
 
 	override fun onNotificationPosted(sbn: StatusBarNotification?) {
-		super.onNotificationPosted(sbn)
-		sbn?.let { n ->
-			if (seenNotifications.find { it.first == n.packageName && it.second == n.id } == null) {
-				seenNotifications.add(Pair(n.packageName, n.id))
-				missedNotifications?.add(n.packageName)
-				service?.onNotificationPosted(n.packageName)
+		if (sbn == null) return
+		val n = Notification(sbn.id, sbn.tag, sbn.packageName)
+		if (seenNotifications.add(n)) {
+			// Either missedNotifications or service is always non-null
+			if (missedNotifications != null) {
+				missedNotifications?.add(n)
+			} else if (service != null) {
+				service?.onNotificationPosted(sbn.packageName)
+			} else {
+				// TODO BUG()
 			}
 		}
 	}
 
+	override fun onNotificationRemoved(
+		sbn: StatusBarNotification?,
+		rankingMap: RankingMap?,
+		reason: Int
+	) {
+		if (sbn == null) return
+		seenNotifications.remove(Notification(sbn.id, sbn.tag, sbn.packageName))
+	}
+
 	override fun onWellbeingFrameworkConnected(initial: Boolean) {
-		missedNotifications?.forEach { service?.onNotificationPosted(it) }
+		missedNotifications?.forEach { service?.onNotificationPosted(it.packageName) }
 		missedNotifications = null
 	}
 
 	override fun onWellbeingFrameworkDisconnected() {
 		missedNotifications = ArrayList()
 	}
+
+	private data class Notification(val id: Int, val tag: String?, val packageName: String)
 }

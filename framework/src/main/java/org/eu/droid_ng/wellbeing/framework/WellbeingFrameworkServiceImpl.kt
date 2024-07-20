@@ -38,7 +38,7 @@ class WellbeingFrameworkServiceImpl(context: Context) :
 			tracksScreenUnlock = !isInWorkProfile()
 			// Ensure we have notification permission
 			val nm = context.getSystemService(NotificationManager::class.java)
-			if (!nm.isNotificationPolicyAccessGranted) {
+			/*if (!nm.isNotificationPolicyAccessGranted) {
 				// Grant ourselves notification permission (the perks of being a system app :D)
 				val cn = ComponentName(context, NotificationListener::class.java).flattenToString()
 				val value = Settings.Secure.getString(
@@ -55,7 +55,7 @@ class WellbeingFrameworkServiceImpl(context: Context) :
 					// Eh?
 					Log.e(TAG, "failed to grant myself notification access")
 				}
-			}
+			}*/ // <-- does not work
 			if (tracksScreenUnlock) {
 				try {
 					context.registerReceiver(
@@ -147,7 +147,7 @@ class WellbeingFrameworkServiceImpl(context: Context) :
 	@Throws(RemoteException::class)
 	override fun getEventCount(type: String, dimension: Int, from: Long, to: Long): Long {
 		return doGetEventCount(type,
-			TimeDimension.values()[dimension],
+			TimeDimension.entries[dimension],
 			LocalDateTime.ofInstant(Instant.ofEpochSecond(from), ZoneId.systemDefault()),
 			LocalDateTime.ofInstant(Instant.ofEpochSecond(to), ZoneId.systemDefault())
 		)
@@ -157,7 +157,7 @@ class WellbeingFrameworkServiceImpl(context: Context) :
 	@Throws(RemoteException::class)
 	override fun getTypesForPrefix(type: String, dimension: Int, from: Long, to: Long): Map<out Any?, Any?> {
 		return doGetTypesForPrefix(type,
-			TimeDimension.values()[dimension],
+			TimeDimension.entries[dimension],
 			LocalDateTime.ofInstant(Instant.ofEpochSecond(from), ZoneId.systemDefault()),
 			LocalDateTime.ofInstant(Instant.ofEpochSecond(to), ZoneId.systemDefault())
 		)
