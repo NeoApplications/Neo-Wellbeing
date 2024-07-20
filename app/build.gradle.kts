@@ -140,14 +140,14 @@ tasks.register("zipMagiskModule", Zip::class) {
 }
 
 tasks.register("pushMagiskModule", Exec::class) {
-	commandLine("adb", "push", zipFile.absolutePath, "/sdcard/Documents/$zipName")
+	commandLine("adb", "push", zipFile.absolutePath, "/data/local/tmp/$zipName")
 	dependsOn(":app:zipMagiskModule")
 }
 
 tasks.register("testMagiskModule", Exec::class) {
 	setIgnoreExitValue(true)
 	commandLine("adb", "shell", "su", "-c",
-			"magisk --install-module /sdcard/Documents/" + zipName +
+			"magisk --install-module /data/local/tmp/" + zipName +
 					" && (/system/bin/svc power reboot || /system/bin/reboot)")
 	dependsOn(":app:pushMagiskModule")
 }

@@ -22,6 +22,7 @@
 -->
 <permissions>
     <privapp-permissions package="org.eu.droid_ng.wellbeing">
+        <permission name="android.permission.ACCESS_AMBIENT_CONTEXT_EVENT" />
         <permission name="android.permission.ACCESS_INSTANT_APPS" />
         <permission name="android.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS" />
         <permission name="android.permission.CONTROL_DISPLAY_SATURATION" />
@@ -40,6 +41,7 @@
         <permission name="android.permission.START_TASKS_FROM_RECENTS" />
         <permission name="android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME" />
         <permission name="android.permission.SUSPEND_APPS" />
+        <permission name="android.permission.SCHEDULE_EXACT_ALARM" />
         <permission name="android.permission.WRITE_DREAM_STATE" />
 	    <permission name="android.permission.WRITE_SECURE_SETTINGS" />
         <permission name="android.permission.SET_WALLPAPER_DIM_AMOUNT" />
