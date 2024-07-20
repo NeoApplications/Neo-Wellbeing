@@ -15,7 +15,7 @@
             app:icon="@drawable/ic_baseline_person_24dp"
             app:summary="@string/main_preference_focus_mode_summary">
             <intent
-                android:targetClass="org.eu.droid_ng.wellbeing.prefs.FocusModeActivity"
+                android:targetClass="org.eu.droid_ng.wellbeing.ui.FocusModeActivity"
                 android:targetPackage="org.eu.droid_ng.wellbeing" />
         </Preference>
         <Preference
