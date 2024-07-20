@@ -49,7 +49,7 @@ ksp {
 }
 
 dependencies {
-	implementation("androidx.annotation:annotation:1.7.1")
+	implementation("androidx.annotation:annotation:1.8.0")
 	val roomVersion = "2.4.0-alpha05" // Android 13 (https://cs.android.com/android/platform/superproject/+/android-13.0.0_r31:prebuilts/sdk/current/androidx/m2repository/androidx/room/room-runtime/;bpv=1)
 	//noinspection GradleDependency
 	implementation("androidx.room:room-runtime:$roomVersion")
