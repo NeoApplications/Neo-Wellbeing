@@ -12,7 +12,6 @@
 	<string name="disabled">Nakasara</string>
 	<string name="app_icon_content_desc">Icon ng aplikasyon</string>
 	<string name="suspended_app_details_app">App</string>
-	<string name="suspended_app_details_was_suspended_due_to">…ay sinuspinde dahil sa:</string>
 	<string name="focus_mode">Mode sa pag-focus</string>
 	<string name="focus_mode_enabled">Binuksan ang mode sa pag-focus</string>
 	<string name="suspended_app_details_focus_mode">Kasalukuyang nakabukas ang mode sa pag-focus!</string>
@@ -77,12 +76,9 @@
 	<string name="copy_to_clipboard">Kopyahin</string>
 	<string name="copied">Nakopya sa clipboard</string>
 	<string name="bug_viewer">Pangtingin sa mga bug</string>
-	<string name="bed_icon_content_desc">Mode sa pagtulog</string>
 	<string name="greyscale">Grayscale</string>
 	<string name="airplane_mode">Mode pang-eroplano</string>
 	<string name="sched_charging">Kapag nagcha-charge lang</string>
-	<string name="startTime">Oras ng pagsisimula:</string>
-	<string name="endTime">Oras ng pagtatapos:</string>
 	<string name="dpicker_monday">Lu</string>
 	<string name="dpicker_tuesday">Ma</string>
 	<string name="dpicker_wednesday">Mi</string>

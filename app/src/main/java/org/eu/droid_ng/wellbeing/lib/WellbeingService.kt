@@ -1180,7 +1180,7 @@ class WellbeingService(private val context: Context) : WellbeingFrameworkClient.
 	}
 
 	private fun ensureSchedSetup() {
-		triggers.forEach { it.setup(context, this) }
+		triggers.forEach { it.setup(context) }
 	}
 
 	private fun triggerFired(expire: Boolean, trigger: Trigger) {
