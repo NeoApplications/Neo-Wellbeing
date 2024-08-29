@@ -98,7 +98,6 @@ class WellbeingService(private val context: Context) : WellbeingFrameworkClient.
 		host?.stop()
 	}
 
-	@JvmOverloads
 	fun getInstalledApplications(flags: Int = 0): List<ApplicationInfo> {
 		val newflags = (when(systemApp) {
 			true -> Utils.PACKAGE_MANAGER_MATCH_INSTANT
@@ -107,12 +106,10 @@ class WellbeingService(private val context: Context) : WellbeingFrameworkClient.
 		return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
 			pm.getInstalledApplications(PackageManager.ApplicationInfoFlags.of(newflags.toLong()))
 		} else {
-			@Suppress("deprecation")
 			pm.getInstalledApplications(newflags)
 		}
 	}
 
-	@JvmOverloads
 	@Throws(PackageManager.NameNotFoundException::class)
 	fun getApplicationInfo(packageName: String, matchUninstalled: Boolean = true, flags: Int = 0): ApplicationInfo {
 		val newflags = when(matchUninstalled) {
@@ -125,19 +122,16 @@ class WellbeingService(private val context: Context) : WellbeingFrameworkClient.
 		return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
 			pm.getApplicationInfo(packageName, PackageManager.ApplicationInfoFlags.of(newflags.toLong()))
 		} else {
-			@Suppress("deprecation")
 			pm.getApplicationInfo(packageName, newflags)
 		}
 	}
 
-	@JvmOverloads
 	@Throws(PackageManager.NameNotFoundException::class)
 	fun getApplicationLabel(packageName: String, matchUninstalled: Boolean = true): CharSequence {
 		return pm.getApplicationLabel(getApplicationInfo(packageName, matchUninstalled))
 	}
 
 	companion object {
-		@JvmStatic
 		fun get(): WellbeingService {
 			return Wellbeing.getService()
 		}
@@ -149,14 +143,14 @@ class WellbeingService(private val context: Context) : WellbeingFrameworkClient.
 		const val INTENT_ACTION_QUIT_BED = "org.eu.droid_ng.wellbeing.QUIT_BED"
 		const val INTENT_ACTION_QUIT_FOCUS = "org.eu.droid_ng.wellbeing.QUIT_FOCUS"
 		const val INTENT_ACTION_UNSUSPEND_ALL = "org.eu.droid_ng.wellbeing.UNSUSPEND_ALL"
-		@JvmField val breakTimeOptions = intArrayOf(1, 3, 5, 10, 15) // keep in sync with getUseAppForString
+		val breakTimeOptions = intArrayOf(1, 3, 5, 10, 15) // keep in sync with getUseAppForString
 	}
 
 	private val handler = Handler.createAsync(context.mainLooper)
 	private val pm = context.packageManager
 	val pmd = PackageManagerDelegate(pm)
 	val cdm: PackageManagerDelegate.IColorDisplayManager = PackageManagerDelegate.getColorDisplayManager(context)
-	@JvmField val usm = context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
+	val usm = context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
 	private val alc = AlarmCoordinator(context)
 	private val notificationManager = context.getSystemService(NotificationManager::class.java) as NotificationManager
 	private val bgThread: HandlerThread = HandlerThread("WellbeingService")
@@ -171,7 +165,7 @@ class WellbeingService(private val context: Context) : WellbeingFrameworkClient.
 	private val config = context.getSharedPreferences("appTimers", 0)
 	private val sched = context.getSharedPreferences("sched", 0)
 
-	@JvmField var focusModeAllApps = true
+	var focusModeAllApps = true
 	private var focusModeInvertSelection = false
 	private var focusModeBreakTimeDialog = -1
 	private var focusModeBreakTimeNotification = -1
@@ -305,7 +299,6 @@ class WellbeingService(private val context: Context) : WellbeingFrameworkClient.
 	override fun onWellbeingFrameworkDisconnected() {}
 
 	// Service / Global state. Do not confuse with per-app state, that's using the same values.
-	@JvmOverloads
 	fun getState(includeAppState: Boolean = true): State {
 		val value =
 			(if (bedtimeModeEnabled) State.STATE_BED_MODE else 0) or
@@ -401,9 +394,8 @@ class WellbeingService(private val context: Context) : WellbeingFrameworkClient.
 		var uoid: String = uniqueObserverId
 		if (oidMap.getInt(uoid, -2) != observerId) {
 			msg = "Warning: unknown oid/uoid - $observerId / $uoid - this might be an bug? Trying to recover."
-			//Toast.makeText(ctx, msg, Toast.LENGTH_LONG).show(); this should really be shown. but the underlying problem lies in android code :(
+			Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
 			Log.e("AppTimersInternal", msg)
-			// Attempt to recover, in doubt always trust the oid. Because android is fucking dumb. Thank you.
 			uoid = oidMap.all.entries.stream().filter { a -> observerId == a.value }
 				.findAny().get().key
 		}
@@ -424,9 +416,9 @@ class WellbeingService(private val context: Context) : WellbeingFrameworkClient.
 				dropAppTimer(parsed)
 				parsed.pkgs.forEach {
 					if (it == null) return@forEach
-					val text = context.getString(
-						R.string.app_timer_reminder_title,
-						reminderMin
+					val text = context.resources.getQuantityString(
+						R.plurals.app_timer_reminder_title,
+						reminderMin, reminderMin
 					)
 					val n = Notification.Builder(context, "reminder")
 						.setWhen(System.currentTimeMillis())
@@ -900,7 +892,6 @@ class WellbeingService(private val context: Context) : WellbeingFrameworkClient.
 
 	private val breakEndedCallback = Runnable { endFocusModeBreak(false) }
 
-	@JvmOverloads
 	fun endFocusModeBreak(needCancel: Boolean = true) {
 		loadSettings()
 
@@ -1112,15 +1103,15 @@ class WellbeingService(private val context: Context) : WellbeingFrameworkClient.
 		val i = Intent(context, AppTimersBroadcastReceiver::class.java)
 		i.putExtra("observerId", oid)
 		i.putExtra("uniqueObserverId", uoid)
-		val pintent: PendingIntent =
-			PendingIntent.getBroadcast(context, oid, i, PendingIntent.FLAG_IMMUTABLE)
+		val pIntent =
+			PendingIntent.getBroadcast(context, oid, i, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_CANCEL_CURRENT)
 		PackageManagerDelegate.registerAppUsageLimitObserver(
 			usm,
 			oid,
 			toObserve,
 			timeLimit,
 			timeUsed,
-			pintent
+			pIntent
 		)
 	}
 
@@ -1219,7 +1210,7 @@ class WellbeingService(private val context: Context) : WellbeingFrameworkClient.
 			if (condition(fired) && // is this the trigger we're searching for?
 				(expire || // is this an deactivation request?
 						(fired !is Condition) || // if this trigger is an condition, it needs to be fulfilled
-						fired.isFulfilled(context, this))) {
+						fired.isFulfilled(context))) {
 				triggerFired(expire, fired)
 			}
 		}
@@ -1243,7 +1234,7 @@ class WellbeingService(private val context: Context) : WellbeingFrameworkClient.
 	}
 
 	fun setTriggersForId(id: String, triggersIn: Array<out Trigger>) {
-		triggers.filter { id == it.id }.forEach { it.dispose(context, this) }
+		triggers.filter { id == it.id }.forEach { it.dispose(context) }
 		triggers = triggers.filterNot { id == it.id }.toSet().plus(triggersIn)
 		writeSchedcfg()
 		ensureSchedSetup()

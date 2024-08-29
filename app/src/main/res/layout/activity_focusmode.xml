@@ -152,7 +152,6 @@
 								android:text="@string/focus_mode_break"
 								android:fadingEdge="horizontal" />
 							<androidx.appcompat.widget.AppCompatTextView
-								android:id="@+id/summary2"
 								android:layout_width="wrap_content"
 								android:layout_height="wrap_content"
 								android:layout_below="@android:id/title"

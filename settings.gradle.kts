@@ -1,3 +1,5 @@
+@file:Suppress("UnstableApiUsage")
+
 pluginManagement {
 	repositories {
 		gradlePluginPortal()
@@ -5,6 +7,7 @@ pluginManagement {
 		mavenCentral()
 	}
 }
+
 dependencyResolutionManagement {
 	repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
 	repositories {
@@ -13,7 +16,6 @@ dependencyResolutionManagement {
 		maven("https://jitpack.io")
 	}
 }
+
 rootProject.name = "NeoWellbeing"
-include(":shared")
-include(":app")
-include(":framework")
+include(":shared", ":framework", ":app")

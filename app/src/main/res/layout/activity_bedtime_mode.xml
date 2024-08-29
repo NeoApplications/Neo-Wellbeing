@@ -114,7 +114,6 @@
 								android:textAppearance="?android:attr/textAppearanceLarge" />
 
 							<androidx.appcompat.widget.AppCompatTextView
-								android:id="@+id/summary"
 								android:layout_width="wrap_content"
 								android:layout_height="wrap_content"
 								android:layout_below="@android:id/title"

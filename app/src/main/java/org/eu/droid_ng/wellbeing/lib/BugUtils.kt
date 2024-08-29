@@ -13,7 +13,6 @@ class BugUtils(private val bugFolder: File) {
 	companion object {
 		private var utils: BugUtils? = null
 
-		@JvmStatic
 		fun maybeInit(context: Context) {
 			if (utils == null) {
 				val f = File(context.cacheDir, "bugutils")
@@ -23,7 +22,6 @@ class BugUtils(private val bugFolder: File) {
 		}
 
 		@Suppress("FunctionName")
-		@JvmStatic
 		fun BUG(message: String) {
 			if (utils != null) {
 				utils?.onBugAdded(RuntimeException(message), System.currentTimeMillis())
@@ -33,12 +31,10 @@ class BugUtils(private val bugFolder: File) {
 			}
 		}
 
-		@JvmStatic
 		fun get(): BugUtils? {
 			return utils
 		}
 
-		@JvmStatic
 		fun formatDateForRender(epochMillis: Long): String {
 			return DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss").format(LocalDateTime.ofInstant(Instant.ofEpochMilli(epochMillis), ZoneId.systemDefault()))
 		}

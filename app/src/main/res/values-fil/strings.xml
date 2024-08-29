@@ -98,7 +98,6 @@
 	<string name="sample_app_t">23o 59m</string>
 	<string name="on">Bukas</string>
 	<string name="off">Sarado</string>
-	<string name="app_timer_reminder_title">%d minutong natitira</string>
 	<string name="app_timer_reminder_pref">Magpaalala kung paubos na ang oras</string>
 	<string name="always_ask">Laging magtanong</string>
 	<string name="whitelist_title">Allowlist mode</string>

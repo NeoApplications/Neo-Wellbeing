@@ -1,7 +1,6 @@
 package org.eu.droid_ng.wellbeing.lib
 
 import android.content.Context
-import android.content.Intent
 import android.provider.Settings
 
 enum class WellbeingAirplaneState(val airplaneModeState: Boolean, val systemAirplaneModeState: Boolean, val wellbeingAirplaneModeState: Boolean) {
@@ -81,7 +80,6 @@ enum class WellbeingAirplaneState(val airplaneModeState: Boolean, val systemAirp
     }
 
     companion object {
-        @JvmStatic
         fun isAirplaneModeOn(context: Context): Boolean {
             return Settings.Global.getInt(context.contentResolver,
                     Settings.Global.AIRPLANE_MODE_ON, 0) != 0

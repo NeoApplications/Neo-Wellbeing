@@ -9,7 +9,6 @@ class Wellbeing : Application() {
 	companion object {
 		private lateinit var application: Wellbeing
 
-		@JvmStatic
 		fun getService(): WellbeingService {
 			return application.getServiceInternal()
 		}

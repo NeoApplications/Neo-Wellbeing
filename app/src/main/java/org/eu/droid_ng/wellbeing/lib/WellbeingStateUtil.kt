@@ -9,6 +9,7 @@ import android.graphics.drawable.Icon
 import android.os.Binder
 import android.os.Build
 import android.os.IBinder
+import android.util.Log
 import android.widget.Toast
 import org.eu.droid_ng.wellbeing.R
 import org.eu.droid_ng.wellbeing.lib.WellbeingStateHost.LocalBinder
@@ -18,7 +19,7 @@ import java.util.function.Consumer
 // Helper to connect to WellbeingStateHost
 class WellbeingStateClient(context: Context) {
     // Our context
-    private val context: Context
+    private val context = context.applicationContext
 
     // Don't attempt to unbind from the service unless the client has received some
     // information about the service's state.
@@ -36,7 +37,8 @@ class WellbeingStateClient(context: Context) {
         override fun onServiceConnected(className: ComponentName, service: IBinder) {
             mBoundService = try {
                 (service as LocalBinder).service
-            } catch (ignored: ClassCastException) {
+            } catch (e: ClassCastException) {
+                Log.e("WellbeingStateClient", Log.getStackTraceString(e))
                 Toast.makeText(
                     context,
                     "Assertion failure (0xAE): Service is in another process. Please report this to the developers!",
@@ -53,7 +55,7 @@ class WellbeingStateClient(context: Context) {
 
         /*override fun onNullBinding(className: ComponentName) {
 			Toast.makeText(context, "Assertion failure (0xAF): Service is null. Please report this to the developers!",
-					Toast.LENGTH_SHORT).show();
+					Toast.LENGTH_SHORT).show()
 		}*/
     }
 
@@ -69,7 +71,6 @@ class WellbeingStateClient(context: Context) {
         return false
     }
 
-    @JvmOverloads
     fun doBindService(
         callback: Consumer<WellbeingService?>,
         canHandleFailure: Boolean,
@@ -111,7 +112,6 @@ class WellbeingStateClient(context: Context) {
         }
     }
 
-    @JvmOverloads
     fun startService(lateNotify: Boolean = false) {
         val i = Intent(context, WellbeingStateHost::class.java)
         i.putExtra("lateNotify", lateNotify)
@@ -121,15 +121,10 @@ class WellbeingStateClient(context: Context) {
     fun killService() {
         context.stopService(Intent(context, WellbeingStateHost::class.java))
     }
-
-    init {
-        this.context = context.applicationContext
-    }
 }
 
 // Fancy class holding WellbeingService & a notification
 class WellbeingStateHost : Service() {
-    @JvmField
     var state: WellbeingService? = null
     private var lateNotify = false
     private var mStopped = false
@@ -188,9 +183,9 @@ class WellbeingStateHost : Service() {
         isBroadcast: Boolean
     ): Notification.Action {
         val pendingIntent = if (isBroadcast) {
-            PendingIntent.getBroadcast(this, 0, actionIntent!!, PendingIntent.FLAG_IMMUTABLE)
+            PendingIntent.getBroadcast(this, 0, actionIntent!!, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_CANCEL_CURRENT)
         } else {
-            PendingIntent.getActivity(this, 0, actionIntent, PendingIntent.FLAG_IMMUTABLE)
+            PendingIntent.getActivity(this, 0, actionIntent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_CANCEL_CURRENT)
         }
         val builder = Notification.Action.Builder(
             Icon.createWithResource(applicationContext, actionIcon),

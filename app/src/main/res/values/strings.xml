@@ -20,7 +20,6 @@
     <string name="disabled">Disabled</string>
     <string name="app_icon_content_desc">Application icon</string>
     <string name="suspended_app_details_app">App</string>
-    <string name="suspended_app_details_was_suspended_due_to">…was suspended due to:</string>
     <string name="focus_mode">Focus mode</string>
     <string name="focus_mode_enabled">Focus mode is enabled</string>
     <string name="suspended_app_details_focus_mode">Focus mode is currently enabled!</string>
@@ -86,12 +85,9 @@
     <string name="copy_to_clipboard">Copy</string>
     <string name="copied">Copied to clipboard</string>
     <string name="bug_viewer">Bug viewer</string>
-    <string name="bed_icon_content_desc">Bedtime mode</string>
     <string name="greyscale">Greyscale</string>
     <string name="airplane_mode">Airplane mode</string>
     <string name="sched_charging">Only while charging</string>
-    <string name="startTime">Start time:</string>
-    <string name="endTime">End time:</string>
     <string name="dpicker_monday">M</string>
     <string name="dpicker_tuesday">T</string>
     <string name="dpicker_wednesday">W</string>
@@ -108,7 +104,10 @@
     <string name="until" translatable="false">-</string>
     <string name="on">On</string>
     <string name="off">Off</string>
-    <string name="app_timer_reminder_title">%d minutes left</string>
+    <plurals name="app_timer_reminder_title">
+        <item quantity="one">%d minute left</item>
+        <item quantity="other">%d minutes left</item>
+    </plurals>
     <string name="app_timer_reminder_pref">Remind when time is running out</string>
     <string name="always_ask">Always ask</string>
     <string name="whitelist_title">Whitelist mode</string>
@@ -117,7 +116,10 @@
     <string name="other">Other</string>
     <string name="dashboard">Dashboard</string>
     <string name="notifications">Notifications</string>
-    <string name="notifications_count">%d notifications</string>
+    <plurals name="notifications_count">
+        <item quantity="one">%d notification</item>
+        <item quantity="other">%d notifications</item>
+    </plurals>
     <string name="unlocks">Unlocks</string>
     <string name="this_year">This year</string>
     <string name="this_month">This month</string>

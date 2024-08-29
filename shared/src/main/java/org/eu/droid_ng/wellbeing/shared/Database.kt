@@ -175,7 +175,7 @@ class Database(context: Context, private val bgHandler: Handler, private val con
 		val tto = ExactTime.of(to, dimension)
 		val results = dao.findStatsOfTypeBetween(type, dimension, tfrom, tto)
 		if (results.isEmpty()) {
-			val newdim = TimeDimension.values()[dimension.ordinal + 1]
+			val newdim = TimeDimension.entries[dimension.ordinal + 1]
 			if (newdim == TimeDimension.ERROR) return 0
 			return getCountFor(type, newdim, from, to)
 		}
@@ -193,7 +193,7 @@ class Database(context: Context, private val bgHandler: Handler, private val con
 		val tto = ExactTime.of(to, dimension)
 		val results = dao.findStatsOfPrefixBetween(prefix, dimension, tfrom, tto)
 		if (results.isEmpty()) {
-			val newdim = TimeDimension.values()[dimension.ordinal + 1]
+			val newdim = TimeDimension.entries[dimension.ordinal + 1]
 			if (newdim == TimeDimension.ERROR) return hashMapOf()
 			return getTypesForPrefix(prefix, newdim, from, to)
 		}
@@ -229,7 +229,7 @@ class Database(context: Context, private val bgHandler: Handler, private val con
 		if (!ExactTime.ofUnit(last, dimension).isAfter(earliest)) return
 		val from = genFrom(last)
 		val to = ExactTime.of(last, dimension)
-		val newdim = TimeDimension.values()[dimension.ordinal + 1]
+		val newdim = TimeDimension.entries[dimension.ordinal + 1]
 		if (newdim == TimeDimension.ERROR) return
 		val results = dao.findStatsOfTypeBetween(type, newdim, ExactTime.of(from, dimension), to)
 		var count = 0L

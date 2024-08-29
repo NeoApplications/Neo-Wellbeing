@@ -11,7 +11,6 @@ import android.content.IntentFilter
 import android.os.BatteryManager
 import android.os.Handler
 import org.eu.droid_ng.wellbeing.broadcast.AlarmFiresBroadcastReceiver
-import org.eu.droid_ng.wellbeing.widget.ScreenTimeAppWidget
 import java.time.DayOfWeek
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -83,13 +82,13 @@ interface Trigger {
 	val id: String
 	val iid: String
 	val enabled: Boolean
-	fun setup(applicationContext: Context, service: WellbeingService)
-	fun dispose(applicationContext: Context, service: WellbeingService)
+	fun setup(applicationContext: Context)
+	fun dispose(applicationContext: Context)
 }
 
 interface Condition {
 	val id: String
-	fun isFulfilled(applicationContext: Context, service: WellbeingService): Boolean
+	fun isFulfilled(applicationContext: Context): Boolean
 }
 
 class TimeChargerTriggerCondition(
@@ -104,7 +103,7 @@ class TimeChargerTriggerCondition(
 	val needCharger: Boolean,
 	val endOnAlarm: Boolean
 ) : Trigger, Condition {
-	override fun setup(applicationContext: Context, service: WellbeingService) {
+	override fun setup(applicationContext: Context) {
 		if (!weekdays.any { it }) return // bail if no weekday is enabled
 		if (!enabled) return
 		val now = LocalDateTime.now().withNano(0)
@@ -165,12 +164,12 @@ class TimeChargerTriggerCondition(
 		ScheduleUtils.setAlarm(applicationContext, "expire::$iid", end)
 	}
 
-	override fun dispose(applicationContext: Context, service: WellbeingService) {
+	override fun dispose(applicationContext: Context) {
 		ScheduleUtils.dropAlarm(applicationContext, iid)
 		ScheduleUtils.dropAlarm(applicationContext, "expire::$iid")
 	}
 
-	override fun isFulfilled(applicationContext: Context, service: WellbeingService): Boolean {
+	override fun isFulfilled(applicationContext: Context): Boolean {
 		val now = LocalDateTime.now().withNano(0)
 		return (enabled && weekdays[now.dayOfWeek.ordinal] && run {
 			val end = now.withSecond(0).withHour(endHour).withMinute(endMinute)

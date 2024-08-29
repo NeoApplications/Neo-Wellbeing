@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="app_widget_background_radius">16dp</dimen>
-    <dimen name="app_widget_inner_radius">8dp</dimen>
 </resources>

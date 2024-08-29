@@ -7,17 +7,14 @@ class Framework : Application() {
 	companion object {
 		private lateinit var application: Framework
 
-		@JvmStatic
 		fun setService(service: WellbeingFrameworkServiceImpl?) {
 			return application.setServiceInternal(service)
 		}
 
-		@JvmStatic
 		fun getService(): WellbeingFrameworkServiceImpl {
 			return application.getServiceInternal()!!
 		}
 
-		@JvmStatic
 		fun hasService(): Boolean {
 			return application.getServiceInternal() != null
 		}

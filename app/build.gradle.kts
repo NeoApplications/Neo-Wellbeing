@@ -70,7 +70,7 @@ android {
 dependencies {
 	implementation(project(":shared"))
 
-	implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.3")
+	implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.4")
 
 	implementation("androidx.recyclerview:recyclerview:1.3.2")
 	implementation("androidx.constraintlayout:constraintlayout:2.1.4")

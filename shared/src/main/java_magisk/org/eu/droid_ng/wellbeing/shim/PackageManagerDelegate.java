@@ -24,7 +24,7 @@ import java.lang.reflect.Method;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
-/* both PackageManager stub for building in Android Studio for UI stuff
+/** @noinspection ALL*/ /* both PackageManager stub for building in Android Studio for UI stuff
 * and reflective delegate for magisk module, only used in debug builds.
 *
 * Note: The class must not fail or crash if a reference is missing.

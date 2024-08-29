@@ -14,15 +14,13 @@ import java.util.*
 
 
 object Utils {
-    private const val mostUsedPackagesCacheSize: Int = 3
-    private const val mostUsedPackagesMinUsageInSeconds: Long = 5
+    private const val MOST_USED_PKG_CACHE_SIZE: Int = 3
+    private const val MOST_USED_PKG_MIN_USAGE_MINS: Long = 5
     private var calculatedUsageStats: HashMap<String, Duration>? = null
     private var calculatedScreenTime: Duration? = null
     private var mostUsedPackages: Array<String>? = null
     const val PACKAGE_MANAGER_MATCH_INSTANT = 0x00800000
-    @JvmField
     val blackListedPackages: HashSet<String> = HashSet()
-    @JvmField
     val restrictedPackages: HashSet<String> = HashSet()
 
     private fun eventsStr(events: Iterable<UsageEvents.Event>): String {
@@ -35,7 +33,6 @@ object Utils {
         return b.toString()
     }
 
-    @JvmStatic
     fun clearUsageStatsCache(usm: UsageStatsManager?, pm: PackageManager?, pmd: PackageManagerDelegate?, recalculate: Boolean) {
         calculatedUsageStats = null
         calculatedScreenTime = null
@@ -46,13 +43,11 @@ object Utils {
         }
     }
 
-    @JvmStatic
     fun getTimeUsed(usm: UsageStatsManager, packageName: String?): Duration {
         checkInitializeCache(usm)
         return calculatedUsageStats!!.getOrDefault(packageName, Duration.ZERO)
     }
 
-    @JvmStatic
     fun getTimeUsed(usm: UsageStatsManager, packageNames: Array<String?>): Duration {
         checkInitializeCache(usm)
         var d = Duration.ZERO
@@ -62,13 +57,11 @@ object Utils {
         return if (d.isNegative) Duration.ZERO else d
     }
 
-    @JvmStatic
     fun getScreenTime(usm: UsageStatsManager): Duration {
         checkInitializeCache(usm)
         return calculatedScreenTime!!
     }
 
-    @JvmStatic
     fun getMostUsedPackages(usm: UsageStatsManager): Array<String> {
         checkInitializeCache(usm)
         return mostUsedPackages!!
@@ -152,37 +145,37 @@ object Utils {
         }
         // Calculate screenTime + mostUsedPackages
         var screenTimeTmp: Duration = Duration.ZERO
-        val mostUsedPackagesTmp = arrayOfNulls<String>(mostUsedPackagesCacheSize)
-        val mostUsedPackageTime = Array(mostUsedPackagesCacheSize) { mostUsedPackagesMinUsageInSeconds }
+        val mostUsedPackagesTmp = arrayOfNulls<String>(MOST_USED_PKG_CACHE_SIZE)
+        val mostUsedPackageTime = Array(MOST_USED_PKG_CACHE_SIZE) { MOST_USED_PKG_MIN_USAGE_MINS }
         myCalculatedUsageStats.forEach { (pkgName: String, duration: Duration) ->
             val seconds: Long
             if (!blackListedPackages.contains(pkgName)) {
                 screenTimeTmp = screenTimeTmp.plus(duration)
                 seconds = duration.seconds
             } else seconds = 0
-            if (!restrictedPackages.contains(pkgName) && seconds > mostUsedPackageTime[mostUsedPackagesCacheSize - 1]) {
+            if (!restrictedPackages.contains(pkgName) && seconds > mostUsedPackageTime[MOST_USED_PKG_CACHE_SIZE - 1]) {
                 var index = 0
                 while (seconds <= mostUsedPackageTime[index]) {
                     index++
                 }
                 System.arraycopy(mostUsedPackagesTmp, index,
                         mostUsedPackagesTmp, index + 1,
-                        (mostUsedPackagesCacheSize - 1) - index)
+                        (MOST_USED_PKG_CACHE_SIZE - 1) - index)
                 System.arraycopy(mostUsedPackageTime, index,
                         mostUsedPackageTime, index + 1,
-                        (mostUsedPackagesCacheSize - 1) - index)
+                        (MOST_USED_PKG_CACHE_SIZE - 1) - index)
                 mostUsedPackagesTmp[index] = pkgName
                 mostUsedPackageTime[index] = seconds
             }
         }
         val myMostUsedPackages: Array<String>
-        if (mostUsedPackagesTmp[mostUsedPackagesCacheSize - 1] != null) {
+        if (mostUsedPackagesTmp[MOST_USED_PKG_CACHE_SIZE - 1] != null) {
             @Suppress("UNCHECKED_CAST")
             myMostUsedPackages = mostUsedPackagesTmp as Array<String>
         } else if (mostUsedPackagesTmp[0] == null) {
             myMostUsedPackages = emptyArray()
         } else {
-            var arraySize = mostUsedPackagesCacheSize
+            var arraySize = MOST_USED_PKG_CACHE_SIZE
             while (arraySize --> 0) {
                 if (mostUsedPackagesTmp[arraySize] != null) {
                     arraySize + 1
