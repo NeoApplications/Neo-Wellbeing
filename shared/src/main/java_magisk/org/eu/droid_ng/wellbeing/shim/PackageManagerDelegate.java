@@ -187,6 +187,7 @@ public class PackageManagerDelegate {
 		boolean isDisplayWhiteBalanceAvailable(Context context);
 	}
 
+	@NonNull
 	public static IColorDisplayManager getColorDisplayManager(Context ctx) {
 		Object cdm;
 		Method isDeviceColorManaged, setSaturationLevel, setAppSaturationLevel, isNightDisplayAvailable, isDisplayWhiteBalanceAvailable;

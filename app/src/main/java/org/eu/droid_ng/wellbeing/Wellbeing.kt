@@ -1,7 +1,7 @@
 package org.eu.droid_ng.wellbeing
 
 import android.app.Application
-import org.eu.droid_ng.wellbeing.lib.BugUtils
+import org.eu.droid_ng.wellbeing.shared.BugUtils
 import org.eu.droid_ng.wellbeing.lib.WellbeingService
 import kotlin.system.exitProcess
 

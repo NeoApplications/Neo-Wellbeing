@@ -19,7 +19,7 @@ import org.eu.droid_ng.wellbeing.Wellbeing
 import org.eu.droid_ng.wellbeing.broadcast.AppTimersBroadcastReceiver
 import org.eu.droid_ng.wellbeing.broadcast.NotificationBroadcastReceiver
 import org.eu.droid_ng.wellbeing.join
-import org.eu.droid_ng.wellbeing.lib.BugUtils.Companion.BUG
+import org.eu.droid_ng.wellbeing.shared.BugUtils.Companion.BUG
 import org.eu.droid_ng.wellbeing.lib.Utils.getTimeUsed
 import org.eu.droid_ng.wellbeing.shared.Database
 import org.eu.droid_ng.wellbeing.shared.ExactTime
@@ -149,13 +149,13 @@ class WellbeingService(private val context: Context) : WellbeingFrameworkClient.
 	private val handler = Handler.createAsync(context.mainLooper)
 	private val pm = context.packageManager
 	val pmd = PackageManagerDelegate(pm)
-	val cdm: PackageManagerDelegate.IColorDisplayManager = PackageManagerDelegate.getColorDisplayManager(context)
+	val cdm = PackageManagerDelegate.getColorDisplayManager(context)
 	val usm = context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
 	private val alc = AlarmCoordinator(context)
 	private val notificationManager = context.getSystemService(NotificationManager::class.java) as NotificationManager
-	private val bgThread: HandlerThread = HandlerThread("WellbeingService")
-	val bgHandler: Handler
-	private val db: Database
+	private val bgThread = HandlerThread("WellbeingService").also { it.start() }
+	val bgHandler = Handler(bgThread.looper)
+	private val db = Database(context, bgHandler, 0)
 
 	private var airplaneState: WellbeingAirplaneState
 	private var airplaneStateLogical: Boolean = false
@@ -240,9 +240,6 @@ class WellbeingService(private val context: Context) : WellbeingFrameworkClient.
 	private val perAppState: HashMap<String /* packageName */, Int /* does NOT contain global flags like FOCUS_MODE_ENABLED or FOCUS_MODE_GLOBAL_BREAK, so always use getAppState() when reading */> = HashMap()
 
 	init {
-		bgThread.start()
-		bgHandler = Handler(bgThread.looper)
-		db = Database(context, bgHandler, 0)
 		Utils.clearUsageStatsCache(usm, pm, pmd, true)
 		airplaneState = when (WellbeingAirplaneState.isAirplaneModeOn(context)) {
 			true -> WellbeingAirplaneState.ENABLED_BY_SYSTEM
@@ -394,7 +391,7 @@ class WellbeingService(private val context: Context) : WellbeingFrameworkClient.
 		if (oidMap.getInt(uoid, -2) != observerId) {
 			msg = "Warning: unknown oid/uoid - $observerId / $uoid - this might be an bug? Trying to recover."
 			Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
-			Log.e("AppTimersInternal", msg)
+			BUG(msg)
 			uoid = oidMap.all.entries.stream().filter { a -> observerId == a.value }
 				.findAny().get().key
 		}
@@ -440,6 +437,7 @@ class WellbeingService(private val context: Context) : WellbeingFrameworkClient.
 			"AppBreak" -> endBreak(parsed.pkgs)
 			else -> {
 				Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
+				BUG(msg)
 				dropAppTimer(parsed)
 			}
 		}
@@ -519,6 +517,11 @@ class WellbeingService(private val context: Context) : WellbeingFrameworkClient.
 		doUpdateTile(FocusModeQSTile::class.java)
 		doUpdateTile(BedtimeModeQSTile::class.java)
 		onStateChanged()
+	}
+
+	@Suppress("unchecked_cast") // AIDL
+	fun getBugs(): MutableMap<Long, String> {
+		return frameworkService.bugs as MutableMap<Long, String>
 	}
 
 	private fun doUpdateTile(tile: Class<out TileService>) {
@@ -802,7 +805,6 @@ class WellbeingService(private val context: Context) : WellbeingFrameworkClient.
 
 	// Runs every 12 hours
 	fun onProcessStats(inBackground: Boolean) {
-		// TODO do NOT entirely get rid of this, some phones do not ever unlock?
 		val knownKeys = HashSet<String>()
 		knownKeys.add("usage")
 		// Data saved for ~10 days. We make sure we don't delete correct data, so even if there is no data, it's OK.

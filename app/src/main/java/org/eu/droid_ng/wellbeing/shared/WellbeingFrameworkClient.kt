@@ -134,6 +134,12 @@ class WellbeingFrameworkClient(
 		throw IllegalArgumentException("no longer supported")
 	}
 
+	// since 3
+	override fun getBugs(): MutableMap<Any?, Any?> {
+		if (versionCode() < 3) return mutableMapOf()
+		return wellbeingFrameworkService!!.getBugs()
+	}
+
 	override fun asBinder(): IBinder {
 		return binder!!
 	}

@@ -1,20 +1,11 @@
 package org.eu.droid_ng.wellbeing.framework
 
-import android.content.BroadcastReceiver
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
-import android.os.Build
-import android.os.Handler
-import android.os.Looper
 import android.os.RemoteException
 import android.provider.Settings
-import android.util.Log
+import org.eu.droid_ng.wellbeing.shared.BugUtils
 import org.eu.droid_ng.wellbeing.shim.UserHandlerShim
-import java.time.Instant
-import java.time.LocalDateTime
-import java.time.ZoneId
 
 class WellbeingFrameworkServiceImpl(context: Context) :
 	WellbeingFrameworkService.BaseWellbeingFrameworkService(context) {
@@ -22,59 +13,13 @@ class WellbeingFrameworkServiceImpl(context: Context) :
 	companion object {
 		const val VERSION_CODE = 3
 	}
-	private val handler = Handler(Looper.getMainLooper())
-	private var lastTime = 0L
-
-	private val screenUnlockReceiver = object : BroadcastReceiver() {
-		override fun onReceive(context: Context?, intent: Intent?) {
-			if (intent?.action != Intent.ACTION_USER_PRESENT)
-				return
-			onScreenUnlock()
-		}
-	}
 
 	override fun start() {
-		try {
-			context.registerReceiver(
-				screenUnlockReceiver,
-				IntentFilter(Intent.ACTION_USER_PRESENT),
-				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
-					Context.RECEIVER_EXPORTED else 0
-			)
-		} catch (e: Exception) {
-			// While errors are errors, if we crash, we cause the device to reboot.
-			Log.e(TAG, Log.getStackTraceString(e))
-		}
+		// do nothing
 	}
 
 	override fun stop() {
-		try {
-			context.unregisterReceiver(screenUnlockReceiver)
-		} catch (e: Exception) {
-			// While errors are errors, if we crash, we cause the device to reboot.
-			Log.e(TAG, Log.getStackTraceString(e))
-		}
-	}
-
-	private fun onScreenUnlock() {
-		// Let's avoid reducing perf in CUJs by waiting three seconds
-		handler.postDelayed({
-			val midnight = LocalDateTime.now().withHour(0).withMinute(0)
-				.withSecond(0).withNano(0).atZone(ZoneId.systemDefault())
-				.toEpochSecond() * 1000
-			val lastTimePlus12H = lastTime + 12 * 60 * 60 * 1000
-			if (lastTimePlus12H <= System.currentTimeMillis() || midnight >= lastTime) {
-				lastTime = System.currentTimeMillis()
-				context.startForegroundService(
-					Intent().setComponent(
-						ComponentName(
-							"org.eu.droid_ng.wellbeing",
-							"org.eu.droid_ng.wellbeing.lib.EventProcessingService"
-						)
-					)
-				)
-			}
-		}, 3000)
+		// do nothing
 	}
 
 	// since 1
@@ -114,5 +59,10 @@ class WellbeingFrameworkServiceImpl(context: Context) :
 	@Throws(RemoteException::class)
 	override fun getTypesForPrefix(type: String, dimension: Int, from: Long, to: Long): Map<out Any?, Any?> {
 		throw IllegalArgumentException("no longer supported")
+	}
+
+	// since 3
+	override fun getBugs(): MutableMap<Any?, Any?> {
+		return BugUtils.get()?.getBugs()?.toMutableMap() ?: mutableMapOf()
 	}
 }

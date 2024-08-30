@@ -3,6 +3,7 @@ package org.eu.droid_ng.wellbeing.prefs
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.widget.ArrayAdapter
 import android.widget.Toast
@@ -11,7 +12,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import org.eu.droid_ng.wellbeing.R
-import org.eu.droid_ng.wellbeing.lib.BugUtils.Companion.get
+import org.eu.droid_ng.wellbeing.lib.WellbeingService
+import org.eu.droid_ng.wellbeing.shared.BugUtils.Companion.formatDateForRender
+import org.eu.droid_ng.wellbeing.shared.BugUtils.Companion.get
 import org.eu.droid_ng.wellbeing.shim.PackageManagerDelegate
 import java.util.Objects
 
@@ -46,9 +49,10 @@ class SettingsActivity : AppCompatActivity() {
 				(Objects.requireNonNull<Any?>(findPreference("focus_dialog")) as Preference).isEnabled =
 					false
 			}
-			if (get()!!.hasBugs()) {
-				val bugMap = get()!!.getBugs()
-				val a = bugMap.keys.toTypedArray<String>()
+			val bugs = get()!!.getBugs() + WellbeingService.get().getBugs()
+			if (bugs.isNotEmpty()) {
+				val bugMap = bugs.toList().sortedBy { it.first }.map { Pair(formatDateForRender(it.first), it.second) }
+				val a = bugMap.map { it.first }.toTypedArray<String>()
 				val bp = findPreference<Preference>("bugs")!!
 				bp.isVisible = true
 				bp.onPreferenceClickListener =
@@ -63,7 +67,7 @@ class SettingsActivity : AppCompatActivity() {
 								)
 							) { _, pos ->
 								val key = a[pos]
-								val value = bugMap[a[pos]]
+								val value = bugMap[pos].second
 								AlertDialog.Builder(requireActivity())
 									.setTitle(key)
 									.setMessage(value)
@@ -82,8 +86,14 @@ class SettingsActivity : AppCompatActivity() {
 										) as ClipboardManager
 										val clip = ClipData.newPlainText("Bug report", value)
 										clipboard.setPrimaryClip(clip)
-										Toast.makeText(activity, R.string.copied, Toast.LENGTH_LONG)
-											.show()
+										if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+											// T+ have built in indicator
+											Toast.makeText(
+												activity,
+												R.string.copied,
+												Toast.LENGTH_LONG
+											).show()
+										}
 									}
 									.setNegativeButton(R.string.cancel) { _, _ -> }
 									.show()

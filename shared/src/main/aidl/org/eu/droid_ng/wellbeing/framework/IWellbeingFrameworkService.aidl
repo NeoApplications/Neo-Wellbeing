@@ -9,8 +9,11 @@ interface IWellbeingFrameworkService {
     int versionCode() = 0;
     void setAirplaneMode(boolean value) = 1;
 
-    // since 2
+    // only in 2
     void onNotificationPosted(String packageName) = 2;
     long getEventCount(String type, int dimension, long from, long to) = 3;
     Map getTypesForPrefix(String prefix, int dimension, long from, long to) = 4;
+
+    // since 3
+    Map getBugs() = 5;
 }

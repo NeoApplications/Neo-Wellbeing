@@ -2,6 +2,7 @@ package org.eu.droid_ng.wellbeing.lib
 
 import android.annotation.SuppressLint
 import android.app.usage.UsageEvents
+import android.app.usage.UsageEvents.Event
 import android.app.usage.UsageStatsManager
 import android.content.ComponentName
 import android.content.Intent
@@ -16,14 +17,14 @@ import java.util.*
 object Utils {
     private const val MOST_USED_PKG_CACHE_SIZE: Int = 3
     private const val MOST_USED_PKG_MIN_USAGE_MINS: Long = 5
-    private var calculatedUsageStats: HashMap<String, Duration>? = null
+    private var calculatedUsageStats: Map<String, Duration>? = null
     private var calculatedScreenTime: Duration? = null
     private var mostUsedPackages: Array<String>? = null
     const val PACKAGE_MANAGER_MATCH_INSTANT = 0x00800000
     val blackListedPackages: HashSet<String> = HashSet()
     val restrictedPackages: HashSet<String> = HashSet()
 
-    private fun eventsStr(events: Iterable<UsageEvents.Event>): String {
+    private fun eventsStr(events: Iterable<Event>): String {
         val b = StringBuilder()
         b.append("[")
         for (element in events) {
@@ -79,68 +80,48 @@ object Utils {
         mostUsedPackages = result.second.second
     }
 
-    /*
-     * When writing this code, I learnt a lesson. UsageStats and UsageEvents APIs are fucking dumb.
-     * I had cases of user opening the app 3 times and closing it 2 times, cases of user opening the app 2 times without closing it at all...
-     * But in the very end this works. And it's about 3 trillion times faster than UsageStatsManager queries.
-     */
-    fun calculateUsageStats(usm: UsageStatsManager, startTimeMillis: Long, endTimeMillis: Long): Pair<Duration, Pair<HashMap<String, Duration>, Array<String>>> {
+    fun calculateUsageStats(usm: UsageStatsManager, startTimeMillis: Long, endTimeMillis: Long): Pair<Duration, Pair<Map<String, Duration>, Array<String>>> {
         val usageEvents: UsageEvents = usm.queryEvents(startTimeMillis, endTimeMillis)
-        var currentEvent: UsageEvents.Event
-        val e = HashMap<String, ArrayList<UsageEvents.Event>>()
+        var currentEvent: Event
+        val e = HashMap<String, ArrayList<Event>>()
         while (usageEvents.hasNextEvent()) {
-            currentEvent = UsageEvents.Event()
+            currentEvent = Event()
             usageEvents.getNextEvent(currentEvent)
-            if (currentEvent.eventType == UsageEvents.Event.ACTIVITY_PAUSED ||
-                    currentEvent.eventType == UsageEvents.Event.ACTIVITY_RESUMED
-            ) {
-                e.computeIfAbsent(
-                        currentEvent.packageName
-                ) { ArrayList() }
-                        .add(currentEvent)
-            }
+            e.computeIfAbsent(currentEvent.packageName) { ArrayList() }.add(currentEvent)
         }
         // Calculate usageStats
         val myCalculatedUsageStats = HashMap<String, Duration>()
-        e.forEach { (pkgName: String, events: ArrayList<UsageEvents.Event>) ->
-            var i = 0
-            while (i < events.size) {
-                var j = 1
-                if (i + j >= events.size) {
-                    i += 2
-                    continue
-                }
-                val eventOne = events[i]
-                var eventTwo = events[i + j]
-                if (eventOne.eventType == UsageEvents.Event.ACTIVITY_PAUSED) {
-                    Log.e("AppTimersInternal", "usm soft assert1 fail!! eventOneType=" + eventOne.eventType + " eventTwoType=" + eventTwo.eventType)
-                    i += 1
-                    continue
-                    // Unlucky case. Skip one. Should never happen, but safe is safe. edit: happens. help me
-                }
-                if (eventOne.eventType != UsageEvents.Event.ACTIVITY_RESUMED) {
-                    Log.e("AppTimersInternal", "usm soft assert2 fail!! pkgName=$pkgName i=$i j=$j events=${eventsStr(events)}")
-                    i += 2
-                    continue
-                    // did not find start
-                }
-                while (events[i + j].also { eventTwo = it }.eventType == UsageEvents.Event.ACTIVITY_RESUMED) {
-                    j++
-                    if (i + j == events.size) {
-                        Log.e("AppTimersInternal", "usm soft assert3 fail!! pkgName=$pkgName i=$i j=$j events=${eventsStr(events)}")
-                        break
-                        // did not find ending
+        e.forEach { (pkgName: String, events: ArrayList<Event>) ->
+            val openActivities = hashMapOf<String, Long>()
+            for (event in events.sortedWith { a, b ->
+                val c = a.timeStamp.compareTo(b.timeStamp)
+                if (c != 0) return@sortedWith c
+                val d = a.eventType == Event.ACTIVITY_RESUMED || a.eventType == 4 /* CONTINUE_PREVIOUS_DAY */
+                val f = b.eventType == Event.ACTIVITY_RESUMED || b.eventType == 4 /* CONTINUE_PREVIOUS_DAY */
+                return@sortedWith d.compareTo(f)
+            }) {
+                when (event.eventType) {
+                    Event.ACTIVITY_PAUSED -> {
+                        val start = openActivities.remove(event.className)
+                        if (start != null)
+                            myCalculatedUsageStats[pkgName] = myCalculatedUsageStats
+                                .getOrDefault(pkgName, Duration.ZERO).plus(
+                                    Duration.ofMillis(event.timeStamp - start))
+                        else
+                            Log.w("WellbeingUtils", "got ACTIVITY_PAUSED for ${event.className} at ${event.timeStamp} but didn't remember it starting")
                     }
+                    Event.DEVICE_SHUTDOWN, 3 /* END_OF_DAY */ -> {
+                        while (openActivities.isNotEmpty()) {
+                            myCalculatedUsageStats[pkgName] = myCalculatedUsageStats
+                                .getOrDefault(pkgName, Duration.ZERO).plus(
+                                    Duration.ofMillis(event.timeStamp -
+                                            openActivities.remove(openActivities.keys.first())!!
+                                    ))
+                        }
+                    }
+                    Event.ACTIVITY_RESUMED, 4 /* CONTINUE_PREVIOUS_DAY */ ->
+                        openActivities[event.className] = event.timeStamp
                 }
-                if (eventTwo.eventType != UsageEvents.Event.ACTIVITY_PAUSED) {
-                    Log.e("AppTimersInternal", "usm soft assert4 fail!! pkgName=$pkgName i=$i j=$j events=${eventsStr(events)}")
-                    i += 2
-                    continue
-                    // did not find ending
-                }
-                myCalculatedUsageStats[pkgName] = myCalculatedUsageStats.getOrDefault(pkgName, Duration.ZERO)
-                        .plus(Duration.ofMillis(eventTwo.timeStamp - eventOne.timeStamp))
-                i += 2
             }
         }
         // Calculate screenTime + mostUsedPackages

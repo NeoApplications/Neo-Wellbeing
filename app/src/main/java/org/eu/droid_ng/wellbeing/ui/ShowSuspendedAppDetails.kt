@@ -13,7 +13,7 @@ import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
 import com.google.android.material.card.MaterialCardView
 import org.eu.droid_ng.wellbeing.R
-import org.eu.droid_ng.wellbeing.lib.BugUtils.Companion.BUG
+import org.eu.droid_ng.wellbeing.shared.BugUtils.Companion.BUG
 import org.eu.droid_ng.wellbeing.lib.WellbeingService
 import org.eu.droid_ng.wellbeing.lib.WellbeingService.Companion.get
 import org.eu.droid_ng.wellbeing.shim.PackageManagerDelegate
@@ -32,6 +32,7 @@ class ShowSuspendedAppDetails : AppCompatActivity() {
 				"Assertion failure (0xAB): packageName is null. Please report this to the developers!",
 				Toast.LENGTH_LONG
 			).show()
+			BUG("packageName == null (0xAB)")
 			finish()
 			return
 		}

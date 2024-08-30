@@ -1,7 +1,10 @@
-package org.eu.droid_ng.wellbeing.lib
+package org.eu.droid_ng.wellbeing.shared
 
 import android.content.Context
+import android.util.ArrayMap
 import android.util.Log
+import android.util.SparseArray
+import android.util.SparseLongArray
 import java.io.File
 import java.nio.charset.Charset
 import java.time.Instant
@@ -9,7 +12,7 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
-class BugUtils(private val bugFolder: File) {
+class BugUtils(private val bugFolder: File, private val pkg: String) {
 	companion object {
 		private var utils: BugUtils? = null
 
@@ -17,7 +20,7 @@ class BugUtils(private val bugFolder: File) {
 			if (utils == null) {
 				val f = File(context.cacheDir, "bugutils")
 				f.mkdirs()
-				utils = BugUtils(f)
+				utils = BugUtils(f, context.packageName)
 			}
 		}
 
@@ -52,7 +55,7 @@ class BugUtils(private val bugFolder: File) {
 	}
 
 	fun onBugAdded(message: Throwable, date: Long) {
-		val l = Log.getStackTraceString(message)
+		val l = "$pkg\n${Log.getStackTraceString(message)}"
 		val o = File(bugFolder, date.toString()).outputStream()
 		o.write(l.toByteArray(Charset.defaultCharset()))
 		o.close()
@@ -63,13 +66,13 @@ class BugUtils(private val bugFolder: File) {
 		return (bugFolder.list()?.size ?: 0) > 0
 	}
 
-	fun getBugs(): Map<String, String> {
-		val m = HashMap<String, String>()
+	fun getBugs(): Map<Long, String> {
+		val m = hashMapOf<Long, String>()
 		bugFolder.list()?.let {
 			val l = it.asList().sorted()
 			l.forEach { date ->
 				val content = File(bugFolder, date).readText(Charset.defaultCharset())
-				m[formatDateForRender(date.toLong())] = content
+				m[date.toLong()] = content
 			}
 		}
 		return m

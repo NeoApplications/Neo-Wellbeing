@@ -323,12 +323,6 @@
             android:name=".lib.WellbeingStateHost"
             android:enabled="true"
             android:exported="false" />
-        <service
-            android:name=".lib.EventProcessingService"
-            android:enabled="true"
-            android:exported="true"
-            android:permission="org.eu.droid_ng.wellbeing.framework.permission.BIND" />
-
         <!-- to-do: On A13, implement com.google.android.apps.wellbeing.action.ACTION_WIND_DOWN_STATE_CHANGED -->
     </application>
 

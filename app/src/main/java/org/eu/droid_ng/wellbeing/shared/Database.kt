@@ -13,6 +13,7 @@ import androidx.room.Query
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.Update
+import org.eu.droid_ng.wellbeing.shared.BugUtils.Companion.BUG
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -82,8 +83,11 @@ object ExactTime {
 
 @Dao
 private abstract class StatDao {
-	@Insert(onConflict = OnConflictStrategy.REPLACE)
+	@Insert(onConflict = OnConflictStrategy.ABORT)
 	abstract fun insert(stat: StatEntry)
+
+	@Insert(onConflict = OnConflictStrategy.REPLACE)
+	abstract fun replace(stat: StatEntry)
 
 	@Update
 	abstract fun update(stat: StatEntry)
@@ -118,16 +122,18 @@ private abstract class StatDao {
 		insert(StatEntry(ExactTime.of(date, dimension), dimension, type, count))
 	}
 
+	fun replace(type: String, date: LocalDateTime, dimension: TimeDimension, count: Long) {
+		replace(StatEntry(ExactTime.of(date, dimension), dimension, type, count))
+	}
+
 	fun increment(type: String, date: LocalDateTime, dimension: TimeDimension) {
 		val results = findStatsOfTypeWhere(type, dimension, ExactTime.of(date, dimension))
 		if (results.size > 1) {
 			// Should never happen
-			Log.e("WellbeingDatabase", "FATAL, destroying invalid data! results.size > 1")
-			Log.e("WellbeingDatabase", results[0].toString())
-			for (i in 1..<results.size) {
-				Log.e("WellbeingDatabase", results[i].toString())
+			BUG("FATAL, destroying invalid data! results.size(${results.size}) > 1, ${results.joinToString(";; ")}")
+			Log.e("WellbeingDatabase", "FATAL, destroying invalid data! results.size(${results.size}) > 1")
+			for (i in 1..<results.size)
 				delete(results[i])
-			}
 		}
 		if (results.isEmpty()) {
 			insert(type, date, dimension, 1)
@@ -163,7 +169,7 @@ class Database(context: Context, private val bgHandler: Handler, private val con
 		while (lastConsolidate == -1L) {
 			Thread.sleep(100)
 		}
-		dao.insert(type, date, dimension, count)
+		dao.replace(type, date, dimension, count)
 		maybeConsolidate(type)
 	}
 
@@ -238,10 +244,12 @@ class Database(context: Context, private val bgHandler: Handler, private val con
 		var count = 0L
 		results.forEach {
 			count += it.count
-			dao.delete(it)
 		}
 		if (count > 0) {
 			dao.insert(type, from, dimension, count)
+			results.forEach {
+				dao.delete(it)
+			}
 		}
 		if (every || results.isNotEmpty()) {
 			consolidateUnit(type, dimension, genFrom, every, earliest, from)

@@ -2,6 +2,7 @@ package org.eu.droid_ng.wellbeing.framework
 
 import android.app.Application
 import android.util.Log
+import org.eu.droid_ng.wellbeing.shared.BugUtils
 
 class Framework : Application() {
 	companion object {
@@ -23,12 +24,15 @@ class Framework : Application() {
 		// If Android can't keep us alive, the device gets thrown into a boot loop.
 		// This is also why this app should be kept as simple as possible.
 		Thread.setDefaultUncaughtExceptionHandler { _, e ->
-			Log.e(TAG, Log.getStackTraceString(e)) }
+			Log.e(TAG, Log.getStackTraceString(e))
+			BugUtils.get()?.onBugAdded(e, System.currentTimeMillis())
+		}
 	}
 
 	override fun onCreate() {
 		super.onCreate()
 		application = this
+		BugUtils.maybeInit(this)
 		Thread {
 			// maybe it'll be useful in the future
 			val prefs = getSharedPreferences("framework", 0)

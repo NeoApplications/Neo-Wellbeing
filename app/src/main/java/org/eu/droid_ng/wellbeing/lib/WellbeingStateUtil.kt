@@ -12,6 +12,7 @@ import android.os.IBinder
 import android.util.Log
 import android.widget.Toast
 import org.eu.droid_ng.wellbeing.R
+import org.eu.droid_ng.wellbeing.shared.BugUtils.Companion.BUG
 import org.eu.droid_ng.wellbeing.lib.WellbeingStateHost.LocalBinder
 import org.eu.droid_ng.wellbeing.ui.MainActivity
 import java.util.function.Consumer
@@ -44,6 +45,7 @@ class WellbeingStateClient(context: Context) {
                     "Assertion failure (0xAE): Service is in another process. Please report this to the developers!",
                     Toast.LENGTH_SHORT
                 ).show()
+                BUG("0xAE: ${Log.getStackTraceString(e)}")
                 return
             }
             callback!!.accept(mBoundService!!.state)
@@ -56,6 +58,7 @@ class WellbeingStateClient(context: Context) {
         /*override fun onNullBinding(className: ComponentName) {
 			Toast.makeText(context, "Assertion failure (0xAF): Service is null. Please report this to the developers!",
 					Toast.LENGTH_SHORT).show()
+			BUG("service is null (0xAF)")
 		}*/
     }
 
@@ -100,6 +103,7 @@ class WellbeingStateClient(context: Context) {
                         "Assertion failure (0xAA): Failed to start service. Please report this to the developers!",
                         Toast.LENGTH_SHORT
                     ).show()
+                    BUG("didn't start service (0xAA)")
                 }
             } else if (!canHandleFailure) {
                 Toast.makeText(
@@ -107,6 +111,7 @@ class WellbeingStateClient(context: Context) {
                     "Assertion failure (0xAD): Failed to find service. Please report this to the developers!",
                     Toast.LENGTH_SHORT
                 ).show()
+                BUG("no service (0xAD)")
             }
             false
         }

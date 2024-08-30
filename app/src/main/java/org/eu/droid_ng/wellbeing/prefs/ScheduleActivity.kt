@@ -8,7 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.appcompat.widget.LinearLayoutCompat
 import org.eu.droid_ng.wellbeing.R
-import org.eu.droid_ng.wellbeing.lib.BugUtils.Companion.BUG
+import org.eu.droid_ng.wellbeing.shared.BugUtils.Companion.BUG
 import org.eu.droid_ng.wellbeing.lib.TimeChargerTriggerCondition
 import org.eu.droid_ng.wellbeing.lib.Trigger
 import org.eu.droid_ng.wellbeing.lib.WellbeingService.Companion.get

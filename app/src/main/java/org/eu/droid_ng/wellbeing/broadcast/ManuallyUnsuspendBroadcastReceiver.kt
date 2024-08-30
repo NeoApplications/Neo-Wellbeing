@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.widget.Toast
+import org.eu.droid_ng.wellbeing.shared.BugUtils.Companion.BUG
 import org.eu.droid_ng.wellbeing.lib.WellbeingService
 
 class ManuallyUnsuspendBroadcastReceiver : BroadcastReceiver() {
@@ -20,6 +21,7 @@ class ManuallyUnsuspendBroadcastReceiver : BroadcastReceiver() {
 				"Assertion failure (0xAC): packageName is null. Please report this to the developers!",
 				Toast.LENGTH_LONG
 			).show()
+			BUG("packageName == null (0xAC)")
 			return
 		}
 		WellbeingService.get().onManuallyUnsuspended(packageName)
