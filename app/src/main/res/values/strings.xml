@@ -136,4 +136,8 @@
     <string name="stat_to_display">Statistic to display</string>
     <string name="time_dimension_to_display">Time dimension to display</string>
     <string name="no_data">No data</string>
+    <string name="event_channel_description">Notifies you when Neo Wellbeing is processing events in the background. Feel free to turn off these notifications.</string>
+    <string name="event_channel_name">Event processing</string>
+    <string name="event_notif_name">Processing events…</string>
+    <string name="event_notif_desc">Neo Wellbeing is processing usage statistics in the background. This should only take a moment.</string>
 </resources>

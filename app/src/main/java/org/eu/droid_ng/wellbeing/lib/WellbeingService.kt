@@ -244,7 +244,7 @@ class WellbeingService(private val context: Context) : WellbeingFrameworkClient.
 		bgHandler = Handler(bgThread.looper)
 		db = Database(context, bgHandler, 0)
 		Utils.clearUsageStatsCache(usm, pm, pmd, true)
-		airplaneState = when(WellbeingAirplaneState.isAirplaneModeOn(context)) {
+		airplaneState = when (WellbeingAirplaneState.isAirplaneModeOn(context)) {
 			true -> WellbeingAirplaneState.ENABLED_BY_SYSTEM
 			false -> WellbeingAirplaneState.DISABLED_BY_SYSTEM
 		}
@@ -252,17 +252,16 @@ class WellbeingService(private val context: Context) : WellbeingFrameworkClient.
 		ScheduleUtils.ensureWidgetAlarmSet(context, handler, 60, ScreenTimeAppWidget::class.java)
 		ScheduleUtils.ensureStatProcessorAlarmSet(context, handler)
 
-		if (notificationManager.getNotificationChannel("reminder") == null) {
-			val name: CharSequence = context.getString(R.string.channel2_name)
-			val description = context.getString(R.string.channel2_description)
-			val importance = NotificationManager.IMPORTANCE_HIGH
-			val channel = NotificationChannel("reminder", name, importance)
-			channel.description = description
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-				channel.isBlockable = true
-			}
-			notificationManager.createNotificationChannel(channel)
+		val channel = NotificationChannel(
+			"reminder",
+			context.getString(R.string.channel2_name),
+			NotificationManager.IMPORTANCE_HIGH
+		)
+		channel.description = context.getString(R.string.channel2_description)
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+			channel.isBlockable = true
 		}
+		notificationManager.createNotificationChannel(channel)
 
 		context.registerReceiver(object : BroadcastReceiver() {
 			override fun onReceive(p0: Context?, p1: Intent?) {
@@ -803,6 +802,7 @@ class WellbeingService(private val context: Context) : WellbeingFrameworkClient.
 
 	// Runs every 12 hours
 	fun onProcessStats(inBackground: Boolean) {
+		// TODO do NOT entirely get rid of this, some phones do not ever unlock?
 		val knownKeys = HashSet<String>()
 		knownKeys.add("usage")
 		// Data saved for ~10 days. We make sure we don't delete correct data, so even if there is no data, it's OK.

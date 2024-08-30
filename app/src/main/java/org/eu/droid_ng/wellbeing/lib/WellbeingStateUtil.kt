@@ -151,17 +151,16 @@ class WellbeingStateHost : Service() {
         val notificationManager = getSystemService(
             NotificationManager::class.java
         )
-        if (notificationManager.getNotificationChannel(channelId) == null) {
-            val name: CharSequence = getString(R.string.channel_name)
-            val description = getString(R.string.channel_description)
-            val importance = NotificationManager.IMPORTANCE_LOW
-            val channel = NotificationChannel(channelId, name, importance)
-            channel.description = description
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                channel.isBlockable = true
-            }
-            notificationManager.createNotificationChannel(channel)
+        val channel = NotificationChannel(
+            channelId,
+            getString(R.string.channel_name),
+            NotificationManager.IMPORTANCE_LOW
+        )
+        channel.description = getString(R.string.channel_description)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            channel.isBlockable = true
         }
+        notificationManager.createNotificationChannel(channel)
         if (intent != null) {
             lateNotify = intent.getBooleanExtra("lateNotify", lateNotify)
         }
