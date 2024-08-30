@@ -61,13 +61,13 @@ class ScheduleCardView(context: Context, attrs: AttributeSet?, defStyleAttr: Int
 			}
 		}
 		findViewById<View>(R.id.chargerLayout).setOnClickListener {
-			charger.setChecked(!charger.isChecked)
+			charger.isChecked = !charger.isChecked
 			if (onValuesChangedCallback != null) {
 				onValuesChangedCallback!!.accept(iid)
 			}
 		}
 		findViewById<View>(R.id.alarmLayout).setOnClickListener {
-			alarm.setChecked(!alarm.isChecked)
+			alarm.isChecked = !alarm.isChecked
 			if (onValuesChangedCallback != null) {
 				onValuesChangedCallback!!.accept(iid)
 			}

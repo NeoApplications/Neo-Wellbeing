@@ -151,7 +151,7 @@ public class PackageManagerDelegate {
 		}
 	}
 
-	/* Does not belong here, but for one class im not creating a new delegate */
+	/** @noinspection BooleanMethodIsAlwaysInverted*/ /* Does not belong here, but for one class im not creating a new delegate */
 	public interface IColorDisplayManager {
 		/**
 		 * Returns whether the device has a wide color gamut display.

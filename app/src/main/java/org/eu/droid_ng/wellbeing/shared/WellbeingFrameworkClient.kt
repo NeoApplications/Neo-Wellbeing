@@ -10,8 +10,6 @@ import android.os.Looper
 import android.os.RemoteException
 import android.util.Log
 import org.eu.droid_ng.wellbeing.framework.IWellbeingFrameworkService
-import java.time.LocalDateTime
-import java.time.ZoneId
 
 class WellbeingFrameworkClient(
 	private val context: Context,

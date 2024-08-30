@@ -1,13 +1,11 @@
 package org.eu.droid_ng.wellbeing.framework
 
 import android.app.Service
-import android.app.admin.DevicePolicyManager
 import android.content.Context
 import android.content.Intent
 import android.os.Handler
 import android.os.HandlerThread
 import android.os.IBinder
-import org.eu.droid_ng.wellbeing.framework.WellbeingFrameworkService.BaseWellbeingFrameworkService.Companion.TAG
 
 class WellbeingFrameworkService : Service() {
 	override fun onBind(intent: Intent): IBinder? {
