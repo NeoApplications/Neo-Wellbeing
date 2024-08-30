@@ -7,38 +7,34 @@ import android.content.Intent
 import android.os.Handler
 import android.os.HandlerThread
 import android.os.IBinder
+import org.eu.droid_ng.wellbeing.framework.WellbeingFrameworkService.BaseWellbeingFrameworkService.Companion.TAG
 
 class WellbeingFrameworkService : Service() {
-	private var wellbeingFrameworkService: BaseWellbeingFrameworkService? = null
-
 	override fun onBind(intent: Intent): IBinder? {
 		return if ("org.eu.droid_ng.wellbeing.framework.FRAMEWORK_SERVICE" == intent.action)
-			wellbeingFrameworkService
+			Framework.getService()
 		else
 			null
 	}
 
-	private fun createFwkService(): BaseWellbeingFrameworkService {
-		if (Framework.hasService()) return Framework.getService()
-		return WellbeingFrameworkServiceImpl(this)
-	}
-
 	override fun onCreate() {
 		super.onCreate()
-		if (wellbeingFrameworkService == null)
-			wellbeingFrameworkService = createFwkService()
-		wellbeingFrameworkService!!.doStart()
+		if (Framework.getService() == null)
+			Framework.setService(WellbeingFrameworkServiceImpl(this))
+		val ws = Framework.getService()!!
+		ws.bgThread.start()
+		ws.start()
 	}
 
 	override fun onDestroy() {
-		wellbeingFrameworkService?.doStop()
+		val ws = Framework.getService()
+		ws?.stop()
+		ws?.bgThread?.quitSafely()
+		ws?.bgThread?.join()
 		super.onDestroy()
 	}
 
 	override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-		intent?.let {
-			wellbeingFrameworkService!!.onStartCommand(it)
-		}
 		return START_STICKY
 	}
 
@@ -48,37 +44,11 @@ class WellbeingFrameworkService : Service() {
 			@JvmStatic protected val TAG = "WellbeingFrameworkService"
 		}
 
-		protected lateinit var bgHandler: Handler
-		private lateinit var bgThread: HandlerThread
+		internal val bgThread = HandlerThread(TAG)
+		protected val bgHandler by lazy { Handler(bgThread.looper
+			?: throw IllegalStateException("used bgHandler before start() was called")) }
 
-		fun doStart() {
-			bgThread = HandlerThread(TAG)
-			bgThread.start()
-			bgHandler = Handler(bgThread.looper)
-			start()
-		}
-
-		fun doStop() {
-			stop()
-			bgThread.quitSafely()
-			bgThread.join()
-		}
-
-		protected fun isInWorkProfile(): Boolean {
-			val devicePolicyManager =
-				context.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
-			val activeAdmins = devicePolicyManager.activeAdmins
-			if (activeAdmins != null) {
-				for (admin in activeAdmins) {
-					if (devicePolicyManager.isProfileOwnerApp(admin.packageName))
-						return true
-				}
-			}
-			return false
-		}
-
-		protected abstract fun start()
-		abstract fun onStartCommand(intent: Intent)
-		protected abstract fun stop()
+		abstract fun start()
+		abstract fun stop()
 	}
 }

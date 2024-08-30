@@ -3,11 +3,12 @@ import java.nio.file.Files
 plugins {
 	id("com.android.application")
 	id("org.jetbrains.kotlin.android")
+	id("com.google.devtools.ksp")
 }
 
 android {
 	namespace = "org.eu.droid_ng.wellbeing"
-	compileSdk = 34
+	compileSdk = 35
 
 	defaultConfig {
 		applicationId = "org.eu.droid_ng.wellbeing"
@@ -16,6 +17,12 @@ android {
 		targetSdk = 33
 		versionCode = 4
 		versionName = "0.2.2"
+
+		javaCompileOptions {
+			annotationProcessorOptions {
+				arguments += mapOf("room.schemaLocation" to "$projectDir/schemas")
+			}
+		}
 	}
 
 	signingConfigs {
@@ -67,8 +74,19 @@ android {
 	}
 }
 
+ksp {
+	arg("room.schemaLocation", "$projectDir/schemas")
+}
+
 dependencies {
 	implementation(project(":shared"))
+	val roomVersion = "2.4.0-alpha05" // Android 13 (https://cs.android.com/android/platform/superproject/+/android-13.0.0_r31:prebuilts/sdk/current/androidx/m2repository/androidx/room/room-runtime/;bpv=1)
+	//noinspection GradleDependency
+	implementation("androidx.room:room-runtime:$roomVersion")
+	//noinspection GradleDependency
+	annotationProcessor("androidx.room:room-compiler:$roomVersion")
+	//noinspection GradleDependency
+	ksp("androidx.room:room-compiler:$roomVersion")
 
 	implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.4")
 

@@ -70,7 +70,7 @@ class WellbeingService(private val context: Context) : WellbeingFrameworkClient.
 		updateServiceStatus()
 		stateCallbacks.forEach { it.accept(this) }
 
-		Log.i("WellbeingImpl", "found " + frameworkService.getEventCount("unlock", TimeDimension.MONTH, LocalDateTime.now().minusMonths(1), LocalDateTime.now()) + " unlocks")
+		//Log.i("WellbeingImpl", "found " + frameworkService.getEventCount("unlock", TimeDimension.MONTH, LocalDateTime.now().minusMonths(1), LocalDateTime.now()) + " unlocks") TODO
 	}
 
 	private val onServiceStartedCallbacks: ArrayList<Runnable> = ArrayList()
@@ -848,14 +848,6 @@ class WellbeingService(private val context: Context) : WellbeingFrameworkClient.
 
 	fun getEventStatsByPrefix(prefix: String, dimension: TimeDimension, from: LocalDateTime, to: LocalDateTime): Map<String, Long> {
 		return db.getTypesForPrefix(prefix, dimension, from, to)
-	}
-
-	fun getRemoteEventStatsByType(type: String, dimension: TimeDimension, from: LocalDateTime, to: LocalDateTime): Long {
-		return frameworkService.getEventCount(type, dimension, from, to)
-	}
-
-	fun getRemoteEventStatsByPrefix(prefix: String, dimension: TimeDimension, from: LocalDateTime, to: LocalDateTime): Map<String, Long> {
-		return frameworkService.getTypesForPrefix(prefix, dimension, from, to)
 	}
 
 	fun onFocusModePreferenceChanged(packageName: String) {

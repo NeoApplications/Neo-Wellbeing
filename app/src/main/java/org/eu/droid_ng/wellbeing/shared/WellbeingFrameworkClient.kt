@@ -115,38 +115,25 @@ class WellbeingFrameworkClient(
 		wellbeingFrameworkService!!.setAirplaneMode(value)
 	}
 
-	// since 2
+	// only in 2
+	@Deprecated("superseded by UsageEvents")
 	@Throws(RemoteException::class)
 	override fun onNotificationPosted(packageName: String) {
-		if (versionCode() < 2) return
-		wellbeingFrameworkService!!.onNotificationPosted(packageName)
+		throw IllegalArgumentException("no longer supported")
 	}
 
-	// since 2
+	// only in 2
+	@Deprecated("superseded by UsageEvents")
 	@Throws(RemoteException::class)
-	override fun getEventCount(type: String, dimension: Int, from: Long, to: Long): Long {
-		if (versionCode() < 2) return -1L
-		return wellbeingFrameworkService!!.getEventCount(type, dimension, from, to)
+	override fun getEventCount(type: String?, dimension: Int, from: Long, to: Long): Long {
+		throw IllegalArgumentException("no longer supported")
 	}
 
-	// since 2
+	// only in 2
+	@Deprecated("superseded by UsageEvents")
 	@Throws(RemoteException::class)
-	fun getEventCount(type: String, dimension: TimeDimension, from: LocalDateTime, to: LocalDateTime): Long {
-		return getEventCount(type, dimension.ordinal, from.atZone(ZoneId.systemDefault()).toEpochSecond(), to.atZone(ZoneId.systemDefault()).toEpochSecond())
-	}
-
-	// since 2
-	@Throws(RemoteException::class)
-	override fun getTypesForPrefix(prefix: String, dimension: Int, from: Long, to: Long): Map<Any?, Any?> {
-		if (versionCode() < 2) return hashMapOf()
-		return wellbeingFrameworkService!!.getTypesForPrefix(prefix, dimension, from, to)
-	}
-
-	// since 2
-	@Throws(RemoteException::class)
-	fun getTypesForPrefix(prefix: String, dimension: TimeDimension, from: LocalDateTime, to: LocalDateTime): Map<String, Long> {
-		return getTypesForPrefix(prefix, dimension.ordinal, from.atZone(ZoneId.systemDefault()).toEpochSecond(), to.atZone(ZoneId.systemDefault()).toEpochSecond())
-			.mapKeys { entry -> entry.key as String }.mapValues { entry -> entry.value as Long }
+	override fun getTypesForPrefix(prefix: String?, dimension: Int, from: Long, to: Long): MutableMap<Any?, Any?> {
+		throw IllegalArgumentException("no longer supported")
 	}
 
 	override fun asBinder(): IBinder {

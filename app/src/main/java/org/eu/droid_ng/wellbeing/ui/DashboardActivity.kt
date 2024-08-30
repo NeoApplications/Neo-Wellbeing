@@ -224,7 +224,7 @@ class DashboardActivity : AppCompatActivity() {
 		bgHandler.post {
 			showData(preProcess,
 				if (prefix == null) null else Supplier<Map<String, Long>> {
-					if (remote) get().getRemoteEventStatsByPrefix(prefix, dimension, start!!, end!!)
+					if (remote) /*get().getRemoteEventStatsByPrefix(prefix, dimension, start!!, end!!) TODO*/ hashMapOf()
 					else get().getEventStatsByPrefix(prefix, dimension, start!!, end!!)
 				},
 				if (id == null) null else Supplier<Map<Int, Long>> {
@@ -238,12 +238,12 @@ class DashboardActivity : AppCompatActivity() {
 							end
 						) && newEnd.isAfter(start) && (newEnd.isBefore(end) || newEnd.isEqual(end))
 					) {
-						count[count2++] = if (remote) get().getRemoteEventStatsByType(
+						count[count2++] = if (remote) /*get().getRemoteEventStatsByType(
 							id,
 							myDimension,
 							newStart,
 							newEnd
-						)
+						) TODO */ 0
 						else get().getEventStatsByType(id, myDimension, newStart, newEnd)
 						newStart = plus(newStart, myDimension, 1)
 						newEnd = plus(newEnd, myDimension, 1)

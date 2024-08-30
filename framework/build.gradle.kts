@@ -5,15 +5,14 @@ plugins {
 
 android {
     namespace = "org.eu.droid_ng.wellbeing.framework"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "org.eu.droid_ng.wellbeing.framework"
         minSdk = 29
-        //noinspection OldTargetApi TODO
-        targetSdk = 33
-        versionCode = 1
-        versionName = "1.0"
+        targetSdk = 35
+        versionCode = 33
+        versionName = "13.0"
     }
 
     signingConfigs {

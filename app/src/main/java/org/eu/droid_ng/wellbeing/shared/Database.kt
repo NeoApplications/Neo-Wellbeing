@@ -3,8 +3,8 @@ package org.eu.droid_ng.wellbeing.shared
 import android.content.Context
 import android.os.Handler
 import android.util.Log
-import androidx.room.Dao
 import androidx.room.Database
+import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Entity
 import androidx.room.Insert
@@ -37,19 +37,19 @@ enum class TimeDimension {
 }
 
 object ExactTime {
-	fun ofHour(date: LocalDateTime): LocalDateTime {
+	private fun ofHour(date: LocalDateTime): LocalDateTime {
 		return date.withMinute(0).withSecond(0).withNano(0)
 	}
 
-	fun ofDay(date: LocalDateTime): LocalDateTime {
+	private fun ofDay(date: LocalDateTime): LocalDateTime {
 		return ofHour(date.with(LocalTime.MIN))
 	}
 
-	fun ofMonth(date: LocalDateTime): LocalDateTime {
+	private fun ofMonth(date: LocalDateTime): LocalDateTime {
 		return ofDay(date.withDayOfMonth(1))
 	}
 
-	fun ofYear(date: LocalDateTime): LocalDateTime {
+	private fun ofYear(date: LocalDateTime): LocalDateTime {
 		return ofMonth(date.withMonth(1))
 	}
 
@@ -219,9 +219,12 @@ class Database(context: Context, private val bgHandler: Handler, private val con
 		lastConsolidate = -1L
 		val earliest = LocalDateTime.ofInstant(
 			Instant.ofEpochSecond(dao.getEarliest(type)), ZoneId.systemDefault())
-		consolidateUnit(type, TimeDimension.DAY, { it.minusDays(1) }, false, earliest, LocalDateTime.now().minusDays(7)) // hour -> day. store hourly stats for 7 days
-		consolidateUnit(type, TimeDimension.MONTH, { it.minusMonths(1) }, false, earliest, LocalDateTime.now().minusMonths(3)) // day -> month. store daily stats for 3 months
-		consolidateUnit(type, TimeDimension.YEAR, { it.minusYears(1) }, every, earliest, LocalDateTime.now().minusYears(10)) // month -> year. store monthly stats for 10 years
+		consolidateUnit(type,
+			TimeDimension.DAY, { it.minusDays(1) }, false, earliest, LocalDateTime.now().minusDays(7)) // hour -> day. store hourly stats for 7 days
+		consolidateUnit(type,
+			TimeDimension.MONTH, { it.minusMonths(1) }, false, earliest, LocalDateTime.now().minusMonths(3)) // day -> month. store daily stats for 3 months
+		consolidateUnit(type,
+			TimeDimension.YEAR, { it.minusYears(1) }, every, earliest, LocalDateTime.now().minusYears(10)) // month -> year. store monthly stats for 10 years
 		lastConsolidate = System.currentTimeMillis()
 	}
 
