@@ -85,7 +85,7 @@ object Utils {
         var currentEvent: Event
         val e = HashMap<String, ArrayList<Event>>()
         while (usageEvents.hasNextEvent()) {
-            currentEvent = Event()
+            currentEvent = Event() // TODO don't allocate all of them
             usageEvents.getNextEvent(currentEvent)
             e.computeIfAbsent(currentEvent.packageName) { ArrayList() }.add(currentEvent)
         }
